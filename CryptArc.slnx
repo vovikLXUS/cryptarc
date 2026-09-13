@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/bench/">
+    <Project Path="bench/CryptArc.Bench/CryptArc.Bench.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/CryptArc.App/CryptArc.App.csproj" />
+    <Project Path="src/CryptArc.Cli/CryptArc.Cli.csproj" />
+    <Project Path="src/CryptArc.Core/CryptArc.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/CryptArc.Tests/CryptArc.Tests.csproj" />
+  </Folder>
+</Solution>

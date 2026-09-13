@@ -1,0 +1,26 @@
+<Project>
+
+  <!-- Shared settings for every project in the solution.
+       Keeps the whole team (and CI) on identical compiler behaviour. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <!-- Required by the optimised codec paths (pointer-based match comparison). -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+    <!-- Server GC keeps benchmark numbers stable on large archives. -->
+    <ServerGarbageCollection>true</ServerGarbageCollection>
+    <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
+
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
+
+    <Version>0.1.0</Version>
+    <Authors>CryptArc Team</Authors>
+    <Product>CryptArc</Product>
+  </PropertyGroup>
+
+</Project>
