@@ -9,12 +9,12 @@ most of the coursework happens.
 |---|---|---|---|
 | `StoreCodec.cs` | none (pass-through) | `O(n)` | fallback for incompressible data |
 | `RleCodec.cs` | run-length, PackBits style | `O(n)` time, `O(1)` space | worst case grows input by < 0.8 % |
+| `HuffmanCodec.cs` | canonical Huffman, codes up to 15 bits | `O(n)` time, `O(1)` space | worst case grows input by a 132-byte header; `DecodeTreeWalk` is the baseline |
 
 ## Planned
 
 | Algorithm | Owner | Key structure |
 |---|---|---|
-| Huffman (canonical) | — | min-heap, then lookup-table decoder |
 | LZSS | — | hash chains over a 32 KiB window |
 | Deflate (LZSS + Huffman) | — | composition of the two above |
 | LZW | — | own open-addressing hash table |

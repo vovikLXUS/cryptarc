@@ -24,4 +24,7 @@ worked example in the optimisation section of the report.
 - `BitWriter` never writes past the buffer: it sets `Overflowed` and `Flush()`
   returns `-1`.
 - `BitReader` zero-extends past the end of input rather than throwing, so a
-  decoder can read a trailing partial byte without special-casing it.
+  decoder can read a trailing partial byte without special-casing it. A decoder
+  detects truncation by checking `IsOverrun` once it is done.
+- `PeekBits` and `SkipBits` let a table-driven decoder look at more bits than the
+  next symbol turns out to need. Only consumed bits count towards `IsOverrun`.
