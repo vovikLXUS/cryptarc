@@ -9,6 +9,7 @@ most of the coursework happens.
 |---|---|---|---|
 | `StoreCodec.cs` | none (pass-through) | `O(n)` | fallback for incompressible data |
 | `RleCodec.cs` | run-length, PackBits style | `O(n)` time, `O(1)` space | worst case grows input by < 0.8 % |
+| `LzwCodec.cs` | LZW, 9..12-bit variable width | `O(n)` amortised | own open-addressing hash table |
 
 ## Planned
 
@@ -17,7 +18,6 @@ most of the coursework happens.
 | Huffman (canonical) | — | min-heap, then lookup-table decoder |
 | LZSS | — | hash chains over a 32 KiB window |
 | Deflate (LZSS + Huffman) | — | composition of the two above |
-| LZW | — | own open-addressing hash table |
 | BWT + MTF + RLE0 + Huffman | — | suffix array |
 | Arithmetic / range coder | — | adaptive frequency model |
 
