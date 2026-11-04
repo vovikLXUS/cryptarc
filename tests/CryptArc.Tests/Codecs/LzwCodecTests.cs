@@ -224,6 +224,53 @@ public class LzwCodecTests
         Assert.Throws<ArgumentOutOfRangeException>(() => _codec.MaxCompressedSize(-1));
     }
 
+    [Theory]
+    [InlineData(int.MaxValue)]
+    [InlineData(1_500_000_000)]
+    [InlineData(1 << 28)]
+    public void MaxCompressedSize_LargeLengthDoesNotOverflow(int length)
+    {
+        int bound = _codec.MaxCompressedSize(length);
+        Assert.True(bound > 0, $"Expected positive bound for length {length}, got {bound}.");
+        Assert.True(bound >= length || bound == int.MaxValue);
+    }
+
+    [Fact]
+    public void RejectsTruncatedStream_AtEveryByteBoundary()
+    {
+        byte[] original = TestData.Text();
+        byte[] compressed = new byte[_codec.MaxCompressedSize(original.Length)];
+        int length = _codec.Encode(original, compressed);
+        Assert.True(length > 10);
+
+        byte[] restored = new byte[original.Length];
+
+        // Any truncation from 1 byte up to length - 1 must throw InvalidDataException
+        for (int cut = 1; cut < length; cut++)
+        {
+            byte[] truncated = compressed.AsSpan(0, cut).ToArray();
+            Assert.Throws<InvalidDataException>(() => _codec.Decode(truncated, restored));
+            Assert.Throws<InvalidDataException>(() => _codec.DecodeNaive(truncated, restored));
+        }
+    }
+
+    [Fact]
+    public void LargeStreamRoundTrip_OneMegabyteWithMultipleResets()
+    {
+        // 1 MiB of pseudo-random mixed data with runs exercises dozens of dictionary resets
+        byte[] original = TestData.Mixed(1024 * 1024);
+        byte[] compressed = new byte[_codec.MaxCompressedSize(original.Length)];
+
+        int compressedLength = _codec.Encode(original, compressed);
+        Assert.True(compressedLength > 0);
+
+        byte[] restored = new byte[original.Length];
+        int restoredLength = _codec.Decode(compressed.AsSpan(0, compressedLength), restored);
+
+        Assert.Equal(original.Length, restoredLength);
+        Assert.Equal(original, restored);
+    }
+
     private static byte[] Sample(string name) => name switch
     {
         "empty" => [],

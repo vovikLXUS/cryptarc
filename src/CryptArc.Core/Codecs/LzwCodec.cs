@@ -67,12 +67,12 @@ public sealed class LzwCodec : ICodec
 
     public int MaxCompressedSize(int sourceLength)
     {
-        if (sourceLength < 0)
-            throw new ArgumentOutOfRangeException(nameof(sourceLength), sourceLength, "Source length cannot be negative.");
+        ArgumentOutOfRangeException.ThrowIfNegative(sourceLength);
         if (sourceLength == 0)
             return 0;
 
-        return (int)((sourceLength * 13L + 7) / 8 + 32);
+        long bound = (sourceLength * 13L + 7) / 8 + 32;
+        return bound > int.MaxValue ? int.MaxValue : (int)bound;
     }
 
     public int Encode(ReadOnlySpan<byte> source, Span<byte> destination)
@@ -247,15 +247,16 @@ public sealed class LzwCodec : ICodec
         int nextCode = FirstCode;
         int oldCode = -1;
         int written = 0;
-        int totalBitsRead = 0;
+        long totalBitsRead = 0;
+        long totalBitsAvailable = (long)source.Length * 8;
 
         while (true)
         {
-            totalBitsRead += bitWidth;
-            if (totalBitsRead - (bitWidth - 1) > source.Length * 8)
+            if (totalBitsRead + bitWidth > totalBitsAvailable)
                 throw new InvalidDataException("Truncated LZW stream: reached end of input without end-of-stream code.");
 
             uint code = reader.ReadBits(bitWidth);
+            totalBitsRead += bitWidth;
 
             if (code == EosCode)
                 break;
@@ -285,49 +286,61 @@ public sealed class LzwCodec : ICodec
 
             if (code < nextCode)
             {
-                int cur = (int)code;
-                int length = 0;
-
-                while (cur >= 258)
+                if (code < 256)
                 {
-                    stackBuffer[length++] = suffixes[cur];
-                    cur = prefixes[cur];
-                    if (length >= MaxCodes)
-                        throw new InvalidDataException("Corrupted LZW dictionary cycle detected.");
+                    firstChar = (byte)code;
+                    if (written >= destination.Length)
+                        throw new InvalidDataException("LZW stream expands past the destination buffer.");
+
+                    destination[written++] = firstChar;
                 }
+                else
+                {
+                    int top = MaxCodes;
+                    int cur = (int)code;
 
-                stackBuffer[length++] = (byte)cur;
-                firstChar = (byte)cur;
+                    while (cur >= 258)
+                    {
+                        stackBuffer[--top] = suffixes[cur];
+                        cur = prefixes[cur];
+                        if (top <= 0)
+                            throw new InvalidDataException("Corrupted LZW dictionary cycle detected.");
+                    }
 
-                if (written + length > destination.Length)
-                    throw new InvalidDataException("LZW stream expands past the destination buffer.");
+                    stackBuffer[--top] = (byte)cur;
+                    firstChar = (byte)cur;
 
-                for (int i = length - 1; i >= 0; i--)
-                    destination[written++] = stackBuffer[i];
+                    int length = MaxCodes - top;
+                    if (written + length > destination.Length)
+                        throw new InvalidDataException("LZW stream expands past the destination buffer.");
+
+                    stackBuffer.Slice(top, length).CopyTo(destination[written..]);
+                    written += length;
+                }
             }
             else if (code == nextCode)
             {
+                int top = MaxCodes - 1;
                 int cur = oldCode;
-                int length = 0;
 
                 while (cur >= 258)
                 {
-                    stackBuffer[length++] = suffixes[cur];
+                    stackBuffer[--top] = suffixes[cur];
                     cur = prefixes[cur];
-                    if (length >= MaxCodes)
+                    if (top <= 0)
                         throw new InvalidDataException("Corrupted LZW dictionary cycle detected.");
                 }
 
-                stackBuffer[length++] = (byte)cur;
+                stackBuffer[--top] = (byte)cur;
                 firstChar = (byte)cur;
+                stackBuffer[MaxCodes - 1] = firstChar;
 
-                if (written + length + 1 > destination.Length)
+                int length = MaxCodes - top;
+                if (written + length > destination.Length)
                     throw new InvalidDataException("LZW stream expands past the destination buffer.");
 
-                for (int i = length - 1; i >= 0; i--)
-                    destination[written++] = stackBuffer[i];
-
-                destination[written++] = firstChar;
+                stackBuffer.Slice(top, length).CopyTo(destination[written..]);
+                written += length;
             }
             else
             {
@@ -368,15 +381,16 @@ public sealed class LzwCodec : ICodec
         int nextCode = FirstCode;
         int oldCode = -1;
         int written = 0;
-        int totalBitsRead = 0;
+        long totalBitsRead = 0;
+        long totalBitsAvailable = (long)source.Length * 8;
 
         while (true)
         {
-            totalBitsRead += bitWidth;
-            if (totalBitsRead - (bitWidth - 1) > source.Length * 8)
+            if (totalBitsRead + bitWidth > totalBitsAvailable)
                 throw new InvalidDataException("Truncated LZW stream: reached end of input without end-of-stream code.");
 
             uint code = reader.ReadBits(bitWidth);
+            totalBitsRead += bitWidth;
 
             if (code == EosCode)
                 break;
@@ -409,13 +423,14 @@ public sealed class LzwCodec : ICodec
 
             if (code < nextCode)
             {
-                entry = dictionary[code];
-                if (entry is null)
+                byte[]? candidate = dictionary[code];
+                if (candidate is null)
                     throw new InvalidDataException($"Invalid LZW dictionary access at code {code}.");
+                entry = candidate;
             }
             else if (code == nextCode)
             {
-                byte[] oldEntry = dictionary[oldCode];
+                byte[]? oldEntry = dictionary[oldCode];
                 if (oldEntry is null)
                     throw new InvalidDataException($"Invalid LZW dictionary access at old code {oldCode}.");
 
@@ -436,7 +451,10 @@ public sealed class LzwCodec : ICodec
 
             if (nextCode < MaxCodes)
             {
-                byte[] oldEntry = dictionary[oldCode];
+                byte[]? oldEntry = dictionary[oldCode];
+                if (oldEntry is null)
+                    throw new InvalidDataException($"Invalid LZW dictionary access at old code {oldCode}.");
+
                 byte[] newEntry = new byte[oldEntry.Length + 1];
                 oldEntry.CopyTo(newEntry, 0);
                 newEntry[^1] = entry[0];
