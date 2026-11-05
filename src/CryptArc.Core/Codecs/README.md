@@ -18,12 +18,7 @@ most of the coursework happens.
 
 | Algorithm | Owner | Key structure |
 |---|---|---|
-| LZSS | — | hash chains over a 32 KiB window |
 | Deflate (LZSS + Huffman) | — | composition of the two above |
-| LZW | — | own open-addressing hash table |
-| Huffman (canonical) | — | min-heap, then lookup-table decoder |
-| Deflate (LZSS + Huffman) | — | composition of the two above |
-| BWT + MTF + RLE0 + Huffman | — | suffix array |
 | Arithmetic / range coder | — | adaptive frequency model |
 
 Fill in the owner column when the work is split.

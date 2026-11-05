@@ -15,10 +15,9 @@ public static class CodecRegistry
         new RleCodec(),
         new HuffmanCodec(),
         new BwtCodec(),
-        // TODO: LzssCodec, DeflateCodec, LzwCodec, ArithmeticCodec
         new LzssCodec(),
         new LzwCodec(),
-        // TODO: HuffmanCodec, DeflateCodec, BwtCodec, ArithmeticCodec
+        // TODO: DeflateCodec, ArithmeticCodec
     ];
 
     /// <summary>Every implemented codec, in registration order.</summary>
