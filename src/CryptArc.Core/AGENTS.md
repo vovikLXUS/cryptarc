@@ -12,7 +12,10 @@
   `stackalloc` for small fixed buffers, `ArrayPool<byte>.Shared` for blocks.
   No LINQ, no `List<T>`, no string formatting inside codec loops.
 - **Everything public is XML-documented**, including the stream format of each
-  codec — a codec whose format is not written down cannot be reviewed.
+  codec — a codec whose format is not written down cannot be reviewed. The
+  build enforces the comment's presence (CS1591); its content is on you.
+- `tests/CryptArc.Tests/ArchitectureTests.cs` fails the test run if this assembly
+  references a compression library or a UI assembly.
 - Codecs are **stateless and thread-safe**; blocks are compressed in parallel.
 
 ## Adding a codec

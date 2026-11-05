@@ -19,6 +19,8 @@ public ref struct BitWriter
     private int _position;
     private bool _overflowed;
 
+    /// <summary>Initializes a new instance of the <see cref="BitWriter"/> struct over <paramref name="destination"/>.</summary>
+    /// <param name="destination">The buffer that receives the bytes.</param>
     public BitWriter(Span<byte> destination)
     {
         _destination = destination;
@@ -31,6 +33,7 @@ public ref struct BitWriter
     /// <summary>True once a write did not fit; every later write is discarded.</summary>
     public readonly bool Overflowed => _overflowed;
 
+    /// <summary>Whole bytes written to the destination so far, not counting bits still in the accumulator.</summary>
     public readonly int BytesWritten => _position;
 
     /// <summary>Writes the low <paramref name="count"/> bits of <paramref name="value"/>.</summary>
@@ -60,6 +63,8 @@ public ref struct BitWriter
         }
     }
 
+    /// <summary>Writes one bit.</summary>
+    /// <param name="bit"><see langword="true"/> to write 1; otherwise, <see langword="false"/> to write 0.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void WriteBit(bool bit) => WriteBits(bit ? 1u : 0u, 1);
 

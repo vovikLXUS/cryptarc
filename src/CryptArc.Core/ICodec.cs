@@ -10,6 +10,7 @@ namespace CryptArc.Core;
 /// </remarks>
 public interface ICodec
 {
+    /// <summary>The identifier written into the archive for blocks compressed with this codec.</summary>
     CodecId Id { get; }
 
     /// <summary>Human readable name used in CLI output and benchmark tables.</summary>

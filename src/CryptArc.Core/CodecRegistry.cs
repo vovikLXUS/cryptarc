@@ -23,6 +23,10 @@ public static class CodecRegistry
     /// <summary>Every implemented codec, in registration order.</summary>
     public static IReadOnlyList<ICodec> All => Codecs;
 
+    /// <summary>Looks up the implementation registered for <paramref name="id"/>.</summary>
+    /// <param name="id">The codec to look up.</param>
+    /// <param name="codec">When this method returns, contains the codec if it is registered. This parameter is treated as uninitialized.</param>
+    /// <returns><see langword="true"/> if the codec is implemented; otherwise, <see langword="false"/>.</returns>
     public static bool TryGet(CodecId id, out ICodec codec)
     {
         foreach (ICodec candidate in Codecs)
