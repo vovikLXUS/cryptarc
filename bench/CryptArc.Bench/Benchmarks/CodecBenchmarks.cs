@@ -22,7 +22,7 @@ public class CodecBenchmarks
     [ParamsAllValues]
     public DataShape Shape { get; set; }
 
-    [Params(CodecId.Store, CodecId.Rle)]
+    [Params(CodecId.Store, CodecId.Rle, CodecId.Lzw)]
     public CodecId Codec { get; set; }
 
     [GlobalSetup]
