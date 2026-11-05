@@ -71,13 +71,27 @@ public sealed class HuffmanCodec : ICodec
     // Package-merge: a level merges at most k leaves with fewer than k packages.
     private const int MaxLevelItems = 2 * SymbolCount;
 
+    /// <summary>Always <see cref="CodecId.Huffman"/>.</summary>
     public CodecId Id => CodecId.Huffman;
 
+    /// <summary>Always "Huffman".</summary>
     public string Name => "Huffman";
 
+    /// <summary>
+    /// The source length plus the 132-byte header, or 0 for an empty source. The bit
+    /// stream never takes more than one byte per symbol; see the remarks on this class.
+    /// </summary>
     public int MaxCompressedSize(int sourceLength) =>
         sourceLength == 0 ? 0 : sourceLength + HeaderSize;
 
+    /// <summary>
+    /// Compresses <paramref name="source"/> into <paramref name="destination"/> in the
+    /// format described on this class.
+    /// </summary>
+    /// <returns>
+    /// The number of bytes written, or -1 when <paramref name="destination"/> was too
+    /// small, which is the caller's signal to fall back to <see cref="CodecId.Store"/>.
+    /// </returns>
     public int Encode(ReadOnlySpan<byte> source, Span<byte> destination)
     {
         if (source.IsEmpty)
@@ -115,6 +129,8 @@ public sealed class HuffmanCodec : ICodec
     /// Decodes through a two-level lookup table: one index per symbol for codes up to
     /// 10 bits, two for the longer and much rarer ones.
     /// </summary>
+    /// <returns>The number of bytes written.</returns>
+    /// <exception cref="InvalidDataException">The input is malformed or truncated.</exception>
     public int Decode(ReadOnlySpan<byte> source, Span<byte> destination)
     {
         if (source.IsEmpty)
@@ -123,6 +139,9 @@ public sealed class HuffmanCodec : ICodec
         Span<byte> lengths = stackalloc byte[SymbolCount];
         int count = ReadHeader(source, destination.Length, lengths);
 
+        // About 20 KiB, preferred over ArrayPool: the size is a small constant unrelated
+        // to the input, nothing recurses here, and a malformed stream can throw at any
+        // point with no rented array to return. The table is rebuilt per call regardless.
         Span<uint> table = stackalloc uint[DecodeTableSize];
         BuildDecodeTable(lengths, table);
 
@@ -276,25 +295,25 @@ public sealed class HuffmanCodec : ICodec
     /// </remarks>
     private static void LimitCodeLengths(ReadOnlySpan<int> frequencies, Span<byte> lengths)
     {
-        // Used symbols by ascending frequency.
-        Span<byte> sorted = stackalloc byte[SymbolCount];
-        int symbolCount = 0;
+        // Used symbols by ascending frequency: heap sort, O(k log k).
+        Span<long> weights = stackalloc long[SymbolCount];
+        Span<int> heap = stackalloc int[SymbolCount];
+        int heapSize = 0;
 
         for (int symbol = 0; symbol < SymbolCount; symbol++)
         {
-            if (frequencies[symbol] == 0)
-                continue;
-
-            int slot = symbolCount++;
-
-            while (slot > 0 && frequencies[sorted[slot - 1]] > frequencies[symbol])
+            if (frequencies[symbol] > 0)
             {
-                sorted[slot] = sorted[slot - 1];
-                slot--;
+                weights[symbol] = frequencies[symbol];
+                HeapPush(heap, ref heapSize, weights, symbol);
             }
-
-            sorted[slot] = (byte)symbol;
         }
+
+        int symbolCount = heapSize;
+        Span<byte> sorted = stackalloc byte[SymbolCount];
+
+        for (int i = 0; i < symbolCount; i++)
+            sorted[i] = (byte)HeapPop(heap, ref heapSize, weights);
 
         Span<bool> isPackage = stackalloc bool[MaxCodeLength * MaxLevelItems];
         Span<long> previous = stackalloc long[MaxLevelItems];
@@ -303,7 +322,7 @@ public sealed class HuffmanCodec : ICodec
 
         for (int level = MaxCodeLength - 1; level >= 0; level--)
         {
-            Span<bool> flags = isPackage.Slice(level * MaxLevelItems, MaxLevelItems);
+            Span<bool> levelIsPackage = isPackage.Slice(level * MaxLevelItems, MaxLevelItems);
             int packageCount = previousCount / 2;
             int leaf = 0;
             int package = 0;
@@ -319,13 +338,13 @@ public sealed class HuffmanCodec : ICodec
                 if (leafWeight <= packageWeight)
                 {
                     current[count] = leafWeight;
-                    flags[count++] = false;
+                    levelIsPackage[count++] = false;
                     leaf++;
                 }
                 else
                 {
                     current[count] = packageWeight;
-                    flags[count++] = true;
+                    levelIsPackage[count++] = true;
                     package++;
                 }
             }
@@ -337,23 +356,23 @@ public sealed class HuffmanCodec : ICodec
         }
 
         lengths.Clear();
-        int take = 2 * symbolCount - 2;
+        int selectedItems = 2 * symbolCount - 2;
 
         for (int level = 0; level < MaxCodeLength; level++)
         {
-            ReadOnlySpan<bool> flags = isPackage.Slice(level * MaxLevelItems, MaxLevelItems);
+            ReadOnlySpan<bool> levelIsPackage = isPackage.Slice(level * MaxLevelItems, MaxLevelItems);
             int packages = 0;
             int leaves = 0;
 
-            for (int i = 0; i < take; i++)
+            for (int i = 0; i < selectedItems; i++)
             {
-                if (flags[i])
+                if (levelIsPackage[i])
                     packages++;
                 else
                     lengths[sorted[leaves++]]++;
             }
 
-            take = 2 * packages;
+            selectedItems = 2 * packages;
         }
     }
 
@@ -424,24 +443,17 @@ public sealed class HuffmanCodec : ICodec
         int kraftSum = 0;
         int used = 0;
 
-        for (int i = 0; i < LengthTableSize; i++)
+        for (int symbol = 0; symbol < SymbolCount; symbol++)
         {
-            int low = table[i] & 0x0F;
-            int high = table[i] >> 4;
+            byte packed = table[symbol / 2];
+            int length = symbol % 2 == 0 ? packed & 0x0F : packed >> 4;
 
-            lengths[2 * i] = (byte)low;
-            lengths[2 * i + 1] = (byte)high;
+            lengths[symbol] = (byte)length;
 
-            if (low != 0)
+            if (length != 0)
             {
                 used++;
-                kraftSum += 1 << (MaxCodeLength - low);
-            }
-
-            if (high != 0)
-            {
-                used++;
-                kraftSum += 1 << (MaxCodeLength - high);
+                kraftSum += 1 << (MaxCodeLength - length);
             }
         }
 

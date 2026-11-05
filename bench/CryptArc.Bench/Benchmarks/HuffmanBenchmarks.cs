@@ -19,12 +19,12 @@ public class HuffmanBenchmarks
     private int _compressedLength;
 
     [ParamsAllValues]
-    public DataShape Shape { get; set; }
+    public CodecBenchmarks.DataShape Shape { get; set; }
 
     [GlobalSetup]
     public void Setup()
     {
-        byte[] input = Generate(Shape);
+        byte[] input = CodecBenchmarks.Generate(Shape, Size);
 
         _compressed = new byte[_codec.MaxCompressedSize(input.Length)];
         _restored = new byte[input.Length];
@@ -36,30 +36,4 @@ public class HuffmanBenchmarks
 
     [Benchmark]
     public int LookupTable() => _codec.Decode(_compressed.AsSpan(0, _compressedLength), _restored);
-
-    private static byte[] Generate(DataShape shape)
-    {
-        byte[] buffer = new byte[Size];
-
-        switch (shape)
-        {
-            case DataShape.Random:
-                new Random(2024).NextBytes(buffer);
-                break;
-
-            case DataShape.Text:
-                const string source = "the quick brown fox jumps over the lazy dog; ";
-                for (int i = 0; i < Size; i++)
-                    buffer[i] = (byte)source[i % source.Length];
-                break;
-        }
-
-        return buffer;
-    }
-
-    public enum DataShape
-    {
-        Random,
-        Text,
-    }
 }

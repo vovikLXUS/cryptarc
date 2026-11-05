@@ -57,6 +57,28 @@ public class HuffmanCodecTests
         return output.ToArray();
     }
 
+    /// <summary>
+    /// All 256 byte values: 246 occur once and merge into a subtree of weight 246 and
+    /// depth 8. The other 10 continue a Fibonacci chain from that weight, which puts the
+    /// subtree 10 levels down and its leaves at depth 18, past the 15-bit limit.
+    /// </summary>
+    private static byte[] AllSymbolsSkewed()
+    {
+        const int rareSymbols = 246;
+
+        var output = new List<byte>(Enumerable.Range(0, rareSymbols).Select(symbol => (byte)symbol));
+        int previous = rareSymbols;
+        int current = rareSymbols;
+
+        for (int symbol = rareSymbols; symbol < 256; symbol++)
+        {
+            output.AddRange(Enumerable.Repeat((byte)symbol, current));
+            (previous, current) = (current, previous + current);
+        }
+
+        return output.ToArray();
+    }
+
     private static int[] ReadLengths(byte[] stream)
     {
         int[] lengths = new int[256];
@@ -168,6 +190,40 @@ public class HuffmanCodecTests
         Assert.Equal(1L << MaxCodeLength, kraftSum);
         Assert.Equal(OptimalLimitedCost(weights, MaxCodeLength), cost);
         Assert.Equal(HeaderSize + (cost + 7) / 8, stream.Length);
+    }
+
+    [Fact]
+    public void LimitsACodeThatUsesEverySymbol()
+    {
+        byte[] original = AllSymbolsSkewed();
+        byte[] stream = Encode(original);
+        int[] lengths = ReadLengths(stream);
+
+        long[] counts = new long[256];
+        foreach (byte value in original)
+            counts[value]++;
+
+        long kraftSum = lengths.Sum(length => 1L << (MaxCodeLength - length));
+        long cost = Enumerable.Range(0, 256).Sum(symbol => counts[symbol] * lengths[symbol]);
+
+        Assert.DoesNotContain(0, lengths);
+        Assert.Equal(MaxCodeLength, lengths.Max());
+        Assert.Equal(1L << MaxCodeLength, kraftSum);
+        Assert.Equal(OptimalLimitedCost(counts, MaxCodeLength), cost);
+
+        // A more generous limit does strictly better, so this one really was binding.
+        Assert.True(OptimalLimitedCost(counts, 32) < cost);
+    }
+
+    [Theory]
+    [MemberData(nameof(Decoders))]
+    public void RoundTripsALimitedCodeThatUsesEverySymbol(string decoder)
+    {
+        byte[] original = AllSymbolsSkewed();
+        byte[] restored = new byte[original.Length];
+
+        Assert.Equal(original.Length, Decode(decoder, Encode(original), restored));
+        Assert.Equal(original, restored);
     }
 
     [Theory]
