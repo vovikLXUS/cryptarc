@@ -7,12 +7,16 @@ namespace CryptArc.Core.Codecs;
 /// </summary>
 public sealed class StoreCodec : ICodec
 {
+    /// <inheritdoc/>
     public CodecId Id => CodecId.Store;
 
+    /// <inheritdoc/>
     public string Name => "Store";
 
+    /// <inheritdoc/>
     public int MaxCompressedSize(int sourceLength) => sourceLength;
 
+    /// <inheritdoc/>
     public int Encode(ReadOnlySpan<byte> source, Span<byte> destination)
     {
         if (destination.Length < source.Length)
@@ -22,6 +26,7 @@ public sealed class StoreCodec : ICodec
         return source.Length;
     }
 
+    /// <inheritdoc/>
     public int Decode(ReadOnlySpan<byte> source, Span<byte> destination)
     {
         if (destination.Length < source.Length)

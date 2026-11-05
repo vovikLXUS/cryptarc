@@ -4,9 +4,22 @@ CI/CD and repository templates.
 
 | File | Runs when | Does |
 |---|---|---|
-| `workflows/ci.yml` | every pull request and push to `main` | restore, build and test on Windows and Linux; publishes a win-x64 preview build as an artifact |
+| `workflows/ci.yml` | every pull request and push to `main` | build and test on Windows, Linux and macOS with coverage; a one-shot run of every benchmark; checks the PR title; publishes a win-x64 preview build as an artifact |
 | `workflows/release.yml` | a `v*` tag is pushed | publishes win-x64, linux-x64 and osx-arm64, zips them with checksums, creates a GitHub Release |
 | `PULL_REQUEST_TEMPLATE.md` | opening a pull request | checklist |
+
+## What CI enforces
+
+| Check | Where | Catches |
+|---|---|---|
+| Build, warnings as errors | every OS | compiler warnings; in `CryptArc.Core`, also a public member without an XML comment (CS1591) |
+| `ArchitectureTests` | test run | `CryptArc.Core` referencing a ready-made compressor (`System.IO.Compression`, SharpZipLib, Zstd, LZ4…) or a UI assembly (Avalonia, `System.Console`, WPF): hard rules 1 and 5 |
+| Unit tests + coverage | every OS | failing tests; Cobertura coverage lands in the `test-results-*` artifact |
+| Benchmark smoke test | Linux | a benchmark that throws. `--job Dry` runs each case once and measures nothing; real numbers still come from a local Release run |
+| PR title | pull requests | a title that is not a Conventional Commit; the squash commit on `main` takes it |
+
+Not checked automatically: the stream format being documented, naive and optimised
+versions being kept, and the quality of the tests. Those stay with the reviewer.
 
 ## The preview build is the review app
 

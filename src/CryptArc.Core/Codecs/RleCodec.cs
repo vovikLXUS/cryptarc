@@ -26,13 +26,17 @@ public sealed class RleCodec : ICodec
     private const int MinRepeatRun = 3;
     private const int MaxRepeatRun = MinRepeatRun + 127; // 130
 
+    /// <inheritdoc/>
     public CodecId Id => CodecId.Rle;
 
+    /// <inheritdoc/>
     public string Name => "RLE";
 
+    /// <inheritdoc/>
     public int MaxCompressedSize(int sourceLength) =>
         sourceLength + (sourceLength + MaxLiteralRun - 1) / MaxLiteralRun;
 
+    /// <inheritdoc/>
     public int Encode(ReadOnlySpan<byte> source, Span<byte> destination)
     {
         int read = 0;
@@ -74,6 +78,7 @@ public sealed class RleCodec : ICodec
         return written;
     }
 
+    /// <inheritdoc/>
     public int Decode(ReadOnlySpan<byte> source, Span<byte> destination)
     {
         int read = 0;

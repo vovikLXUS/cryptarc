@@ -23,4 +23,11 @@
     <Product>CryptArc</Product>
   </PropertyGroup>
 
+  <!-- Core's public API must be XML-documented (src/CryptArc.Core/AGENTS.md).
+       Generating the doc file turns a missing comment into CS1591, which
+       TreatWarningsAsErrors makes a build error. -->
+  <PropertyGroup Condition="'$(MSBuildProjectName)' == 'CryptArc.Core'">
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
 </Project>

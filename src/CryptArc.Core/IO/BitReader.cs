@@ -13,6 +13,8 @@ public ref struct BitReader
     private int _position;
     private long _paddingBytes;
 
+    /// <summary>Initializes a new instance of the <see cref="BitReader"/> struct over <paramref name="source"/>.</summary>
+    /// <param name="source">The bytes to read bits from.</param>
     public BitReader(ReadOnlySpan<byte> source)
     {
         _source = source;
@@ -62,6 +64,8 @@ public ref struct BitReader
         _bitCount -= count;
     }
 
+    /// <summary>Reads one bit, zero extending past the end of input.</summary>
+    /// <returns><see langword="true"/> if the bit is 1; otherwise, <see langword="false"/>.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool ReadBit() => ReadBits(1) != 0;
 
