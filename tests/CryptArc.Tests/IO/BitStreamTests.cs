@@ -67,4 +67,41 @@ public class BitStreamTests
         Assert.Equal(0xFFu, reader.ReadBits(8));
         Assert.Equal(0u, reader.ReadBits(8));
     }
+
+    [Fact]
+    public void PeekDoesNotConsumeAndSkipDoes()
+    {
+        var reader = new BitReader([0b1010_0110, 0xFF]);
+
+        Assert.Equal(0b0110u, reader.PeekBits(4));
+        Assert.Equal(0b0110u, reader.PeekBits(4));
+
+        reader.SkipBits(4);
+
+        Assert.Equal(0b1010u, reader.ReadBits(4));
+        Assert.Equal(0xFFu, reader.ReadBits(8));
+    }
+
+    [Fact]
+    public void PeekingPastTheEndIsNotAnOverrun()
+    {
+        var reader = new BitReader([0xFF]);
+
+        reader.SkipBits(4);
+
+        Assert.Equal(0x0Fu, reader.PeekBits(16));
+        Assert.False(reader.IsOverrun);
+    }
+
+    [Fact]
+    public void FlagsAnOverrunOnlyOnceAPaddingBitIsConsumed()
+    {
+        var reader = new BitReader([0xFF]);
+
+        reader.ReadBits(8);
+        Assert.False(reader.IsOverrun);
+
+        reader.ReadBit();
+        Assert.True(reader.IsOverrun);
+    }
 }

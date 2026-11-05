@@ -24,10 +24,11 @@ the on-disk format, [CLAUDE.md](CLAUDE.md) for the working rules.
         │   Analysis    │    Codecs    │    Container    │
         │  entropy,     │  ICodec      │  header, tables,│
         │  codec choice │  implement.  │  crypto, blocks │
-        ├───────────────┴──────┬───────┴─────────────────┤
-        │          IO          │        Hashing          │   primitives
-        │   BitWriter/Reader   │   Crc32, SHA-256 use    │
-        └──────────────────────┴─────────────────────────┘
+        ├───────────────┼──────────────┼─────────────────┤
+        │       IO      │  Transforms  │     Hashing     │   primitives
+        │   BitWriter/  │  BWT, MTF,   │  Crc32, SHA-256 │
+        │   BitReader   │     RLE0     │       use       │
+        └───────────────┴──────────────┴─────────────────┘
                                 ▲
                    ┌────────────┴─────────────┐
                    │                          │
@@ -99,9 +100,10 @@ container also carries a `formatVersion`.
 ### 3.3 `CodecRegistry` — the extension point
 
 Maps `CodecId` to `ICodec` over the codecs that actually exist.
-`TryGet` returns `false` for planned-but-unwritten algorithms, which lets
-`DataAnalyzer` recommend `Bwt` long before `BwtCodec` is written — callers fall
-back to `Store` instead of crashing.
+`TryGet` returns `false` for planned-but-unwritten algorithms, which let
+`DataAnalyzer` recommend `Bwt` before `BwtCodec` existed — and still lets it
+name codecs nobody has written yet. Callers fall back to `Store` instead of
+crashing.
 
 ### 3.4 `DataProfile` — an immutable value
 
@@ -134,9 +136,10 @@ is silently garbage.
 | LZSS — naive | none | scan the whole window | `O(n*W)` |
 | LZSS — optimised | hash table plus chained positions (`head[]`, `prev[]`) | 3-byte hash, bounded chain walk | `O(n*k)`, k = `maxChain` |
 | LZW | open-addressing hash table (own, not `Dictionary<>`) | insert / probe | `O(n)` amortised |
-| BWT — naive | comparison sort of rotations | — | `O(n^2 log n)` |
+| BWT — naive | comparison sort of suffixes | — | `O(n^2 log n)` |
 | BWT — optimised | suffix array via prefix doubling plus radix sort | — | `O(n log n)` |
 | BWT — inverse | LF-mapping over a counting table | — | `O(n)` |
+| RLE0 | none | zero runs as bijective base-2 digits | `O(n)` |
 | MTF | 256-byte array, not a linked list | move-to-front | `O(k)` worst, `O(1)` typical |
 | Arithmetic coding | frequency model plus 32-bit range state | renormalise | `O(n)` |
 | Deduplication | Rabin-Karp rolling hash, SHA-256 per chunk | content-defined chunking | `O(n)` |
