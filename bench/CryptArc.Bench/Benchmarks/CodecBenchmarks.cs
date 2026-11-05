@@ -22,8 +22,15 @@ public class CodecBenchmarks
     [ParamsAllValues]
     public DataShape Shape { get; set; }
 
-    [Params(CodecId.Store, CodecId.Rle, CodecId.Lzw)]
+    [ParamsSource(nameof(RegisteredCodecs))]
     public CodecId Codec { get; set; }
+
+    /// <summary>Every registered codec, so a new one joins the table without editing this file.</summary>
+    public static IEnumerable<CodecId> RegisteredCodecs()
+    {
+        foreach (ICodec codec in CodecRegistry.All)
+            yield return codec.Id;
+    }
 
     [GlobalSetup]
     public void Setup()
@@ -44,7 +51,8 @@ public class CodecBenchmarks
     [Benchmark]
     public int Decode() => _codec.Decode(_compressed.AsSpan(0, _compressedLength), _restored);
 
-    private static byte[] Generate(DataShape shape, int size)
+    /// <summary>Builds <paramref name="size"/> bytes of the given shape from a fixed seed. Shared with the per-codec benchmarks.</summary>
+    internal static byte[] Generate(DataShape shape, int size)
     {
         var random = new Random(2024);
         byte[] buffer = new byte[size];

@@ -9,6 +9,7 @@ most of the coursework happens.
 |---|---|---|---|
 | `StoreCodec.cs` | none (pass-through) | `O(n)` | fallback for incompressible data |
 | `RleCodec.cs` | run-length, PackBits style | `O(n)` time, `O(1)` space | worst case grows input by < 0.8 % |
+| `LzssCodec.cs` | LZSS, 32 KiB window | `O(n*k)` time with hash chains, `O(n*W)` naive | literal runs bound the worst case at < 0.8 %; `EncodeNaive` and `MatchLengthNaive` are the baselines |
 | `LzwCodec.cs` | LZW, 9..12-bit variable width | `O(n)` amortised | own open-addressing hash table |
 
 ## Planned
@@ -16,7 +17,6 @@ most of the coursework happens.
 | Algorithm | Owner | Key structure |
 |---|---|---|
 | Huffman (canonical) | — | min-heap, then lookup-table decoder |
-| LZSS | — | hash chains over a 32 KiB window |
 | Deflate (LZSS + Huffman) | — | composition of the two above |
 | BWT + MTF + RLE0 + Huffman | — | suffix array |
 | Arithmetic / range coder | — | adaptive frequency model |
