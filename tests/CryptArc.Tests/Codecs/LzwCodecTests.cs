@@ -271,6 +271,83 @@ public class LzwCodecTests
         Assert.Equal(original, restored);
     }
 
+    [Theory]
+    [InlineData(512)]
+    [InlineData(1024)]
+    [InlineData(2048)]
+    public void RoundTripsBoundaryNextCodes_DecodeAndDecodeNaive(int targetNextCode)
+    {
+        byte[] original = GenerateSequenceForTargetNextCode(targetNextCode);
+        byte[] compressed = new byte[_codec.MaxCompressedSize(original.Length)];
+        byte[] naiveCompressed = new byte[_codec.MaxCompressedSize(original.Length)];
+
+        int compressedLength = _codec.Encode(original, compressed);
+        int naiveCompressedLength = _codec.EncodeNaive(original, naiveCompressed);
+
+        Assert.True(compressedLength > 0);
+        Assert.Equal(naiveCompressedLength, compressedLength);
+        Assert.Equal(naiveCompressed.AsSpan(0, naiveCompressedLength).ToArray(), compressed.AsSpan(0, compressedLength).ToArray());
+
+        byte[] restoredFast = new byte[original.Length];
+        byte[] restoredNaive = new byte[original.Length];
+
+        int fastLength = _codec.Decode(compressed.AsSpan(0, compressedLength), restoredFast);
+        int naiveLength = _codec.DecodeNaive(compressed.AsSpan(0, compressedLength), restoredNaive);
+
+        Assert.Equal(original.Length, fastLength);
+        Assert.Equal(original.Length, naiveLength);
+        Assert.Equal(original, restoredFast);
+        Assert.Equal(original, restoredNaive);
+    }
+
+    [Fact]
+    public void Repro_Bytes0To254_RoundTripsThroughBothOptimisedAndNaive()
+    {
+        byte[] original = new byte[255];
+        for (int i = 0; i < original.Length; i++)
+            original[i] = (byte)i;
+
+        byte[] compressed = new byte[_codec.MaxCompressedSize(original.Length)];
+        int length = _codec.Encode(original, compressed);
+        Assert.True(length > 0);
+
+        byte[] restoredFast = new byte[original.Length];
+        byte[] restoredNaive = new byte[original.Length];
+
+        int fastLength = _codec.Decode(compressed.AsSpan(0, length), restoredFast);
+        int naiveLength = _codec.DecodeNaive(compressed.AsSpan(0, length), restoredNaive);
+
+        Assert.Equal(original.Length, fastLength);
+        Assert.Equal(original.Length, naiveLength);
+        Assert.Equal(original, restoredFast);
+        Assert.Equal(original, restoredNaive);
+    }
+
+    private static byte[] GenerateSequenceForTargetNextCode(int targetNextCode)
+    {
+        int neededEntries = targetNextCode - 258;
+        byte[] data = new byte[neededEntries + 1];
+        int current = 0;
+        int stride = 1;
+        var edges = new HashSet<int>();
+
+        for (int i = 1; i <= neededEntries; i++)
+        {
+            int next = (current + stride) & 0xFF;
+            int edge = (current << 8) | next;
+            while (!edges.Add(edge))
+            {
+                stride += 2;
+                next = (current + stride) & 0xFF;
+                edge = (current << 8) | next;
+            }
+            data[i] = (byte)next;
+            current = next;
+        }
+
+        return data;
+    }
+
     private static byte[] Sample(string name) => name switch
     {
         "empty" => [],
