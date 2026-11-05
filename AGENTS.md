@@ -116,3 +116,37 @@ an error — the container falls back to `Store`. Do not throw for it.
 - Conventional Commits (`feat:`, `fix:`, `perf:`, `docs:`, `test:`).
 - Releases are cut by pushing a `vX.Y.Z` tag; CI builds and publishes.
 - Do not commit or push unless asked.
+
+## Agent skills
+
+Skills from [skills.sh](https://skills.sh) are installed in `.agents/skills/`.
+Claude Code reaches them through symlinks in `.claude/skills/`. The list,
+sources and licenses are in [.agents/skills/README.md](.agents/skills/README.md).
+Load the matching skill for these tasks:
+
+| Task | Skill |
+|---|---|
+| Reviewing a branch or a diff | `code-review` |
+| Making a commit | `git-commit` |
+| Opening a pull request | `create-pull-request` |
+| Writing or running benchmarks | `microbenchmarking` |
+| Looking for slow code in a hot path | `analyzing-dotnet-performance` |
+| SIMD in a codec | `vectorization` |
+| Writing tests | `csharp-xunit` |
+| Writing XML docs | `csharp-docs` |
+
+The skills are generic. Where one disagrees with this file, this file wins:
+
+- **code-review:** the standards are this file, the nearest nested `AGENTS.md`
+  and `ARCHITECTURE.md`. The spec is the linked issue, or the PR description if
+  there is no issue. Ignore the skill's hint to run `/setup-matt-pocock-skills`.
+- **git-commit:** use the commit types listed under Git above.
+- **create-pull-request:** the template is `.github/PULL_REQUEST_TEMPLATE.md`
+  (upper case). The base branch is `main`, and PRs are squash merged, so do not
+  rebase or squash locally.
+- **microbenchmarking:** permanent benchmarks go in `bench/CryptArc.Bench`. Keep
+  the naive implementation as the `Baseline = true` method (hard rule 4).
+- **csharp-xunit:** do not add Moq, NSubstitute or FluentAssertions. Codecs are
+  pure functions, and plain `Assert` is enough.
+- **analyzing-dotnet-performance, vectorization:** a speedup counts only with a
+  Release BenchmarkDotNet run against the naive version.
