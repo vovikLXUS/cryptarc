@@ -69,13 +69,7 @@ public static class SuffixArray
             foreach (byte value in text)
                 count[value]++;
 
-            int sum = 0;
-            for (int c = 0; c < 256; c++)
-            {
-                int bucket = count[c];
-                count[c] = sum;
-                sum += bucket;
-            }
+            ByteBuckets.CountsToStarts(count, 0);
 
             for (int i = 0; i < n; i++)
                 sa[count[text[i]]++] = i;

@@ -24,10 +24,11 @@ the on-disk format, [CLAUDE.md](CLAUDE.md) for the working rules.
         │   Analysis    │    Codecs    │    Container    │
         │  entropy,     │  ICodec      │  header, tables,│
         │  codec choice │  implement.  │  crypto, blocks │
-        ├───────────────┴──────┬───────┴─────────────────┤
-        │          IO          │        Hashing          │   primitives
-        │   BitWriter/Reader   │   Crc32, SHA-256 use    │
-        └──────────────────────┴─────────────────────────┘
+        ├───────────────┼──────────────┼─────────────────┤
+        │       IO      │  Transforms  │     Hashing     │   primitives
+        │   BitWriter/  │  BWT, MTF,   │  Crc32, SHA-256 │
+        │   BitReader   │     RLE0     │       use       │
+        └───────────────┴──────────────┴─────────────────┘
                                 ▲
                    ┌────────────┴─────────────┐
                    │                          │
@@ -99,9 +100,10 @@ container also carries a `formatVersion`.
 ### 3.3 `CodecRegistry` — the extension point
 
 Maps `CodecId` to `ICodec` over the codecs that actually exist.
-`TryGet` returns `false` for planned-but-unwritten algorithms, which lets
-`DataAnalyzer` recommend `Bwt` long before `BwtCodec` is written — callers fall
-back to `Store` instead of crashing.
+`TryGet` returns `false` for planned-but-unwritten algorithms, which let
+`DataAnalyzer` recommend `Bwt` before `BwtCodec` existed — and still lets it
+name codecs nobody has written yet. Callers fall back to `Store` instead of
+crashing.
 
 ### 3.4 `DataProfile` — an immutable value
 

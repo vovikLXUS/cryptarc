@@ -11,7 +11,13 @@ public class BwtCodecTests
     public void EncodesEmptyInputAsNothing()
     {
         Assert.Equal(0, _codec.Encode([], new byte[16]));
-        Assert.Equal(0, _codec.Decode([], new byte[16]));
+        Assert.Equal(0, _codec.Decode([], []));
+    }
+
+    [Fact]
+    public void RejectsEmptyStreamForANonEmptyBlock()
+    {
+        Assert.Throws<InvalidDataException>(() => _codec.Decode([], new byte[16]));
     }
 
     [Fact]
@@ -95,6 +101,32 @@ public class BwtCodecTests
     }
 
     [Fact]
+    public void RejectsEveryTruncationOfAStoredBlock()
+    {
+        byte[] original = TestData.Random(300);
+        byte[] compressed = Encode(_codec, original);
+        Assert.Equal(1, compressed[0]);
+
+        for (int length = 1; length < compressed.Length; length++)
+        {
+            byte[] truncated = compressed[..length];
+            Assert.Throws<InvalidDataException>(() => _codec.Decode(truncated, new byte[original.Length]));
+        }
+    }
+
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(1)]
+    public void RejectsATransformedBlockOfTheWrongSize(int delta)
+    {
+        byte[] original = TestData.Text();
+        byte[] compressed = Encode(_codec, original);
+        Assert.Equal(0, compressed[0]);
+
+        Assert.Throws<InvalidDataException>(() => _codec.Decode(compressed, new byte[original.Length + delta]));
+    }
+
+    [Fact]
     public void RejectsPrimaryIndexOutOfRange()
     {
         byte[] compressed = Encode(_codec, TestData.Text());
@@ -130,7 +162,7 @@ public class BwtCodecTests
         for (int trial = 0; trial < 500; trial++)
         {
             byte[] corrupt = (byte[])compressed.Clone();
-            corrupt[1 + random.Next(corrupt.Length - 1)] ^= (byte)(1 << random.Next(8));
+            corrupt[random.Next(corrupt.Length)] ^= (byte)(1 << random.Next(8));
 
             // Either a clean rejection or some output; never another exception type.
             try

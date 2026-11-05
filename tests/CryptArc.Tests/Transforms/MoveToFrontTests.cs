@@ -43,6 +43,28 @@ public class MoveToFrontTests
     [InlineData(0)]
     [InlineData(1)]
     [InlineData(5000)]
+    public void BlockMoveAgreesWithThePlainLoop(int size)
+    {
+        foreach (byte[] original in new[] { TestData.Random(size), TestData.Mixed(size), TestData.Text() })
+        {
+            byte[] fast = (byte[])original.Clone();
+            byte[] naive = (byte[])original.Clone();
+
+            MoveToFront.Encode(fast);
+            MoveToFront.EncodeNaive(naive);
+            Assert.Equal(naive, fast);
+
+            MoveToFront.Decode(fast);
+            MoveToFront.DecodeNaive(naive);
+            Assert.Equal(original, naive);
+            Assert.Equal(original, fast);
+        }
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(5000)]
     public void DecodeInvertsEncode(int size)
     {
         foreach (byte[] original in new[] { TestData.Random(size), TestData.Mixed(size), TestData.Alternating(size) })

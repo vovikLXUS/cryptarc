@@ -28,9 +28,16 @@ namespace CryptArc.Core.Codecs;
 ///   </description></item>
 /// </list>
 /// <para>
-/// The stored mode is what bounds the worst case: zero-run encoding may expand
-/// incompressible input, so whenever the transformed stream would be longer than the
-/// input plus one byte, the block is stored instead and grows by exactly one byte.
+/// The stream does not record the block length. <see cref="Decode"/> must be given a
+/// destination of exactly the original length — the container keeps it in the block
+/// index — and rejects a stream that decodes to any other length.
+/// </para>
+/// <para>
+/// Why a stored mode, when the container already stores a block whose
+/// <see cref="Encode"/> returns -1: it keeps <see cref="MaxCompressedSize"/> at
+/// n + 1. Zero-run encoding can double incompressible input, so without it the true
+/// bound would be about 2n plus the Huffman header, and every caller would have to
+/// allocate twice the block size just to learn that the block does not compress.
 /// </para>
 /// <para>
 /// Complexity: O(n log n) time for encoding, dominated by the suffix sort; O(n) for
@@ -43,15 +50,19 @@ public sealed class BwtCodec : ICodec
     private const byte ModeStored = 1;
     private const int TransformedHeaderSize = 1 + sizeof(uint);
 
-    private static readonly HuffmanCodec Entropy = new();
+    private static readonly ICodec Entropy = new HuffmanCodec();
 
+    /// <inheritdoc/>
     public CodecId Id => CodecId.Bwt;
 
+    /// <inheritdoc/>
     public string Name => "BWT";
 
+    /// <inheritdoc/>
     public int MaxCompressedSize(int sourceLength) =>
         sourceLength == 0 ? 0 : sourceLength + 1;
 
+    /// <inheritdoc/>
     public int Encode(ReadOnlySpan<byte> source, Span<byte> destination)
     {
         int n = source.Length;
@@ -62,11 +73,14 @@ public sealed class BwtCodec : ICodec
 
         if (limit > TransformedHeaderSize)
         {
-            byte[] columnBuffer = ArrayPool<byte>.Shared.Rent(n);
-            byte[] runBuffer = ArrayPool<byte>.Shared.Rent(ZeroRunLength.MaxEncodedSize(n));
+            byte[]? columnBuffer = null;
+            byte[]? runBuffer = null;
 
             try
             {
+                columnBuffer = ArrayPool<byte>.Shared.Rent(n);
+                runBuffer = ArrayPool<byte>.Shared.Rent(ZeroRunLength.MaxEncodedSize(n));
+
                 Span<byte> column = columnBuffer.AsSpan(0, n);
                 int primaryIndex = BurrowsWheeler.Forward(source, column);
                 MoveToFront.Encode(column);
@@ -83,8 +97,10 @@ public sealed class BwtCodec : ICodec
             }
             finally
             {
-                ArrayPool<byte>.Shared.Return(columnBuffer);
-                ArrayPool<byte>.Shared.Return(runBuffer);
+                if (columnBuffer is not null)
+                    ArrayPool<byte>.Shared.Return(columnBuffer);
+                if (runBuffer is not null)
+                    ArrayPool<byte>.Shared.Return(runBuffer);
             }
         }
 
@@ -96,18 +112,27 @@ public sealed class BwtCodec : ICodec
         return n + 1;
     }
 
+    /// <inheritdoc/>
+    /// <remarks>
+    /// <paramref name="destination"/> must be exactly the original block length: a
+    /// stream that decodes to fewer or more bytes is treated as truncated or corrupt.
+    /// </remarks>
     public int Decode(ReadOnlySpan<byte> source, Span<byte> destination)
     {
         if (source.IsEmpty)
+        {
+            if (!destination.IsEmpty)
+                throw new InvalidDataException("Empty BWT stream for a non-empty block.");
             return 0;
+        }
 
         byte mode = source[0];
 
         if (mode == ModeStored)
         {
             ReadOnlySpan<byte> payload = source[1..];
-            if (payload.Length > destination.Length)
-                throw new InvalidDataException("Stored BWT block is larger than the declared block size.");
+            if (payload.Length != destination.Length)
+                throw new InvalidDataException("Stored BWT block does not match the declared block size.");
 
             payload.CopyTo(destination);
             return payload.Length;
@@ -123,13 +148,20 @@ public sealed class BwtCodec : ICodec
             throw new InvalidDataException("BWT primary index is out of range.");
 
         int capacity = destination.Length;
-        byte[] runBuffer = ArrayPool<byte>.Shared.Rent(ZeroRunLength.MaxEncodedSize(capacity));
-        byte[] columnBuffer = ArrayPool<byte>.Shared.Rent(capacity);
+        int runCapacity = ZeroRunLength.MaxEncodedSize(capacity);
+        byte[]? runBuffer = null;
+        byte[]? columnBuffer = null;
 
         try
         {
-            int runLength = Entropy.Decode(source[TransformedHeaderSize..], runBuffer.AsSpan(0, ZeroRunLength.MaxEncodedSize(capacity)));
+            runBuffer = ArrayPool<byte>.Shared.Rent(runCapacity);
+            columnBuffer = ArrayPool<byte>.Shared.Rent(capacity);
+
+            int runLength = Entropy.Decode(source[TransformedHeaderSize..], runBuffer.AsSpan(0, runCapacity));
             int n = ZeroRunLength.Decode(runBuffer.AsSpan(0, runLength), columnBuffer.AsSpan(0, capacity));
+
+            if (n != capacity)
+                throw new InvalidDataException("BWT block does not match the declared block size.");
 
             Span<byte> column = columnBuffer.AsSpan(0, n);
             MoveToFront.Decode(column);
@@ -138,8 +170,10 @@ public sealed class BwtCodec : ICodec
         }
         finally
         {
-            ArrayPool<byte>.Shared.Return(runBuffer);
-            ArrayPool<byte>.Shared.Return(columnBuffer);
+            if (runBuffer is not null)
+                ArrayPool<byte>.Shared.Return(runBuffer);
+            if (columnBuffer is not null)
+                ArrayPool<byte>.Shared.Return(columnBuffer);
         }
     }
 }

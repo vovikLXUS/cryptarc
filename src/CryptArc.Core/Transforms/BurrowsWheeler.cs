@@ -110,13 +110,7 @@ public static class BurrowsWheeler
         foreach (byte value in lastColumn)
             next[value]++;
 
-        int sum = 1;
-        for (int c = 0; c < 256; c++)
-        {
-            int bucket = next[c];
-            next[c] = sum;
-            sum += bucket;
-        }
+        ByteBuckets.CountsToStarts(next, 1);
 
         int[] lfBuffer = ArrayPool<int>.Shared.Rent(n);
 
