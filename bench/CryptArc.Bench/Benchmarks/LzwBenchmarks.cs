@@ -1,4 +1,5 @@
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Configs;
 using CryptArc.Core.Codecs;
 
 namespace CryptArc.Bench.Benchmarks;
@@ -8,6 +9,8 @@ namespace CryptArc.Bench.Benchmarks;
 /// against the straightforward linear-search naive baseline.
 /// </summary>
 [MemoryDiagnoser]
+[GroupBenchmarksBy(BenchmarkLogicalGroupRule.ByCategory)]
+[CategoriesColumn]
 public class LzwBenchmarks
 {
     private readonly LzwCodec _codec = new();
@@ -32,15 +35,15 @@ public class LzwBenchmarks
         _compressedLength = _codec.Encode(_data, _compressed);
     }
 
-    [Benchmark(Baseline = true)]
+    [BenchmarkCategory("Encode"), Benchmark(Baseline = true)]
     public int EncodeNaive() => _codec.EncodeNaive(_data, _compressed);
 
-    [Benchmark]
+    [BenchmarkCategory("Encode"), Benchmark]
     public int EncodeOptimised() => _codec.Encode(_data, _compressed);
 
-    [Benchmark]
+    [BenchmarkCategory("Decode"), Benchmark(Baseline = true)]
     public int DecodeNaive() => _codec.DecodeNaive(_compressed.AsSpan(0, _compressedLength), _restored);
 
-    [Benchmark]
+    [BenchmarkCategory("Decode"), Benchmark]
     public int DecodeOptimised() => _codec.Decode(_compressed.AsSpan(0, _compressedLength), _restored);
 }
