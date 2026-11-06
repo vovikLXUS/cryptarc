@@ -89,9 +89,6 @@ public class DeflateVersusReferenceBenchmarks
         _reference = ReferenceDeflate(_input);
     }
 
-    /// <summary>Compressed size, ours against the reference, printed as a custom column.</summary>
-    public string Sizes => $"{_ours.Length} vs {_reference.Length}";
-
     [Benchmark(Baseline = true)]
     public int ReferenceEncode() => ReferenceDeflate(_input).Length;
 

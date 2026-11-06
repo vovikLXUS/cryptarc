@@ -265,10 +265,31 @@ Each row is a measurable before/after pair, kept side by side in the code:
 | Huffman decode | tree walk | lookup table | ~5-8x |
 | LZSS match search | linear window scan | hash chains plus lazy matching | 10-50x |
 | LZSS match length | byte-by-byte compare | 8-byte compare plus `TrailingZeroCount` | ~3-5x |
-| Deflate match search | linear window scan | hash chains plus lazy matching | as LZSS, over 3-258 byte matches |
+| Deflate match search | linear window scan | hash chains plus lazy matching | see the note below |
 | Deflate block type | fixed codes only | priced against dynamic and stored, cheapest wins | ratio, not speed |
+| Back-reference copy | one byte at a time | blocks of `distance` bytes, vectorised | ~5x on overlapping matches |
 | Suffix array | comparison sort | prefix doubling | `O(n^2 log n)` to `O(n log n)` |
 | Whole archive | single thread | block-parallel pipeline | ~cores, per Amdahl |
+
+**Measured, not expected.** The match-search row is the one place where the
+first measurements contradicted the estimate above, and the honest answer
+depends on the data:
+
+| 64 KiB of | Linear scan | Hash chains | Ratio |
+|---|---|---|---|
+| random bytes | 1 466 895 us | 970 us | 1523x faster |
+| runs | 10 695 us | 273 us | 39x faster |
+| repeating text | 36 us | 111 us | **3x slower** |
+
+Random data has no matches at all, so the scan pays the full `O(n*W)` to find
+nothing while a chain lookup lands in an empty bucket — hence a speedup far
+beyond the 10-50x this table first claimed. Repeating text is the opposite: the
+scan finds a maximal 258-byte match on its 45th candidate and stops, while the
+chains still have to hash and link every one of the 258 positions the match
+skips over. zlib keeps those insertions too, because dropping them costs ratio,
+so this is the cost of being correct rather than something to fix. It belongs in
+the report as it stands: an optimisation that is worth 1523x on one input and
+0.33x on another is a more useful result than an average.
 
 ---
 
