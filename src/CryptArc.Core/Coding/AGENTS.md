@@ -1,6 +1,7 @@
 # Coding
 
-Shared entropy-coding construction. Used by `Codecs/`, depends only on `IO/`.
+Shared coding machinery: canonical Huffman construction and Lempel-Ziv match
+finding. Used by `Codecs/`; depends on nothing but the framework.
 
 - **Nothing here implements `ICodec`.** These are building blocks. A type that
   compresses a block belongs in `Codecs/`.
@@ -18,3 +19,14 @@ Shared entropy-coding construction. Used by `Codecs/`, depends only on `IO/`.
   belong to the caller. These routines run once per block.
 - Any change here affects every entropy coder at once — `HuffmanCodec`,
   `BwtCodec` through it, and Deflate. Run the full test suite.
+
+## Match finding
+
+- **A finder carries state across calls.** It belongs to one encode pass and is
+  never shared between threads. The codec owns the pooled `head`/`prev` arrays.
+- **The window must be a power of two** — it masks into `prev`.
+- **Positions are asked for in increasing order**, each at most twice in a row,
+  because a lazy parser looks one byte ahead. A position is linked into its chain
+  only after it has been searched from, so a chain never reaches the present.
+- `LinearScanFinder` and `HashChainFinder` must agree byte for byte with an
+  unbounded chain and greedy matching. `LzssCodecTests` proves it; keep it true.
