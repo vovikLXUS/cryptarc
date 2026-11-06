@@ -193,15 +193,6 @@ public class DeflateCodecTests
         Assert.Throws<InvalidDataException>(() => Codec.Decode(corrupt, new byte[8]));
     }
 
-    [Fact]
-    public void DynamicBlocksAreNotSupportedYet()
-    {
-        // BFINAL = 1, BTYPE = 10. Delete this test when dynamic blocks land.
-        byte[] dynamicHeader = [0x05];
-
-        Assert.Throws<NotSupportedException>(() => Codec.Decode(dynamicHeader, new byte[8]));
-    }
-
     [Theory]
     [InlineData(1)]
     [InlineData(3)]
@@ -229,18 +220,24 @@ public class DeflateCodecTests
             () => Codec.Decode(compressed.AsSpan(0, length), new byte[16]));
     }
 
-    [Fact]
-    public void CorruptFixedStreamsOnlyEverRaiseInvalidData()
+    [Theory]
+    [InlineData("text")]
+    [InlineData("mixed")]
+    public void CorruptStreamsOnlyEverRaiseInvalidData(string sample)
     {
-        byte[] original = TestData.Text();
+        byte[] original = Sample(sample);
         byte[] compressed = new byte[Codec.MaxCompressedSize(original.Length)];
         int length = Codec.Encode(original, compressed);
 
         byte[] restored = new byte[original.Length];
 
         // Every single-byte corruption must either decode to something or be rejected
-        // cleanly. It must never read out of bounds, loop forever or throw anything else.
-        for (int i = 0; i < Math.Min(length, 200); i++)
+        // cleanly. All three block types are implemented now, so InvalidDataException is
+        // the only exception a malformed stream may produce, and it must never read out of
+        // bounds or loop forever. Corrupting the code-length description is the interesting
+        // case: it can describe an over-subscribed Huffman code, which would overflow the
+        // decoding table if CanonicalHuffman.IsDecodable did not reject it first.
+        for (int i = 0; i < Math.Min(length, 300); i++)
         {
             byte[] corrupt = compressed[..length];
             corrupt[i] ^= 0xFF;
@@ -251,10 +248,6 @@ public class DeflateCodecTests
             }
             catch (InvalidDataException)
             {
-            }
-            catch (NotSupportedException)
-            {
-                // Flipping the type bits can name a dynamic block.
             }
         }
     }
@@ -284,6 +277,96 @@ public class DeflateCodecTests
     public void RejectsAChainLimitBelowOne()
     {
         Assert.Throws<ArgumentOutOfRangeException>(() => new DeflateCodec(0));
+    }
+
+    [Fact]
+    public void EmitsADynamicBlockWhenDescribingItsOwnCodesPaysOff()
+    {
+        byte[] original = TestData.Text();
+        byte[] compressed = new byte[Codec.MaxCompressedSize(original.Length)];
+
+        int length = Codec.Encode(original, compressed);
+
+        Assert.True(length > 0);
+
+        // BFINAL in bit 0, BTYPE in bits 1-2. Type 2 means the encoder priced a dynamic
+        // block, description and all, below both the fixed and the stored form.
+        Assert.Equal(1, compressed[0] & 1);
+        Assert.Equal(2, (compressed[0] >> 1) & 0b11);
+    }
+
+    [Theory]
+    [InlineData("constant")]
+    [InlineData("alternating")]
+    [InlineData("mixed")]
+    [InlineData("text")]
+    public void WeReadWhatAReferenceEncoderWrote(string sample)
+    {
+        // The other direction of the oracle, and the one that was impossible until dynamic
+        // blocks landed: the reference compressor emits dynamic blocks for anything that
+        // compresses, so until now its output could not be decoded at all.
+        byte[] original = Sample(sample);
+        byte[] reference = ReferenceDeflate(original, CompressionLevel.Optimal);
+
+        byte[] restored = new byte[original.Length];
+
+        Assert.Equal(original.Length, Codec.Decode(reference, restored));
+        Assert.Equal(original, restored);
+    }
+
+    [Fact]
+    public void ReadsAReferenceStreamWithMatchesAcrossMostOfTheWindow()
+    {
+        // A distinctive run repeated 30 000 bytes later, which needs distance symbol 29 and
+        // its 13 extra bits. The reference compressor searches the whole window, so it will
+        // find the far match; our decoder has to expand it.
+        byte[] original = new byte[40_000];
+        byte[] filler = TestData.Text();
+
+        for (int i = 0; i < original.Length; i++)
+            original[i] = filler[i % filler.Length];
+
+        byte[] marker = TestData.Random(64, seed: 31);
+        marker.CopyTo(original, 0);
+        marker.CopyTo(original, 30_000);
+
+        byte[] reference = ReferenceDeflate(original, CompressionLevel.Optimal);
+        byte[] restored = new byte[original.Length];
+
+        Assert.Equal(original.Length, Codec.Decode(reference, restored));
+        Assert.Equal(original, restored);
+
+        // And our own encoder has to survive the same shape.
+        byte[] compressed = new byte[Codec.MaxCompressedSize(original.Length)];
+        int length = Codec.Encode(original, compressed);
+
+        Assert.True(length >= 0);
+        Assert.Equal(original, ReferenceInflate(compressed.AsSpan(0, length)));
+    }
+
+    [Fact]
+    public void RejectsADynamicBlockDeclaringTooManyLiteralCodes()
+    {
+        // BFINAL = 1, BTYPE = 10, then HLIT = 31, which would mean 288 literal codes.
+        // Bits low first: 1, then 0 1 for the type, then 11111 for HLIT.
+        byte[] corrupt = [0b1111_1101, 0xFF, 0xFF, 0xFF];
+
+        Assert.Throws<InvalidDataException>(() => Codec.Decode(corrupt, new byte[64]));
+    }
+
+    [Fact]
+    public void RejectsATruncatedDynamicHeader()
+    {
+        byte[] original = TestData.Text();
+        byte[] compressed = new byte[Codec.MaxCompressedSize(original.Length)];
+        int length = Codec.Encode(original, compressed);
+
+        Assert.Equal(2, (compressed[0] >> 1) & 0b11);
+
+        byte[] restored = new byte[original.Length];
+
+        // Two bytes in, the code-length description is still being read.
+        Assert.Throws<InvalidDataException>(() => Codec.Decode(compressed.AsSpan(0, 2), restored));
     }
 
     /// <summary>Decompresses a raw deflate stream with the framework's implementation.</summary>

@@ -398,6 +398,49 @@ internal static class CanonicalHuffman
         }
     }
 
+    /// <summary>
+    /// Reports whether <paramref name="lengths"/> is a prefix code that
+    /// <see cref="BuildDecodeTable"/> can safely build a table for.
+    /// </summary>
+    /// <param name="lengths">One code length per symbol.</param>
+    /// <param name="maxCodeLength">The longest code permitted.</param>
+    /// <returns>
+    /// <see langword="true"/> if the lengths are usable; otherwise, <see langword="false"/>.
+    /// </returns>
+    /// <remarks>
+    /// Code lengths read from a stream are attacker-controlled, and an over-subscribed set
+    /// — a Kraft sum above 1 — would make <see cref="BuildDecodeTable"/> claim more
+    /// subtable space than <see cref="DecodeTableSize"/> reserved. Callers must reject a
+    /// set this refuses rather than build from it.
+    /// <para>
+    /// An under-subscribed set leaves holes in the table, which decode as "invalid code",
+    /// so it is only accepted when at most one symbol is used: that is the one incomplete
+    /// code RFC 1951 permits, a distance tree for a block that contains no matches.
+    /// </para>
+    /// </remarks>
+    internal static bool IsDecodable(ReadOnlySpan<byte> lengths, int maxCodeLength)
+    {
+        long full = 1L << maxCodeLength;
+        long kraft = 0;
+        int used = 0;
+
+        foreach (byte length in lengths)
+        {
+            if (length == 0)
+                continue;
+            if (length > maxCodeLength)
+                return false;
+
+            used++;
+            kraft += full >> length;
+
+            if (kraft > full)
+                return false;
+        }
+
+        return kraft == full || used <= 1;
+    }
+
     /// <summary>Reverses the low <paramref name="count"/> bits of <paramref name="value"/>.</summary>
     /// <param name="value">The value to reverse.</param>
     /// <param name="count">How many low bits take part.</param>
