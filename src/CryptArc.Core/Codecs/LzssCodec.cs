@@ -1,6 +1,7 @@
 using System.Buffers;
 using System.Buffers.Binary;
 using System.Numerics;
+using CryptArc.Core.Coding;
 
 namespace CryptArc.Core.Codecs;
 
@@ -72,11 +73,6 @@ public sealed class LzssCodec : ICodec
     private const int MaxLiteralRun = 128;
     private const int MatchFlag = 0x80;
     private const int MatchTokenSize = 3;
-    private const int WindowMask = WindowSize - 1;
-    private const int HashBits = 15;
-    private const int HashSize = 1 << HashBits;
-    private const int HashedBytes = 3;
-    private const int NoPosition = -1;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="LzssCodec"/> class.
@@ -121,14 +117,14 @@ public sealed class LzssCodec : ICodec
     /// <remarks>Searches for matches with hash chains. See the class remarks.</remarks>
     public int Encode(ReadOnlySpan<byte> source, Span<byte> destination)
     {
-        int[] head = ArrayPool<int>.Shared.Rent(HashSize);
+        int[] head = ArrayPool<int>.Shared.Rent(HashChainFinder.HashSize);
         try
         {
             int[] prev = ArrayPool<int>.Shared.Rent(WindowSize);
             try
             {
-                head.AsSpan(0, HashSize).Fill(NoPosition);
-                var finder = new HashChainFinder(head, prev, MaxChainLength);
+                head.AsSpan(0, HashChainFinder.HashSize).Fill(HashChainFinder.NoPosition);
+                var finder = new HashChainFinder(head, prev, WindowSize, MinMatch, MaxMatch, MaxChainLength);
                 return EncodeCore(source, destination, ref finder, LazyMatching);
             }
             finally
@@ -151,7 +147,7 @@ public sealed class LzssCodec : ICodec
     /// <returns>The number of bytes written, or -1 when <paramref name="destination"/> is too small.</returns>
     public static int EncodeNaive(ReadOnlySpan<byte> source, Span<byte> destination)
     {
-        var finder = new LinearScanFinder();
+        var finder = new LinearScanFinder(WindowSize, MinMatch, MaxMatch);
         return EncodeCore(source, destination, ref finder, lazy: false);
     }
 
@@ -195,7 +191,7 @@ public sealed class LzssCodec : ICodec
             if (length > destination.Length - written)
                 throw ExpandsPastBlock();
 
-            CopyMatch(destination, written, distance, length);
+            LzOutput.CopyMatch(destination, written, distance, length);
             written += length;
         }
 
@@ -216,7 +212,7 @@ public sealed class LzssCodec : ICodec
     public static int MatchLength(ReadOnlySpan<byte> left, ReadOnlySpan<byte> right, int limit)
     {
         CheckLimit(left, right, limit);
-        return MatchLengthWide(left, right, limit);
+        return MatchLengths.Wide(left, right, limit);
     }
 
     /// <summary>
@@ -233,7 +229,7 @@ public sealed class LzssCodec : ICodec
     public static int MatchLengthNaive(ReadOnlySpan<byte> left, ReadOnlySpan<byte> right, int limit)
     {
         CheckLimit(left, right, limit);
-        return MatchLengthBytewise(left, right, limit);
+        return MatchLengths.Bytewise(left, right, limit);
     }
 
     /// <summary>
@@ -332,56 +328,6 @@ public sealed class LzssCodec : ICodec
         return true;
     }
 
-    private static void CopyMatch(Span<byte> output, int written, int distance, int length)
-    {
-        int from = written - distance;
-
-        if (distance >= length)
-        {
-            output.Slice(from, length).CopyTo(output[written..]);
-        }
-        else if (distance == 1)
-        {
-            output.Slice(written, length).Fill(output[from]);
-        }
-        else
-        {
-            // The source overlaps the bytes being written, so copy forwards one byte at a time.
-            for (int i = 0; i < length; i++)
-                output[written + i] = output[from + i];
-        }
-    }
-
-    private static int MatchLengthWide(ReadOnlySpan<byte> left, ReadOnlySpan<byte> right, int limit)
-    {
-        int length = 0;
-
-        while (limit - length >= sizeof(ulong))
-        {
-            ulong difference = BinaryPrimitives.ReadUInt64LittleEndian(left[length..])
-                               ^ BinaryPrimitives.ReadUInt64LittleEndian(right[length..]);
-            if (difference != 0)
-                return length + BitOperations.TrailingZeroCount(difference) / 8;
-
-            length += sizeof(ulong);
-        }
-
-        while (length < limit && left[length] == right[length])
-            length++;
-
-        return length;
-    }
-
-    private static int MatchLengthBytewise(ReadOnlySpan<byte> left, ReadOnlySpan<byte> right, int limit)
-    {
-        int length = 0;
-
-        while (length < limit && left[length] == right[length])
-            length++;
-
-        return length;
-    }
-
     private static void CheckLimit(ReadOnlySpan<byte> left, ReadOnlySpan<byte> right, int limit)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(limit);
@@ -391,126 +337,4 @@ public sealed class LzssCodec : ICodec
     private static InvalidDataException ExpandsPastBlock() =>
         new("LZSS stream expands past the declared block size.");
 
-    /// <summary>The longest match a finder could see from one position.</summary>
-    private readonly record struct Match(int Length, int Distance)
-    {
-        public static Match None => default;
-    }
-
-    /// <summary>
-    /// A match-search strategy. A struct constraint lets the JIT specialise
-    /// <see cref="EncodeCore{TFinder}"/> per strategy, with no virtual calls in the loop.
-    /// </summary>
-    private interface IMatchFinder
-    {
-        /// <summary>
-        /// Finds the longest match at <paramref name="position"/>, preferring the nearest on a tie.
-        /// Positions are asked for in increasing order, and each one at most twice in a row.
-        /// </summary>
-        Match Find(ReadOnlySpan<byte> source, int position);
-    }
-
-    /// <summary>The O(n·W) baseline: compare every position in the window, byte by byte.</summary>
-    private struct LinearScanFinder : IMatchFinder
-    {
-        public readonly Match Find(ReadOnlySpan<byte> source, int position)
-        {
-            int limit = Math.Min(MaxMatch, source.Length - position);
-            if (limit < MinMatch)
-                return Match.None;
-
-            ReadOnlySpan<byte> ahead = source.Slice(position, limit);
-            int bestLength = MinMatch - 1;
-            int bestDistance = 0;
-            int oldest = Math.Max(0, position - WindowSize);
-
-            for (int candidate = position - 1; candidate >= oldest; candidate--)
-            {
-                int length = MatchLengthBytewise(source.Slice(candidate, limit), ahead, limit);
-                if (length > bestLength)
-                {
-                    bestLength = length;
-                    bestDistance = position - candidate;
-                    if (length == limit)
-                        break;
-                }
-            }
-
-            return bestDistance == 0 ? Match.None : new Match(bestLength, bestDistance);
-        }
-    }
-
-    /// <summary>
-    /// Hash chains: only positions whose first 3 bytes hash alike are compared, newest first,
-    /// and at most <c>maxChain</c> of them.
-    /// </summary>
-    private struct HashChainFinder(int[] head, int[] prev, int maxChain) : IMatchFinder
-    {
-        // Every position below this one is already linked into the chains.
-        private int _inserted;
-
-        public Match Find(ReadOnlySpan<byte> source, int position)
-        {
-            InsertUpTo(source, position);
-
-            int limit = Math.Min(MaxMatch, source.Length - position);
-            if (limit < MinMatch)
-                return Match.None;
-
-            ReadOnlySpan<byte> ahead = source.Slice(position, limit);
-            int bestLength = MinMatch - 1;
-            int bestDistance = 0;
-            int oldest = position - WindowSize;
-            int candidate = head[Hash(source, position)];
-
-            for (int steps = maxChain; candidate >= 0 && candidate >= oldest && steps > 0; steps--)
-            {
-                // Cheap reject: a longer match must also agree on the byte just past the best one.
-                if (source[candidate + bestLength] == ahead[bestLength])
-                {
-                    int length = MatchLengthWide(source.Slice(candidate, limit), ahead, limit);
-                    if (length > bestLength)
-                    {
-                        bestLength = length;
-                        bestDistance = position - candidate;
-                        if (length == limit)
-                            break;
-                    }
-                }
-
-                int next = prev[candidate & WindowMask];
-                if (next >= candidate)
-                    break;
-
-                candidate = next;
-            }
-
-            return bestDistance == 0 ? Match.None : new Match(bestLength, bestDistance);
-        }
-
-        /// <summary>
-        /// Links every position before <paramref name="end"/> into its chain. A position is linked
-        /// only after it has been searched from, so a chain never reaches the current position.
-        /// </summary>
-        private void InsertUpTo(ReadOnlySpan<byte> source, int end)
-        {
-            int last = Math.Min(end, source.Length - HashedBytes + 1);
-
-            for (; _inserted < last; _inserted++)
-            {
-                int hash = Hash(source, _inserted);
-                prev[_inserted & WindowMask] = head[hash];
-                head[hash] = _inserted;
-            }
-
-            if (_inserted < end)
-                _inserted = end;
-        }
-
-        private static int Hash(ReadOnlySpan<byte> source, int position)
-        {
-            uint key = source[position] | (uint)source[position + 1] << 8 | (uint)source[position + 2] << 16;
-            return (int)((key * 0x9E3779B1u) >> (32 - HashBits));
-        }
-    }
 }

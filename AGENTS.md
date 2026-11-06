@@ -31,8 +31,10 @@ When you add a rule, put it in the `AGENTS.md` closest to the code it governs.
 
 1. **Compression is written by hand.** Never introduce `System.IO.Compression`
    (`DeflateStream`, `GZipStream`, `ZipArchive`), SharpZipLib, ZstdNet or any
-   other compression library into `src/`. They are allowed in `bench/` only, as
-   a baseline to measure against. Using one in the product code defeats the
+   other compression library into `src/`. They are allowed in `bench/` as a
+   baseline to measure against, and in `tests/` as a conformance oracle for a
+   published format — Deflate's output has to be readable by a real inflater.
+   Never as a step inside a codec: using one in the product code defeats the
    entire purpose of the coursework.
 2. **Cryptography is never written by hand.** AES-256-GCM, SHA-256, HMAC and
    PBKDF2 come from `System.Security.Cryptography`; Argon2id from

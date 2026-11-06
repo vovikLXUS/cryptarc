@@ -12,6 +12,7 @@ the algorithms testable and benchmarkable on their own.
 | Folder | Purpose |
 |---|---|
 | `Codecs/` | compression algorithms, one class per algorithm |
+| `Coding/` | shared entropy-coding construction: canonical Huffman codes, decode tables |
 | `Transforms/` | reversible stages codecs are built from: suffix array, BWT, move-to-front, zero runs |
 | `IO/` | bit-level reading and writing |
 | `Hashing/` | CRC-32 for block integrity |

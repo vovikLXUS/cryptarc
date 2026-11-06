@@ -69,6 +69,22 @@ public ref struct BitReader
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool ReadBit() => ReadBits(1) != 0;
 
+    /// <summary>
+    /// Discards bits up to the next byte boundary, so that the next read starts on one.
+    /// A no-op when the stream is already aligned.
+    /// </summary>
+    /// <remarks>
+    /// The counterpart of <see cref="BitWriter.AlignToByte"/>: the bits it skips are the
+    /// zero padding that one wrote.
+    /// </remarks>
+    public void AlignToByte()
+    {
+        int extra = _bitCount & 7;
+
+        if (extra != 0)
+            SkipBits(extra);
+    }
+
     /// <summary>Tops the accumulator up until it holds at least <paramref name="count"/> bits.</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void Fill(int count)

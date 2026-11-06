@@ -19,7 +19,7 @@ most of the coursework happens.
 
 | Algorithm | Owner | Key structure |
 |---|---|---|
-| Deflate (LZSS + Huffman) | — | composition of the two above |
+| Deflate (LZ77 + Huffman) | — | shares `Coding/` with both, but is not a composition of them: it interleaves two alphabets in one bit stream and describes them with a third |
 
 Fill in the owner column when the work is split.
 

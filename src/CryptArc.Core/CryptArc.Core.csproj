@@ -4,4 +4,12 @@
     <PackageReference Include="Konscious.Security.Cryptography.Argon2" Version="1.3.1" />
   </ItemGroup>
 
+  <!-- Coding/ is implementation detail: internal, so it stays out of the documented
+       public API, but the tests and the benchmarks have to reach it to verify and
+       measure the optimised/naive pairs it holds. -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="CryptArc.Tests" />
+    <InternalsVisibleTo Include="CryptArc.Bench" />
+  </ItemGroup>
+
 </Project>
