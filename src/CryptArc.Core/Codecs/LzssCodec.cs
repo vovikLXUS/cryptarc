@@ -191,7 +191,7 @@ public sealed class LzssCodec : ICodec
             if (length > destination.Length - written)
                 throw ExpandsPastBlock();
 
-            CopyMatch(destination, written, distance, length);
+            LzOutput.CopyMatch(destination, written, distance, length);
             written += length;
         }
 
@@ -326,26 +326,6 @@ public sealed class LzssCodec : ICodec
         BinaryPrimitives.WriteUInt16LittleEndian(destination[(written + 1)..], (ushort)(match.Distance - 1));
         written += MatchTokenSize;
         return true;
-    }
-
-    private static void CopyMatch(Span<byte> output, int written, int distance, int length)
-    {
-        int from = written - distance;
-
-        if (distance >= length)
-        {
-            output.Slice(from, length).CopyTo(output[written..]);
-        }
-        else if (distance == 1)
-        {
-            output.Slice(written, length).Fill(output[from]);
-        }
-        else
-        {
-            // The source overlaps the bytes being written, so copy forwards one byte at a time.
-            for (int i = 0; i < length; i++)
-                output[written + i] = output[from + i];
-        }
     }
 
     private static void CheckLimit(ReadOnlySpan<byte> left, ReadOnlySpan<byte> right, int limit)
