@@ -105,7 +105,30 @@ Maps `CodecId` to `ICodec` over the codecs that actually exist.
 name codecs nobody has written yet. Callers fall back to `Store` instead of
 crashing.
 
-### 3.4 `DataProfile` — an immutable value
+### 3.4 `Coding` — construction shared by the codecs
+
+`Codecs/` holds algorithms; `Coding/` holds the machinery more than one of them
+needs, and nothing in it implements `ICodec`:
+
+| Type | What it builds |
+|---|---|
+| `CanonicalHuffman` | code lengths (heap, then package-merge when limited), canonical codes, decode tables, and `IsDecodable` to refuse an over-subscribed set read from a stream |
+| `MatchFinder` | `LinearScanFinder` and `HashChainFinder` over a parameterised window and match range |
+| `MatchLengths` | common-prefix length, 8 bytes at a time and byte by byte |
+| `LzOutput` | expanding a back-reference, including the overlapping case |
+
+Everything here takes its alphabet size from the span lengths and its limits as
+parameters, because the codecs need different shapes: `HuffmanCodec` codes 256
+byte values with codes of up to 15 bits, while Deflate needs 288 literal/length
+symbols, 30 distance symbols and a 19-symbol alphabet limited to 7 bits, and
+matches of 3-258 bytes where LZSS wants 4-131.
+
+`BwtCodec` composes at the `ICodec` level instead — it hands its transformed
+bytes to a `HuffmanCodec` and treats the result as an opaque stream. Deflate
+cannot: it interleaves two alphabets into one bit stream and describes them with
+a third, so it needs the construction rather than a codec.
+
+### 3.5 `DataProfile` — an immutable value
 
 ```csharp
 readonly record struct DataProfile(
@@ -114,7 +137,7 @@ readonly record struct DataProfile(
 
 A `readonly record struct`: small, copied by value, no allocation, free equality.
 
-### 3.5 `BitWriter` / `BitReader` — `ref struct`
+### 3.6 `BitWriter` / `BitReader` — `ref struct`
 
 Bit-level streams over a caller-supplied `Span<byte>`. Declared `ref struct` so
 the compiler *forbids* boxing them, storing them in fields or capturing them in
@@ -136,6 +159,9 @@ is silently garbage.
 | LZSS — naive | none | scan the whole window | `O(n*W)` |
 | LZSS — optimised | hash table plus chained positions (`head[]`, `prev[]`) | 3-byte hash, bounded chain walk | `O(n*k)`, k = `maxChain` |
 | LZW | open-addressing hash table (own, not `Dictionary<>`) | insert / probe | `O(n)` amortised |
+| Deflate — parse | token buffer, 4 bytes per input byte, pooled | append | `O(n)` |
+| Deflate — block choice | frequency vectors, priced as dot products | compare three costs | `O(k)`, k <= 318 |
+| Deflate — code lengths | 19-symbol alphabet with run-length repeats | encode / expand | `O(k)` |
 | BWT — naive | comparison sort of suffixes | — | `O(n^2 log n)` |
 | BWT — optimised | suffix array via prefix doubling plus radix sort | — | `O(n log n)` |
 | BWT — inverse | LF-mapping over a counting table | — | `O(n)` |
@@ -239,6 +265,8 @@ Each row is a measurable before/after pair, kept side by side in the code:
 | Huffman decode | tree walk | lookup table | ~5-8x |
 | LZSS match search | linear window scan | hash chains plus lazy matching | 10-50x |
 | LZSS match length | byte-by-byte compare | 8-byte compare plus `TrailingZeroCount` | ~3-5x |
+| Deflate match search | linear window scan | hash chains plus lazy matching | as LZSS, over 3-258 byte matches |
+| Deflate block type | fixed codes only | priced against dynamic and stored, cheapest wins | ratio, not speed |
 | Suffix array | comparison sort | prefix doubling | `O(n^2 log n)` to `O(n log n)` |
 | Whole archive | single thread | block-parallel pipeline | ~cores, per Amdahl |
 
