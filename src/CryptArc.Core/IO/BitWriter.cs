@@ -69,6 +69,23 @@ public ref struct BitWriter
     public void WriteBit(bool bit) => WriteBits(bit ? 1u : 0u, 1);
 
     /// <summary>
+    /// Pads the pending partial byte with zeros so that the next write starts on a byte
+    /// boundary. A no-op when the stream is already aligned.
+    /// </summary>
+    /// <remarks>
+    /// Deflate needs this before a stored block, whose length fields and payload are
+    /// byte-aligned. Unlike <see cref="Flush"/> this does not end the stream: writing
+    /// continues afterwards.
+    /// </remarks>
+    public void AlignToByte()
+    {
+        int extra = _bitCount & 7;
+
+        if (extra != 0)
+            WriteBits(0, 8 - extra);
+    }
+
+    /// <summary>
     /// Emits the trailing partial byte, zero padded.
     /// Returns the total byte count, or -1 if the buffer overflowed at any point.
     /// </summary>

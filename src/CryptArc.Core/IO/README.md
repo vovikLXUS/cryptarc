@@ -28,3 +28,7 @@ worked example in the optimisation section of the report.
   detects truncation by checking `IsOverrun` once it is done.
 - `PeekBits` and `SkipBits` let a table-driven decoder look at more bits than the
   next symbol turns out to need. Only consumed bits count towards `IsOverrun`.
+- `AlignToByte` moves to the next byte boundary — padding with zeros when
+  writing, discarding them when reading. Deflate's stored blocks are
+  byte-aligned, and their payload goes through `WriteBits(value, 8)` per byte
+  rather than a bulk copy: it is the incompressible fallback, not a hot path.
