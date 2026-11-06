@@ -18,7 +18,7 @@ public static class CodecRegistry
         new LzssCodec(),
         new LzwCodec(),
         new ArithmeticCodec(),
-        // TODO: DeflateCodec
+        new DeflateCodec(),
     ];
 
     /// <summary>Every implemented codec, in registration order.</summary>

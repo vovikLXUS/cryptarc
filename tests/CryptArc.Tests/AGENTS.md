@@ -16,3 +16,7 @@
   group or window limit, plus empty and single-byte input.
 - When an optimised implementation is added, assert that it agrees with the
   naive one rather than re-deriving the expected output by hand.
+- **A published format gets a reference oracle.** `System.IO.Compression` is
+  allowed here, and only here outside `bench/`, to check that a real
+  implementation reads what we wrote and that we read what it wrote. It must
+  never appear as a step in a codec — see hard rule 1 in the root `AGENTS.md`.
