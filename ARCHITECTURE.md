@@ -267,7 +267,7 @@ Each row is a measurable before/after pair, kept side by side in the code:
 | LZSS match length | byte-by-byte compare | 8-byte compare plus `TrailingZeroCount` | ~3-5x |
 | Deflate match search | linear window scan | hash chains plus lazy matching | see the note below |
 | Deflate block type | fixed codes only | priced against dynamic and stored, cheapest wins | ratio, not speed |
-| Back-reference copy | one byte at a time | blocks of `distance` bytes, vectorised | ~5x on overlapping matches |
+| Back-reference copy | one byte at a time | doubling blocks, vectorised | 1.5-10x overlapping, 32x not |
 | Suffix array | comparison sort | prefix doubling | `O(n^2 log n)` to `O(n log n)` |
 | Whole archive | single thread | block-parallel pipeline | ~cores, per Amdahl |
 

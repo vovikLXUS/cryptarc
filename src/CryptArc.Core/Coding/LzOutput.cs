@@ -24,11 +24,13 @@ internal static class LzOutput
     /// rather than one byte at a time: each block is entirely written before the next one
     /// reads it, so every individual copy is non-overlapping and can go through
     /// <see cref="Span{T}.CopyTo"/>, which is vectorised. The block doubles on each
-    /// iteration, which matters for the short distances: copying 3 bytes at a time 86 times
-    /// is slower than the byte loop it replaced, while doubling needs 7 copies.
+    /// iteration, which is what makes the short distances fast too: a fixed block of
+    /// <paramref name="distance"/> bytes means 86 three-byte copies for a 258-byte match at
+    /// distance 3, slower than the byte loop it replaced, where doubling needs 7.
+    /// <para>
     /// Repetitive data decodes almost entirely through this path — a match of 258 bytes at
-    /// distance 45 is typical — and it took whole-stream decoding of repeating text from
-    /// 31.8 us to 9.7 us per 64 KiB.
+    /// distance 45 is typical, and goes from 109 ns to 10 ns.
+    /// </para>
     /// <see cref="CopyMatchNaive"/> keeps the one-byte-at-a-time version for the benchmark
     /// comparison (hard rule 4).
     /// </para>
