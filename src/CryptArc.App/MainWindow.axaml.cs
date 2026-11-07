@@ -2,19 +2,31 @@ using System.Collections.Generic;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
+using CryptArc.App.Services;
 using CryptArc.App.ViewModels;
 
 namespace CryptArc.App;
 
 public partial class MainWindow : Window
 {
-    private readonly MainWindowViewModel _viewModel = new();
+    private readonly MainWindowViewModel _viewModel;
 
-    public MainWindow()
+    /// <summary>Runtime constructor: the container supplies the view model.</summary>
+    public MainWindow(MainWindowViewModel viewModel)
     {
+        _viewModel = viewModel;
         InitializeComponent();
         DataContext = _viewModel;
         ChooseFileButton.Click += OnChooseFileClick;
+    }
+
+    /// <summary>
+    /// Design-time constructor for the XAML previewer and the runtime loader, which
+    /// need a public parameterless one. The application itself never calls it.
+    /// </summary>
+    public MainWindow()
+        : this(new MainWindowViewModel(new CodecMeasurement()))
+    {
     }
 
     // File dialogs are a view concern, so the picker lives here and the view model
