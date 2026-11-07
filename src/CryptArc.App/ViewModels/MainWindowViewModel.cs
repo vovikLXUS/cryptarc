@@ -1,16 +1,17 @@
 using System;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CryptArc.App.Services;
 using CryptArc.Core;
 using CryptArc.Core.Analysis;
-using CryptArc.Core.Hashing;
 
 namespace CryptArc.App.ViewModels;
 
-public partial class MainWindowViewModel : ObservableObject
+/// <summary>State and logic behind the main window: load a file, measure it, show the results.</summary>
+/// <param name="measurement">Does the analysis and the per-codec round trips.</param>
+public partial class MainWindowViewModel(ICodecMeasurement measurement) : ObservableObject
 {
     [ObservableProperty]
     private string _status = "Pick a file to see which codec CryptArc would choose for it.";
@@ -63,7 +64,7 @@ public partial class MainWindowViewModel : ObservableObject
             Status = "Analysing…";
 
             (DataProfile profile, uint crc, CodecResult[] results) =
-                await Task.Run(() => Measure(data));
+                await Task.Run(() => measurement.Measure(data));
 
             Checksum = $"{crc:X8}";
             Entropy = $"{profile.Entropy:F3} bits/byte";
@@ -89,49 +90,4 @@ public partial class MainWindowViewModel : ObservableObject
             IsBusy = false;
         }
     }
-
-    private static (DataProfile Profile, uint Crc, CodecResult[] Results) Measure(byte[] data)
-    {
-        DataProfile profile = DataAnalyzer.Analyze(data);
-        uint crc = Crc32.Compute(data);
-
-        var results = new CodecResult[CodecRegistry.All.Count];
-
-        for (int i = 0; i < results.Length; i++)
-        {
-            ICodec codec = CodecRegistry.All[i];
-            byte[] compressed = new byte[codec.MaxCompressedSize(data.Length)];
-
-            var encodeTimer = Stopwatch.StartNew();
-            int compressedLength = codec.Encode(data, compressed);
-            encodeTimer.Stop();
-
-            if (compressedLength < 0)
-            {
-                results[i] = new CodecResult(codec.Name, 0, 1, 0, 0, RoundTripOk: false);
-                continue;
-            }
-
-            byte[] restored = new byte[data.Length];
-
-            var decodeTimer = Stopwatch.StartNew();
-            int restoredLength = codec.Decode(compressed.AsSpan(0, compressedLength), restored);
-            decodeTimer.Stop();
-
-            bool ok = restoredLength == data.Length && Crc32.Compute(restored) == crc;
-
-            results[i] = new CodecResult(
-                codec.Name,
-                compressedLength,
-                data.Length == 0 ? 1 : compressedLength / (double)data.Length,
-                Throughput(data.Length, encodeTimer.Elapsed),
-                Throughput(data.Length, decodeTimer.Elapsed),
-                ok);
-        }
-
-        return (profile, crc, results);
-    }
-
-    private static double Throughput(int bytes, TimeSpan elapsed) =>
-        elapsed.TotalSeconds <= 0 ? 0 : bytes / elapsed.TotalSeconds / (1024 * 1024);
 }

@@ -33,6 +33,7 @@ For *what* the system looks like, see [ARCHITECTURE.md](ARCHITECTURE.md).
 | [0010](#adr-0010--the-archive-header-stays-in-plaintext) | The archive header stays in plaintext | Accepted |
 | [0011](#adr-0011--core-has-no-ui-dependency) | `Core` has no UI dependency | Accepted |
 | [0012](#adr-0012--trunk-based-git-with-releases-cut-from-tags) | Trunk-based git with releases cut from tags | Accepted |
+| [0013](#adr-0013--plain-microsoftextensionsdependencyinjection-in-the-gui-not-prism) | Plain `Microsoft.Extensions.DependencyInjection` in the GUI, not Prism | Accepted |
 
 ---
 
@@ -480,3 +481,48 @@ request.
 - **GitFlow with `develop` and `release/*`** — designed for versioned parallel
   releases; overhead we have no use for.
 - **`staging` branch** — solves a deployment problem this project does not have.
+
+---
+
+## ADR-0013 — Plain `Microsoft.Extensions.DependencyInjection` in the GUI, not Prism
+
+**Status:** Accepted · 2026-11-08
+
+### Context
+
+`MainWindow` created its view model with `new`, and the view model ran the
+analysis through a private static method. Nothing could be swapped, so the view
+model could not be tested without running every real codec. The obvious
+candidate for dependency injection in a XAML application is Prism, which has an
+Avalonia port (`Prism.Avalonia`).
+
+### Decision
+
+Use `Microsoft.Extensions.DependencyInjection` directly. `App.axaml.cs` is the
+composition root: it registers the services, view models and windows and
+resolves `MainWindow` from the container. Everything else receives its
+dependencies through the constructor. The first injected service is
+`ICodecMeasurement`, which took over the measuring loop from
+`MainWindowViewModel`.
+
+### Consequences
+
+- `MainWindowViewModel` depends on an interface and can be tested with a fake
+  measurement.
+- One small Microsoft package that is independent of the Avalonia version.
+- MVVM stays on `CommunityToolkit.Mvvm` alone.
+- `MainWindow` keeps a parameterless constructor for the XAML previewer and the
+  runtime loader. It builds the dependencies by hand and is never used by the
+  application.
+- No navigation, regions or modules. If the GUI grows several screens, routing
+  has to be written by hand or this decision revisited.
+
+### Alternatives
+
+- **Prism.Avalonia** — the latest stable release (9.0.537.11130) targets
+  Avalonia 11.1 while the app is on 12.1. It also brings its own MVVM types
+  (`BindableBase`, `DelegateCommand`) alongside `CommunityToolkit.Mvvm`, and
+  `Prism.Core` 9 is under the Prism Community License rather than MIT. Its
+  regions and modules solve a problem a one-window app does not have.
+- **Keep `new` in code-behind** — no dependency, but the view model stays
+  untestable in isolation.

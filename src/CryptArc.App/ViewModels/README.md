@@ -12,7 +12,8 @@ Presentation state for the Avalonia UI.
 - These classes know nothing about windows or dialogs. `MainWindowViewModel`
   takes a **path**, not an `IStorageFile`, which is why it can be unit-tested
   without starting Avalonia.
-- Heavy work happens inside `Task.Run` (`Measure`), and only the resulting
-  values are assigned back to observable properties.
+- Heavy work happens inside `Task.Run` (`ICodecMeasurement.Measure`, injected
+  through the constructor), and only the resulting values are assigned back to
+  observable properties.
 - Formatting for display (`"85.2 %"`, `"4 044 B"`) belongs on the view model, not
   in XAML converters and not in `Core`.
