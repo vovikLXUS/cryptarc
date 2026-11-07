@@ -1,4 +1,5 @@
 using System.Buffers.Binary;
+using CryptArc.Core.Coding;
 using CryptArc.Core.IO;
 
 namespace CryptArc.Core.Codecs;
@@ -48,7 +49,6 @@ namespace CryptArc.Core.Codecs;
 public sealed class HuffmanCodec : ICodec
 {
     private const int SymbolCount = 256;
-    private const int MaxNodes = 2 * SymbolCount - 1;
     private const int MaxCodeLength = 15;
 
     private const int LengthTableSize = SymbolCount / 2;
@@ -61,15 +61,6 @@ public sealed class HuffmanCodec : ICodec
     private const int RootSize = 1 << RootBits;
     private const int MaxSubtableBits = MaxCodeLength - RootBits;
     private const int DecodeTableSize = RootSize + (SymbolCount / 2 << MaxSubtableBits);
-
-    // Decoder table entries: 0 is invalid, a leaf is (symbol << 4) | bits to consume,
-    // and a link is LinkFlag | (subtable offset << 4) | subtable index bits.
-    private const uint LinkFlag = 0x8000_0000;
-    private const int EntryFieldBits = 4;
-    private const uint EntryFieldMask = (1u << EntryFieldBits) - 1;
-
-    // Package-merge: a level merges at most k leaves with fewer than k packages.
-    private const int MaxLevelItems = 2 * SymbolCount;
 
     /// <summary>Always <see cref="CodecId.Huffman"/>.</summary>
     public CodecId Id => CodecId.Huffman;
@@ -106,10 +97,10 @@ public sealed class HuffmanCodec : ICodec
             frequencies[value]++;
 
         Span<byte> lengths = stackalloc byte[SymbolCount];
-        BuildCodeLengths(frequencies, lengths);
+        CanonicalHuffman.BuildLengths(frequencies, lengths, MaxCodeLength);
 
         Span<uint> codes = stackalloc uint[SymbolCount];
-        AssignCanonicalCodes(lengths, codes);
+        CanonicalHuffman.AssignCodes(lengths, codes, MaxCodeLength);
 
         BinaryPrimitives.WriteUInt32LittleEndian(destination, (uint)source.Length);
 
@@ -143,7 +134,7 @@ public sealed class HuffmanCodec : ICodec
         // to the input, nothing recurses here, and a malformed stream can throw at any
         // point with no rented array to return. The table is rebuilt per call regardless.
         Span<uint> table = stackalloc uint[DecodeTableSize];
-        BuildDecodeTable(lengths, table);
+        CanonicalHuffman.BuildDecodeTable(lengths, table, MaxCodeLength, RootBits);
 
         var reader = new BitReader(source[HeaderSize..]);
 
@@ -151,20 +142,20 @@ public sealed class HuffmanCodec : ICodec
         {
             uint entry = table[(int)reader.PeekBits(RootBits)];
 
-            if ((entry & LinkFlag) != 0)
+            if ((entry & CanonicalHuffman.LinkFlag) != 0)
             {
                 reader.SkipBits(RootBits);
 
-                int subtable = (int)((entry & ~LinkFlag) >> EntryFieldBits);
-                int subtableBits = (int)(entry & EntryFieldMask);
+                int subtable = (int)((entry & ~CanonicalHuffman.LinkFlag) >> CanonicalHuffman.EntryFieldBits);
+                int subtableBits = (int)(entry & CanonicalHuffman.EntryFieldMask);
                 entry = table[subtable + (int)reader.PeekBits(subtableBits)];
             }
 
             if (entry == 0)
                 throw new InvalidDataException("Invalid code in Huffman stream.");
 
-            reader.SkipBits((int)(entry & EntryFieldMask));
-            destination[i] = (byte)(entry >> EntryFieldBits);
+            reader.SkipBits((int)(entry & CanonicalHuffman.EntryFieldMask));
+            destination[i] = (byte)(entry >> CanonicalHuffman.EntryFieldBits);
         }
 
         if (reader.IsOverrun)
@@ -190,7 +181,7 @@ public sealed class HuffmanCodec : ICodec
         // Two child slots per internal node: 0 is absent, a positive value is a node
         // index and a negative value is the complement of a symbol.
         Span<int> children = stackalloc int[2 * SymbolCount];
-        BuildTree(lengths, children);
+        CanonicalHuffman.BuildTree(lengths, children, MaxCodeLength);
 
         var reader = new BitReader(source[HeaderSize..]);
 
@@ -214,209 +205,6 @@ public sealed class HuffmanCodec : ICodec
             throw new InvalidDataException("Truncated Huffman stream.");
 
         return count;
-    }
-
-    /// <summary>
-    /// Computes optimal code lengths: repeatedly merges the two lightest nodes of a
-    /// min-heap, then reads each leaf's depth back from the parent links.
-    /// </summary>
-    private static void BuildCodeLengths(ReadOnlySpan<int> frequencies, Span<byte> lengths)
-    {
-        lengths.Clear();
-
-        // Node ids: 0…255 are the symbols, 256… the merged nodes in creation order,
-        // so a parent always has a higher id than its children.
-        Span<long> weights = stackalloc long[MaxNodes];
-        Span<int> parents = stackalloc int[MaxNodes];
-        Span<int> heap = stackalloc int[SymbolCount];
-        int heapSize = 0;
-
-        for (int symbol = 0; symbol < SymbolCount; symbol++)
-        {
-            if (frequencies[symbol] > 0)
-            {
-                weights[symbol] = frequencies[symbol];
-                HeapPush(heap, ref heapSize, weights, symbol);
-            }
-        }
-
-        if (heapSize == 1)
-        {
-            lengths[heap[0]] = 1;
-            return;
-        }
-
-        int next = SymbolCount;
-
-        while (heapSize > 1)
-        {
-            int first = HeapPop(heap, ref heapSize, weights);
-            int second = HeapPop(heap, ref heapSize, weights);
-
-            weights[next] = weights[first] + weights[second];
-            parents[first] = next;
-            parents[second] = next;
-            HeapPush(heap, ref heapSize, weights, next);
-            next++;
-        }
-
-        int root = next - 1;
-        Span<int> depths = stackalloc int[MaxNodes];
-        depths[root] = 0;
-
-        for (int node = root - 1; node >= SymbolCount; node--)
-            depths[node] = depths[parents[node]] + 1;
-
-        int longest = 0;
-
-        for (int symbol = 0; symbol < SymbolCount; symbol++)
-        {
-            if (frequencies[symbol] > 0)
-            {
-                int depth = depths[parents[symbol]] + 1;
-                longest = Math.Max(longest, depth);
-                lengths[symbol] = (byte)depth;
-            }
-        }
-
-        if (longest > MaxCodeLength)
-            LimitCodeLengths(frequencies, lengths);
-    }
-
-    /// <summary>
-    /// Package-merge: computes the optimal code lengths that do not exceed
-    /// <see cref="MaxCodeLength"/>. Only runs when the plain tree came out too deep.
-    /// </summary>
-    /// <remarks>
-    /// Each level is the sorted merge of all symbols with the packages (adjacent pairs)
-    /// of the level below. Taking the 2k - 2 lightest items of the top level and following
-    /// the packages down gives a symbol's code length as the number of levels in which
-    /// it was taken. Recording only whether an item is a package is enough to do that.
-    /// </remarks>
-    private static void LimitCodeLengths(ReadOnlySpan<int> frequencies, Span<byte> lengths)
-    {
-        // Used symbols by ascending frequency: heap sort, O(k log k).
-        Span<long> weights = stackalloc long[SymbolCount];
-        Span<int> heap = stackalloc int[SymbolCount];
-        int heapSize = 0;
-
-        for (int symbol = 0; symbol < SymbolCount; symbol++)
-        {
-            if (frequencies[symbol] > 0)
-            {
-                weights[symbol] = frequencies[symbol];
-                HeapPush(heap, ref heapSize, weights, symbol);
-            }
-        }
-
-        int symbolCount = heapSize;
-        Span<byte> sorted = stackalloc byte[SymbolCount];
-
-        for (int i = 0; i < symbolCount; i++)
-            sorted[i] = (byte)HeapPop(heap, ref heapSize, weights);
-
-        Span<bool> isPackage = stackalloc bool[MaxCodeLength * MaxLevelItems];
-        Span<long> previous = stackalloc long[MaxLevelItems];
-        Span<long> current = stackalloc long[MaxLevelItems];
-        int previousCount = 0;
-
-        for (int level = MaxCodeLength - 1; level >= 0; level--)
-        {
-            Span<bool> levelIsPackage = isPackage.Slice(level * MaxLevelItems, MaxLevelItems);
-            int packageCount = previousCount / 2;
-            int leaf = 0;
-            int package = 0;
-            int count = 0;
-
-            while (leaf < symbolCount || package < packageCount)
-            {
-                long leafWeight = leaf < symbolCount ? frequencies[sorted[leaf]] : long.MaxValue;
-                long packageWeight = package < packageCount
-                    ? previous[2 * package] + previous[2 * package + 1]
-                    : long.MaxValue;
-
-                if (leafWeight <= packageWeight)
-                {
-                    current[count] = leafWeight;
-                    levelIsPackage[count++] = false;
-                    leaf++;
-                }
-                else
-                {
-                    current[count] = packageWeight;
-                    levelIsPackage[count++] = true;
-                    package++;
-                }
-            }
-
-            Span<long> swap = previous;
-            previous = current;
-            current = swap;
-            previousCount = count;
-        }
-
-        lengths.Clear();
-        int selectedItems = 2 * symbolCount - 2;
-
-        for (int level = 0; level < MaxCodeLength; level++)
-        {
-            ReadOnlySpan<bool> levelIsPackage = isPackage.Slice(level * MaxLevelItems, MaxLevelItems);
-            int packages = 0;
-            int leaves = 0;
-
-            for (int i = 0; i < selectedItems; i++)
-            {
-                if (levelIsPackage[i])
-                    packages++;
-                else
-                    lengths[sorted[leaves++]]++;
-            }
-
-            selectedItems = 2 * packages;
-        }
-    }
-
-    /// <summary>
-    /// Assigns each used symbol its canonical code, bit-reversed so that writing it
-    /// least-significant-bit-first puts the code's first bit on the wire first.
-    /// </summary>
-    private static void AssignCanonicalCodes(ReadOnlySpan<byte> lengths, Span<uint> codes)
-    {
-        Span<int> lengthCounts = stackalloc int[MaxCodeLength + 1];
-        lengthCounts.Clear();
-
-        foreach (byte length in lengths)
-            lengthCounts[length]++;
-
-        lengthCounts[0] = 0;
-
-        Span<uint> nextCode = stackalloc uint[MaxCodeLength + 1];
-        uint code = 0;
-
-        for (int length = 1; length <= MaxCodeLength; length++)
-        {
-            code = (code + (uint)lengthCounts[length - 1]) << 1;
-            nextCode[length] = code;
-        }
-
-        for (int symbol = 0; symbol < SymbolCount; symbol++)
-        {
-            int length = lengths[symbol];
-            codes[symbol] = length == 0 ? 0 : ReverseBits(nextCode[length]++, length);
-        }
-    }
-
-    private static uint ReverseBits(uint value, int count)
-    {
-        uint reversed = 0;
-
-        for (int i = 0; i < count; i++)
-        {
-            reversed = reversed << 1 | value & 1;
-            value >>= 1;
-        }
-
-        return reversed;
     }
 
     /// <summary>
@@ -464,147 +252,5 @@ public sealed class HuffmanCodec : ICodec
             throw new InvalidDataException("Huffman code lengths do not form a valid prefix code.");
 
         return (int)count;
-    }
-
-    /// <summary>Fills the two-level decoding table; see the layout notes on the constants.</summary>
-    private static void BuildDecodeTable(ReadOnlySpan<byte> lengths, Span<uint> table)
-    {
-        table.Clear();
-
-        Span<uint> codes = stackalloc uint[SymbolCount];
-        AssignCanonicalCodes(lengths, codes);
-
-        // Long codes sharing their first 10 bits share a subtable, sized for the longest.
-        Span<byte> subtableBits = stackalloc byte[RootSize];
-        subtableBits.Clear();
-
-        for (int symbol = 0; symbol < SymbolCount; symbol++)
-        {
-            if (lengths[symbol] > RootBits)
-            {
-                int prefix = (int)codes[symbol] & (RootSize - 1);
-                subtableBits[prefix] = Math.Max(subtableBits[prefix], (byte)(lengths[symbol] - RootBits));
-            }
-        }
-
-        int nextSubtable = RootSize;
-
-        for (int symbol = 0; symbol < SymbolCount; symbol++)
-        {
-            int length = lengths[symbol];
-
-            if (length == 0)
-                continue;
-
-            uint code = codes[symbol];
-
-            if (length <= RootBits)
-            {
-                uint leaf = (uint)symbol << EntryFieldBits | (uint)length;
-
-                // The bits after a short code can be anything, so it claims every slot
-                // that starts with it.
-                for (int index = (int)code; index < RootSize; index += 1 << length)
-                    table[index] = leaf;
-            }
-            else
-            {
-                int prefix = (int)code & (RootSize - 1);
-                int bits = subtableBits[prefix];
-
-                if (table[prefix] == 0)
-                {
-                    table[prefix] = LinkFlag | (uint)nextSubtable << EntryFieldBits | (uint)bits;
-                    nextSubtable += 1 << bits;
-                }
-
-                int subtable = (int)((table[prefix] & ~LinkFlag) >> EntryFieldBits);
-                int remaining = length - RootBits;
-                uint leaf = (uint)symbol << EntryFieldBits | (uint)remaining;
-
-                for (int index = (int)(code >> RootBits); index < 1 << bits; index += 1 << remaining)
-                    table[subtable + index] = leaf;
-            }
-        }
-    }
-
-    /// <summary>Builds the explicit code tree walked by <see cref="DecodeTreeWalk"/>.</summary>
-    private static void BuildTree(ReadOnlySpan<byte> lengths, Span<int> children)
-    {
-        children.Clear();
-
-        Span<uint> codes = stackalloc uint[SymbolCount];
-        AssignCanonicalCodes(lengths, codes);
-
-        int nodeCount = 1;
-
-        for (int symbol = 0; symbol < SymbolCount; symbol++)
-        {
-            int length = lengths[symbol];
-
-            if (length == 0)
-                continue;
-
-            uint code = codes[symbol];
-            int node = 0;
-
-            for (int bit = 0; bit < length - 1; bit++)
-            {
-                int slot = 2 * node + (int)(code >> bit & 1);
-
-                if (children[slot] == 0)
-                    children[slot] = nodeCount++;
-
-                node = children[slot];
-            }
-
-            children[2 * node + (int)(code >> (length - 1) & 1)] = ~symbol;
-        }
-    }
-
-    /// <summary>Heap order: lighter first, ties by node id so the output is deterministic.</summary>
-    private static bool Lighter(ReadOnlySpan<long> weights, int a, int b) =>
-        weights[a] < weights[b] || (weights[a] == weights[b] && a < b);
-
-    private static void HeapPush(Span<int> heap, ref int size, ReadOnlySpan<long> weights, int node)
-    {
-        int index = size++;
-
-        while (index > 0)
-        {
-            int parent = (index - 1) / 2;
-
-            if (!Lighter(weights, node, heap[parent]))
-                break;
-
-            heap[index] = heap[parent];
-            index = parent;
-        }
-
-        heap[index] = node;
-    }
-
-    private static int HeapPop(Span<int> heap, ref int size, ReadOnlySpan<long> weights)
-    {
-        int top = heap[0];
-        int last = heap[--size];
-        int index = 0;
-
-        while (2 * index + 1 < size)
-        {
-            int child = 2 * index + 1;
-
-            if (child + 1 < size && Lighter(weights, heap[child + 1], heap[child]))
-                child++;
-
-            if (!Lighter(weights, heap[child], last))
-                break;
-
-            heap[index] = heap[child];
-            index = child;
-        }
-
-        heap[index] = last;
-        return top;
     }
 }

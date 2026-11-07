@@ -33,7 +33,8 @@ For *what* the system looks like, see [ARCHITECTURE.md](ARCHITECTURE.md).
 | [0010](#adr-0010--the-archive-header-stays-in-plaintext) | The archive header stays in plaintext | Accepted |
 | [0011](#adr-0011--core-has-no-ui-dependency) | `Core` has no UI dependency | Accepted |
 | [0012](#adr-0012--trunk-based-git-with-releases-cut-from-tags) | Trunk-based git with releases cut from tags | Accepted |
-| [0013](#adr-0013--plain-microsoftextensionsdependencyinjection-in-the-gui-not-prism) | Plain `Microsoft.Extensions.DependencyInjection` in the GUI, not Prism | Accepted |
+| [0013](#adr-0013--deflate-follows-rfc-1951-to-the-bit) | Deflate follows RFC 1951 to the bit | Accepted |
+| [0014](#adr-0014--plain-microsoftextensionsdependencyinjection-in-the-gui-not-prism) | Plain `Microsoft.Extensions.DependencyInjection` in the GUI, not Prism | Accepted |
 
 ---
 
@@ -484,7 +485,68 @@ request.
 
 ---
 
-## ADR-0013 — Plain `Microsoft.Extensions.DependencyInjection` in the GUI, not Prism
+## ADR-0013 — Deflate follows RFC 1951 to the bit
+
+**Status:** Accepted · 2026-11-06
+
+### Context
+
+Deflate is the last codec and the only one in the project that implements a
+format somebody else published. That leaves a choice the other codecs never had:
+produce a real RFC 1951 stream, or a simpler "Deflate-like" format of our own
+with the same two ideas (LZ77 plus Huffman) but our own headers.
+
+The simpler variant is genuinely cheaper. The real format demands the HCLEN
+permutation, the 16/17/18 code-length repeaters, and the exact extra-bit tables
+for 29 length codes and 30 distance codes — a lot of table data that is easy to
+get subtly wrong and whose errors produce streams that look plausible and decode
+to garbage.
+
+Against that: every other codec here can only be checked against itself. A
+round-trip test proves the encoder and decoder agree, not that either is right.
+Two mistakes that cancel out stay invisible.
+
+### Decision
+
+Implement RFC 1951 exactly, with no zlib or gzip wrapper. `DeflateStream` then
+becomes a correctness oracle: our output must inflate under a real
+implementation, and our decoder must read what a real implementation deflates.
+
+Hard rule 1 is relaxed for `tests/` only: a reference compressor may appear
+there as an oracle, never as a step inside a codec. `bench/` already allowed it
+as a performance baseline.
+
+### Consequences
+
+- Deflate gets a class of verification nothing else in the project has, and it
+  catches exactly the mistakes a round-trip test cannot see.
+- `.cryptarc` archives become partly inspectable with standard tools, which is
+  useful when debugging a container that will not open.
+- The block framing is fixed for us: 64 KiB stored blocks, three block types,
+  byte-aligned stored payload. We cannot "improve" any of it.
+- The shared construction in `Coding/` exists because of this decision. Deflate
+  needs canonical Huffman over three alphabets (288, 30 and 19 symbols, with
+  limits of 15 and 7 bits) and match finding at 3…258 bytes, while `HuffmanCodec`
+  and `LzssCodec` had both hard-coded to their own shapes. Generalising them
+  surfaced two real bugs: symbol indices stored in a `byte`, which truncates
+  above 255, and an empty-alphabet path that indexed an empty heap — the distance
+  alphabet is empty whenever a block has no matches.
+- More work than the alternative, concentrated in table data rather than in
+  algorithms.
+
+### Alternatives
+
+- **Our own simplified format.** Cheaper, and nothing outside the project would
+  read it. Rejected: it throws away the only external oracle available, and
+  calling it "Deflate" at the defence would be a stretch.
+- **Wrap the output in zlib.** An extra header and an Adler-32 the container
+  already duplicates with CRC-32. Rejected as redundant.
+- **Match zlib's output byte for byte.** Would pin every heuristic zlib happens
+  to use. Rejected: RFC 1951 compliance is the contract, not imitation.
+
+---
+
+## ADR-0014 — Plain `Microsoft.Extensions.DependencyInjection` in the GUI, not Prism
 
 **Status:** Accepted · 2026-11-08
 

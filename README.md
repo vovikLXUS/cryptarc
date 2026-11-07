@@ -11,9 +11,9 @@ Coursework for *Algorithms and Optimisation of Software Solutions*.
 | Area | State |
 |---|---|
 | Block codec contract (`ICodec`) | ✅ |
-| Store, RLE, Huffman, BWT, LZSS, LZW | ✅ |
+| Store, RLE, Huffman, BWT, LZSS, LZW, Arithmetic, Deflate | ✅ every codec in `CodecId` |
 | Bit I/O, CRC-32, entropy analyzer | ✅ |
-| Deflate, arithmetic coding | 🚧 planned |
+| Deflate interoperability with RFC 1951 | ✅ checked against a reference implementation both ways |
 | Archive container + AES-256-GCM | 🚧 planned |
 | Avalonia desktop UI | ✅ analyser screen, 🚧 pack/unpack |
 

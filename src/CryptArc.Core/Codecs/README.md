@@ -13,13 +13,13 @@ most of the coursework happens.
 | `BwtCodec.cs` | BWT + move-to-front + zero runs + Huffman | `O(n log n)` encode, `O(n)` decode, `O(n)` space | stages live in `../Transforms/`; worst case grows input by 1 byte |
 | `LzssCodec.cs` | LZSS, 32 KiB window | `O(n*k)` time with hash chains, `O(n*W)` naive | literal runs bound the worst case at < 0.8 %; `EncodeNaive` and `MatchLengthNaive` are the baselines |
 | `LzwCodec.cs` | LZW, 9..12-bit variable width | `O(n)` amortised | own open-addressing hash table |
+| `ArithmeticCodec.cs` | adaptive arithmetic / range coding | `O(n log k)` time, `O(1)` space | Fenwick tree and binary lifting; `EncodeNaive`/`DecodeNaive` baseline |
 
 ## Planned
 
 | Algorithm | Owner | Key structure |
 |---|---|---|
-| Deflate (LZSS + Huffman) | — | composition of the two above |
-| Arithmetic / range coder | — | adaptive frequency model |
+| Deflate (LZ77 + Huffman) | — | shares `Coding/` with both, but is not a composition of them: it interleaves two alphabets in one bit stream and describes them with a third |
 
 Fill in the owner column when the work is split.
 

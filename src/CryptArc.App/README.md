@@ -33,7 +33,7 @@ dotnet run --project src/CryptArc.App -c Release
 resolves `MainWindow` from it; the window gets its view model and the view model
 gets `ICodecMeasurement` through the constructor. Register new services there.
 `MainWindow()` without arguments exists only for the XAML previewer. See
-ADR-0013 for why this is not Prism.
+ADR-0014 for why this is not Prism.
 
 ## Why the file picker lives in code-behind
 
