@@ -6,6 +6,7 @@ Coding machinery that more than one codec needs. Nothing here implements
 | File | Contents |
 |---|---|
 | `CanonicalHuffman.cs` | optimal code lengths, package-merge length limiting, canonical code assignment, two-level decode table, explicit decode tree |
+| `HuffmanCodeBook.cs` | public, read-only view of the byte-level code `HuffmanCodec` builds: frequencies, lengths and codes written most significant bit first, for display. The one byte-specific type here; it wraps the generic construction rather than replacing it |
 | `MatchFinder.cs` | `Match`, `IMatchFinder`, and the two Lempel-Ziv match searches: linear scan and hash chains |
 | `MatchLengths.cs` | common-prefix length of two sequences, 8 bytes at a time and byte by byte |
 

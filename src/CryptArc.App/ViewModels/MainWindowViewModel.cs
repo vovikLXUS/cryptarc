@@ -13,12 +13,16 @@ namespace CryptArc.App.ViewModels;
 /// <param name="measurement">Does the analysis and the per-codec round trips.</param>
 /// <param name="analyse">The "Analyse" page.</param>
 /// <param name="compare">The "Compare codecs" page.</param>
+/// <param name="compress">The "Compress" page.</param>
+/// <param name="lab">The "Transform lab" page.</param>
 public partial class MainWindowViewModel(
     ICodecMeasurement measurement,
     AnalysePageViewModel analyse,
-    ComparePageViewModel compare) : ObservableObject
+    ComparePageViewModel compare,
+    CompressPageViewModel compress,
+    TransformLabPageViewModel lab) : ObservableObject
 {
-    /// <summary>Index of the open page in the side menu: 0 = Analyse, 1 = Compare.</summary>
+    /// <summary>Index of the open page in the side menu: 0 = Analyse, 1 = Compare, 2 = Compress, 3 = Transform lab.</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CurrentPage))]
     private int _selectedPageIndex;
@@ -44,8 +48,20 @@ public partial class MainWindowViewModel(
     /// <summary>The "Compare codecs" page.</summary>
     public ComparePageViewModel Compare { get; } = compare;
 
+    /// <summary>The "Compress" page.</summary>
+    public CompressPageViewModel Compress { get; } = compress;
+
+    /// <summary>The "Transform lab" page.</summary>
+    public TransformLabPageViewModel Lab { get; } = lab;
+
     /// <summary>The page shown in the content area; a data template picks its view.</summary>
-    public object CurrentPage => SelectedPageIndex == 1 ? Compare : Analyse;
+    public object CurrentPage => SelectedPageIndex switch
+    {
+        1 => Compare,
+        2 => Compress,
+        3 => Lab,
+        _ => Analyse,
+    };
 
     /// <summary>
     /// Profiles the file and round-trips it through every implemented codec.
@@ -74,6 +90,7 @@ public partial class MainWindowViewModel(
 
             Analyse.Show(report, summary);
             Compare.Show(report.Results, summary.RecommendedName);
+            Compress.SetFile(data);
 
             HasFile = true;
             Status = $"CRC-32 {report.Crc:X8} · {report.Results.Length} codecs measured";
