@@ -18,6 +18,9 @@
         <DataTemplate DataType="vm:CompressPageViewModel">
             <views:CompressView />
         </DataTemplate>
+        <DataTemplate DataType="vm:TransformLabPageViewModel">
+            <views:TransformLabView />
+        </DataTemplate>
     </Application.DataTemplates>
 
     <Application.Styles>

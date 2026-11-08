@@ -1,0 +1,171 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CryptArc.App.ViewModels"
+             xmlns:svc="using:CryptArc.App.Services"
+             x:Class="CryptArc.App.Views.TransformLabView"
+             x:DataType="vm:TransformLabPageViewModel">
+
+    <UserControl.Styles>
+        <Style Selector="TextBlock.Code">
+            <Setter Property="FontFamily" Value="Menlo, Consolas, monospace" />
+            <Setter Property="FontSize" Value="13" />
+        </Style>
+        <Style Selector="SelectableTextBlock.Code">
+            <Setter Property="FontFamily" Value="Menlo, Consolas, monospace" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style Selector="Border.Chip">
+            <Setter Property="Background" Value="{DynamicResource SemiColorBackground0}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource SemiColorBorder}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="Padding" Value="14,10" />
+            <Setter Property="MinWidth" Value="150" />
+        </Style>
+    </UserControl.Styles>
+
+    <ScrollViewer>
+        <StackPanel Spacing="16">
+
+            <StackPanel Spacing="4">
+                <TextBlock Classes="PageTitle" Text="Transform lab" />
+                <TextBlock Classes="Secondary"
+                           Text="The stages of the BWT codec, one at a time: Burrows–Wheeler groups similar contexts, move-to-front turns them into small numbers, zero runs shrink the zeros, and Huffman codes the rest." />
+            </StackPanel>
+
+            <!-- Input -->
+            <Border Classes="Card">
+                <StackPanel Spacing="10">
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Right" Classes="Hint" VerticalAlignment="Center" Text="{Binding InputNote}" />
+                        <TextBlock Classes="CardTitle" Text="Input" />
+                    </DockPanel>
+                    <TextBox Text="{Binding Input}" AcceptsReturn="True" TextWrapping="Wrap"
+                             MinHeight="60" MaxHeight="140" FontFamily="Menlo, Consolas, monospace" />
+                    <ItemsControl ItemsSource="{Binding Presets}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel ItemSpacing="8" LineSpacing="8" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:LabPreset">
+                                <Button Content="{Binding Name}"
+                                        Command="{Binding $parent[ItemsControl].((vm:TransformLabPageViewModel)DataContext).UsePresetCommand}"
+                                        CommandParameter="{Binding}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
+            <!-- Pipeline summary -->
+            <ItemsControl ItemsSource="{Binding Stages}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel ItemSpacing="0" LineSpacing="8" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:StageChip">
+                        <StackPanel Orientation="Horizontal">
+                            <Border Classes="Chip">
+                                <StackPanel Spacing="2">
+                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                                    <TextBlock Classes="Hint" Text="{Binding Size}" />
+                                    <TextBlock Classes="Hint" Text="{Binding Entropy}" />
+                                    <TextBlock Classes="Hint" Text="{Binding Zeros}" />
+                                </StackPanel>
+                            </Border>
+                            <TextBlock Text="→" FontSize="22" Margin="12,0" VerticalAlignment="Center"
+                                       Foreground="{DynamicResource SemiColorText2}" IsVisible="{Binding HasArrow}" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- 1. BWT -->
+            <Border Classes="Card">
+                <StackPanel Spacing="10">
+                    <TextBlock Classes="CardTitle" Text="1 · Burrows–Wheeler: sort every rotation, keep the last column" />
+                    <TextBlock Classes="Hint" Text="{Binding RotationsCaption}" />
+                    <ItemsControl ItemsSource="{Binding Rotations}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="svc:RotationRow">
+                                <Border CornerRadius="4" Padding="6,1"
+                                        Classes.Original="{Binding IsSentinelRow}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Classes="Code" Text="{Binding Body}" />
+                                        <TextBlock Classes="Code" Text="{Binding Last}" FontWeight="Bold"
+                                                   Foreground="{DynamicResource SemiColorPrimary}" Margin="6,0,0,0" />
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                        <ItemsControl.Styles>
+                            <Style Selector="Border.Original">
+                                <Setter Property="Background" Value="{DynamicResource SemiColorPrimaryLight}" />
+                            </Style>
+                        </ItemsControl.Styles>
+                    </ItemsControl>
+                    <TextBlock Classes="Secondary" Text="Last column — the BWT output. Equal letters cluster because they are followed by similar text:" />
+                    <SelectableTextBlock Classes="Code" Text="{Binding BwtPreview}" FontWeight="Bold" />
+                </StackPanel>
+            </Border>
+
+            <!-- 2. MTF -->
+            <Border Classes="Card">
+                <StackPanel Spacing="10">
+                    <TextBlock Classes="CardTitle" Text="2 · Move-to-front: each byte becomes its position in a recently-used list" />
+                    <TextBlock Classes="Secondary" Text="A repeat of the previous byte is 0, a byte seen a moment ago is a small number. Clusters from BWT turn into runs of zeros." />
+                    <SelectableTextBlock Classes="Code" Text="{Binding MtfPreview}" />
+                </StackPanel>
+            </Border>
+
+            <!-- 3. Zero runs -->
+            <Border Classes="Card">
+                <StackPanel Spacing="10">
+                    <TextBlock Classes="CardTitle" Text="3 · Zero runs: a run of zeros becomes a few RUNA/RUNB digits (0 and 1)" />
+                    <TextBlock Classes="Secondary" Text="Other values move up by one to make room for the two digits, as in bzip2." />
+                    <SelectableTextBlock Classes="Code" Text="{Binding RlePreview}" />
+                </StackPanel>
+            </Border>
+
+            <!-- 4. Huffman -->
+            <Border Classes="Card">
+                <StackPanel Spacing="12">
+                    <TextBlock Classes="CardTitle" Text="4 · Huffman: short codes for frequent symbols" />
+
+                    <Grid ColumnDefinitions="200,*,170" RowDefinitions="Auto,8,Auto">
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Huffman on the input" VerticalAlignment="Center" />
+                        <ProgressBar Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="1" Value="{Binding HuffmanRawShare}"
+                                     Height="12" VerticalAlignment="Center" />
+                        <TextBlock Grid.Row="0" Grid.Column="2" Classes="Code" Margin="12,0,0,0" VerticalAlignment="Center"
+                                   Text="{Binding HuffmanRawSize}" />
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="After the transforms" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        <ProgressBar Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="1" Value="{Binding HuffmanPipelineShare}"
+                                     Height="12" VerticalAlignment="Center" />
+                        <TextBlock Grid.Row="2" Grid.Column="2" Classes="Code" Margin="12,0,0,0" VerticalAlignment="Center"
+                                   FontWeight="SemiBold" Text="{Binding HuffmanPipelineSize}" />
+                    </Grid>
+                    <TextBlock Classes="Hint" TextWrapping="Wrap" Text="{Binding Verdict}" />
+
+                    <Border Classes="Card" Padding="0" ClipToBounds="True">
+                        <DataGrid ItemsSource="{Binding HuffmanCodes}" IsReadOnly="True" AutoGenerateColumns="False"
+                                  GridLinesVisibility="Horizontal" HeadersVisibility="Column" MaxHeight="320">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Symbol" Binding="{Binding Symbol}" Width="Auto" />
+                                <DataGridTextColumn Header="Means" Binding="{Binding Meaning}" Width="Auto" />
+                                <DataGridTextColumn Header="Count" Binding="{Binding Count}" Width="Auto" />
+                                <DataGridTextColumn Header="Bits" Binding="{Binding Length}" Width="Auto" />
+                                <DataGridTextColumn Header="Code" Binding="{Binding Code}" Width="*" FontFamily="Menlo, Consolas, monospace" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Border>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

@@ -13,8 +13,10 @@ of them. Theme: Semi.Avalonia, charts: ScottPlot (ADR-0015).
 | Compare codecs | every registered codec on the file: a bar chart of size or encode speed, and a sortable table |
 | Compress | `BlockCompressor` on the file with a chosen codec or Auto, block size and thread count: progress, cancel, a live map of blocks coloured by codec, and a history of runs with speedup against the one-thread baseline. Nothing is written to disk until the container exists |
 
-Planned, shown as "soon" in the menu: a transform lab (BWT → MTF → RLE step by
-step), naive versus optimised, and the encrypted archive.
+| Transform lab | a short text through the stages of the BWT codec: the sorted rotation matrix and its last column, move-to-front, zero-run coding, and the Huffman code of the result next to Huffman on the raw text. Needs no file |
+
+Planned, shown as "soon" in the menu: naive versus optimised, and the encrypted
+archive.
 
 ## Structure
 
@@ -27,7 +29,7 @@ step), naive versus optimised, and the encrypted archive.
 | `Views/` | one `UserControl` per page; `CompareView` draws its chart in code-behind |
 | `Converters/` | value-to-brush converters (heatmap colours) |
 | `ViewModels/` | presentation state and logic, one view model per page |
-| `Services/` | `ICodecMeasurement`: analysis and per-codec round trip, injected into the view model |
+| `Services/` | `ICodecMeasurement`: analysis and per-codec round trip, injected into the view model; `TransformLab`: the BWT codec's stages run one by one for the lab |
 
 ## Running
 

@@ -40,6 +40,7 @@ public partial class App : Application
             .AddTransient<AnalysePageViewModel>()
             .AddTransient<ComparePageViewModel>()
             .AddTransient<CompressPageViewModel>()
+            .AddTransient<TransformLabPageViewModel>()
             .AddTransient<MainWindowViewModel>()
             .AddTransient<MainWindow>()
             .BuildServiceProvider(new ServiceProviderOptions
