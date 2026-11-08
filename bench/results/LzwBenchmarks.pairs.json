@@ -1,0 +1,103 @@
+{
+  "formatVersion": 1,
+  "suite": "LzwBenchmarks",
+  "measuredAt": "2026-11-08T18:05:23.122183+00:00",
+  "job": "DefaultJob",
+  "machine": {
+    "cpu": "Apple M5 Pro",
+    "os": "macOS 27.0.1",
+    "runtime": ".NET 10.0.14 (10.0.14, 10.0.1426.52326)",
+    "logicalCores": 18,
+    "benchmarkDotNet": "0.15.8"
+  },
+  "groups": [
+    {
+      "parameters": {
+        "Size": "4096"
+      },
+      "categories": [
+        "Decode"
+      ],
+      "results": [
+        {
+          "method": "DecodeNaive",
+          "baseline": true,
+          "meanNs": 7407.580038960775,
+          "allocatedBytes": 67496
+        },
+        {
+          "method": "DecodeOptimised",
+          "baseline": false,
+          "meanNs": 3657.925594874791,
+          "allocatedBytes": 0
+        }
+      ]
+    },
+    {
+      "parameters": {
+        "Size": "65536"
+      },
+      "categories": [
+        "Decode"
+      ],
+      "results": [
+        {
+          "method": "DecodeNaive",
+          "baseline": true,
+          "meanNs": 28255.691951497396,
+          "allocatedBytes": 201304
+        },
+        {
+          "method": "DecodeOptimised",
+          "baseline": false,
+          "meanNs": 69668.55661446707,
+          "allocatedBytes": 0
+        }
+      ]
+    },
+    {
+      "parameters": {
+        "Size": "4096"
+      },
+      "categories": [
+        "Encode"
+      ],
+      "results": [
+        {
+          "method": "EncodeNaive",
+          "baseline": true,
+          "meanNs": 303293.2091909555,
+          "allocatedBytes": 0
+        },
+        {
+          "method": "EncodeOptimised",
+          "baseline": false,
+          "meanNs": 5168.986550903321,
+          "allocatedBytes": 0
+        }
+      ]
+    },
+    {
+      "parameters": {
+        "Size": "65536"
+      },
+      "categories": [
+        "Encode"
+      ],
+      "results": [
+        {
+          "method": "EncodeNaive",
+          "baseline": true,
+          "meanNs": 17159826.4,
+          "allocatedBytes": 0
+        },
+        {
+          "method": "EncodeOptimised",
+          "baseline": false,
+          "meanNs": 108891.70266113282,
+          "allocatedBytes": 0
+        }
+      ]
+    }
+  ]
+}

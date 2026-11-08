@@ -37,10 +37,12 @@ public partial class App : Application
     private static ServiceProvider ConfigureServices() =>
         new ServiceCollection()
             .AddSingleton<ICodecMeasurement, CodecMeasurement>()
+            .AddSingleton<IBenchmarkResults, BenchmarkResults>()
             .AddTransient<AnalysePageViewModel>()
             .AddTransient<ComparePageViewModel>()
             .AddTransient<CompressPageViewModel>()
             .AddTransient<TransformLabPageViewModel>()
+            .AddTransient<NaiveVsOptimisedPageViewModel>()
             .AddTransient<MainWindowViewModel>()
             .AddTransient<MainWindow>()
             .BuildServiceProvider(new ServiceProviderOptions

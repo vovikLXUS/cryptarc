@@ -1,0 +1,55 @@
+{
+  "formatVersion": 1,
+  "suite": "Crc32Benchmarks",
+  "measuredAt": "2026-11-08T17:04:33.151237+00:00",
+  "job": "DefaultJob",
+  "machine": {
+    "cpu": "Apple M5 Pro",
+    "os": "macOS 27.0.1",
+    "runtime": ".NET 10.0.14 (10.0.14, 10.0.1426.52326)",
+    "logicalCores": 18,
+    "benchmarkDotNet": "0.15.8"
+  },
+  "groups": [
+    {
+      "parameters": {
+        "Size": "4096"
+      },
+      "categories": [],
+      "results": [
+        {
+          "method": "Naive",
+          "baseline": true,
+          "meanNs": 33455.07251612345,
+          "allocatedBytes": 0
+        },
+        {
+          "method": "TableDriven",
+          "baseline": false,
+          "meanNs": 7492.982049045792,
+          "allocatedBytes": 0
+        }
+      ]
+    },
+    {
+      "parameters": {
+        "Size": "1048576"
+      },
+      "categories": [],
+      "results": [
+        {
+          "method": "Naive",
+          "baseline": true,
+          "meanNs": 21471830.821331523,
+          "allocatedBytes": 0
+        },
+        {
+          "method": "TableDriven",
+          "baseline": false,
+          "meanNs": 1858622.9928385417,
+          "allocatedBytes": 0
+        }
+      ]
+    }
+  ]
+}

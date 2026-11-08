@@ -1,0 +1,75 @@
+{
+  "formatVersion": 1,
+  "suite": "LzssMatchLengthBenchmarks",
+  "measuredAt": "2026-11-08T17:54:40.770967+00:00",
+  "job": "DefaultJob",
+  "machine": {
+    "cpu": "Apple M5 Pro",
+    "os": "macOS 27.0.1",
+    "runtime": ".NET 10.0.14 (10.0.14, 10.0.1426.52326)",
+    "logicalCores": 18,
+    "benchmarkDotNet": "0.15.8"
+  },
+  "groups": [
+    {
+      "parameters": {
+        "Length": "8"
+      },
+      "categories": [],
+      "results": [
+        {
+          "method": "Bytewise",
+          "baseline": true,
+          "meanNs": 2.242965321491162,
+          "allocatedBytes": 0
+        },
+        {
+          "method": "EightBytesAtATime",
+          "baseline": false,
+          "meanNs": 0.7656915351748467,
+          "allocatedBytes": 0
+        }
+      ]
+    },
+    {
+      "parameters": {
+        "Length": "32"
+      },
+      "categories": [],
+      "results": [
+        {
+          "method": "Bytewise",
+          "baseline": true,
+          "meanNs": 8.18902116715908,
+          "allocatedBytes": 0
+        },
+        {
+          "method": "EightBytesAtATime",
+          "baseline": false,
+          "meanNs": 2.142652811339268,
+          "allocatedBytes": 0
+        }
+      ]
+    },
+    {
+      "parameters": {
+        "Length": "131"
+      },
+      "categories": [],
+      "results": [
+        {
+          "method": "Bytewise",
+          "baseline": true,
+          "meanNs": 35.21726670861244,
+          "allocatedBytes": 0
+        },
+        {
+          "method": "EightBytesAtATime",
+          "baseline": false,
+          "meanNs": 8.753382599726319,
+          "allocatedBytes": 0
+        }
+      ]
+    }
+  ]
+}

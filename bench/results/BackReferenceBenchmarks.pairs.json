@@ -1,0 +1,183 @@
+{
+  "formatVersion": 1,
+  "suite": "BackReferenceBenchmarks",
+  "measuredAt": "2026-11-08T12:24:50.252994+00:00",
+  "job": "DefaultJob",
+  "machine": {
+    "cpu": "Apple M5 Pro",
+    "os": "macOS 27.0.1",
+    "runtime": ".NET 10.0.14 (10.0.14, 10.0.1426.52326)",
+    "logicalCores": 18,
+    "benchmarkDotNet": "0.15.8"
+  },
+  "groups": [
+    {
+      "parameters": {
+        "Distance": "1",
+        "Length": "131"
+      },
+      "categories": [],
+      "results": [
+        {
+          "method": "Bytewise",
+          "baseline": true,
+          "meanNs": 47.94963772296906,
+          "allocatedBytes": 0
+        },
+        {
+          "method": "BlockAtATime",
+          "baseline": false,
+          "meanNs": 2.449639515094459,
+          "allocatedBytes": 0
+        }
+      ]
+    },
+    {
+      "parameters": {
+        "Distance": "1",
+        "Length": "258"
+      },
+      "categories": [],
+      "results": [
+        {
+          "method": "Bytewise",
+          "baseline": true,
+          "meanNs": 91.90599983013593,
+          "allocatedBytes": 0
+        },
+        {
+          "method": "BlockAtATime",
+          "baseline": false,
+          "meanNs": 3.4249645585815114,
+          "allocatedBytes": 0
+        }
+      ]
+    },
+    {
+      "parameters": {
+        "Distance": "3",
+        "Length": "131"
+      },
+      "categories": [],
+      "results": [
+        {
+          "method": "Bytewise",
+          "baseline": true,
+          "meanNs": 58.94857388138771,
+          "allocatedBytes": 0
+        },
+        {
+          "method": "BlockAtATime",
+          "baseline": false,
+          "meanNs": 8.3288725568698,
+          "allocatedBytes": 0
+        }
+      ]
+    },
+    {
+      "parameters": {
+        "Distance": "3",
+        "Length": "258"
+      },
+      "categories": [],
+      "results": [
+        {
+          "method": "Bytewise",
+          "baseline": true,
+          "meanNs": 126.95654302376967,
+          "allocatedBytes": 0
+        },
+        {
+          "method": "BlockAtATime",
+          "baseline": false,
+          "meanNs": 9.83507351949811,
+          "allocatedBytes": 0
+        }
+      ]
+    },
+    {
+      "parameters": {
+        "Distance": "45",
+        "Length": "131"
+      },
+      "categories": [],
+      "results": [
+        {
+          "method": "Bytewise",
+          "baseline": true,
+          "meanNs": 47.67306625843048,
+          "allocatedBytes": 0
+        },
+        {
+          "method": "BlockAtATime",
+          "baseline": false,
+          "meanNs": 3.192547462348427,
+          "allocatedBytes": 0
+        }
+      ]
+    },
+    {
+      "parameters": {
+        "Distance": "45",
+        "Length": "258"
+      },
+      "categories": [],
+      "results": [
+        {
+          "method": "Bytewise",
+          "baseline": true,
+          "meanNs": 93.32472967704138,
+          "allocatedBytes": 0
+        },
+        {
+          "method": "BlockAtATime",
+          "baseline": false,
+          "meanNs": 4.852926762631307,
+          "allocatedBytes": 0
+        }
+      ]
+    },
+    {
+      "parameters": {
+        "Distance": "258",
+        "Length": "131"
+      },
+      "categories": [],
+      "results": [
+        {
+          "method": "Bytewise",
+          "baseline": true,
+          "meanNs": 48.52525209188461,
+          "allocatedBytes": 0
+        },
+        {
+          "method": "BlockAtATime",
+          "baseline": false,
+          "meanNs": 2.824826334913572,
+          "allocatedBytes": 0
+        }
+      ]
+    },
+    {
+      "parameters": {
+        "Distance": "258",
+        "Length": "258"
+      },
+      "categories": [],
+      "results": [
+        {
+          "method": "Bytewise",
+          "baseline": true,
+          "meanNs": 92.91117766270271,
+          "allocatedBytes": 0
+        },
+        {
+          "method": "BlockAtATime",
+          "baseline": false,
+          "meanNs": 4.264904384634325,
+          "allocatedBytes": 0
+        }
+      ]
+    }
+  ]
+}
