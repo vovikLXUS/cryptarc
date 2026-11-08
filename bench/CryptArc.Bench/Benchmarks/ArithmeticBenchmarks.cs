@@ -1,4 +1,5 @@
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Configs;
 using CryptArc.Core.Codecs;
 
 namespace CryptArc.Bench.Benchmarks;
@@ -6,8 +7,12 @@ namespace CryptArc.Bench.Benchmarks;
 /// <summary>
 /// The Arithmetic coding optimization story in the report: replacing the O(k) linear cumulative sum
 /// scans and symbol search with an O(log k) Fenwick tree (Binary Indexed Tree) and binary lifting.
+/// Encode and decode are separate categories, each against its own naive baseline, so a decoder
+/// is never compared with an encoder.
 /// </summary>
 [MemoryDiagnoser]
+[GroupBenchmarksBy(BenchmarkLogicalGroupRule.ByCategory)]
+[CategoriesColumn]
 public class ArithmeticBenchmarks
 {
     private const int Size = 128 * 1024;
@@ -31,16 +36,16 @@ public class ArithmeticBenchmarks
         _compressedLength = _codec.Encode(_input, _compressed);
     }
 
-    [Benchmark(Baseline = true)]
+    [BenchmarkCategory("Encode"), Benchmark(Baseline = true)]
     public int EncodeNaive() => _codec.EncodeNaive(_input, _compressed);
 
-    [Benchmark]
+    [BenchmarkCategory("Encode"), Benchmark]
     public int EncodeFenwick() => _codec.Encode(_input, _compressed);
 
-    [Benchmark]
+    [BenchmarkCategory("Decode"), Benchmark(Baseline = true)]
     public int DecodeNaive() => _codec.DecodeNaive(_compressed.AsSpan(0, _compressedLength), _restored);
 
-    [Benchmark]
+    [BenchmarkCategory("Decode"), Benchmark]
     public int DecodeFenwick() => _codec.Decode(_compressed.AsSpan(0, _compressedLength), _restored);
 }
 
