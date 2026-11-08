@@ -1,9 +1,8 @@
 # Blocks
 
 Splitting input into fixed-size independent blocks and compressing them,
-optionally in parallel (ADR-0005). This is the compression half of the planned
-`Container/` without the archive format: it returns per-block results, it does
-not write a file.
+optionally in parallel (ADR-0005). It returns per-block results and does not
+write a file; `Container/` is what produces archives.
 
 | Type | Role |
 |---|---|
