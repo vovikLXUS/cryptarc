@@ -15,8 +15,9 @@ of them. Theme: Semi.Avalonia, charts: ScottPlot (ADR-0015).
 
 | Transform lab | a short text through the stages of the BWT codec: the sorted rotation matrix and its last column, move-to-front, zero-run coding, and the Huffman code of the result next to Huffman on the raw text. Needs no file |
 
-Planned, shown as "soon" in the menu: naive versus optimised, and the encrypted
-archive.
+| Naive vs optimised | the optimisation pairs of hard rule 4 as measured by BenchmarkDotNet in Release: speedup chart, times and allocations per case, and the machine. Reads `bench/results/*.pairs.json`, copied beside the executable at build time; the app times nothing here |
+
+Planned, shown as "soon" in the menu: the encrypted archive.
 
 ## Structure
 
@@ -29,7 +30,7 @@ archive.
 | `Views/` | one `UserControl` per page; `CompareView` draws its chart in code-behind |
 | `Converters/` | value-to-brush converters (heatmap colours) |
 | `ViewModels/` | presentation state and logic, one view model per page |
-| `Services/` | `ICodecMeasurement`: analysis and per-codec round trip, injected into the view model; `TransformLab`: the BWT codec's stages run one by one for the lab |
+| `Services/` | `ICodecMeasurement`: analysis and per-codec round trip, injected into the view model; `TransformLab`: the BWT codec's stages run one by one for the lab; `IBenchmarkResults`: reads the committed benchmark results |
 
 ## Running
 

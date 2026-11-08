@@ -15,14 +15,16 @@ namespace CryptArc.App.ViewModels;
 /// <param name="compare">The "Compare codecs" page.</param>
 /// <param name="compress">The "Compress" page.</param>
 /// <param name="lab">The "Transform lab" page.</param>
+/// <param name="pairs">The "Naive vs optimised" page.</param>
 public partial class MainWindowViewModel(
     ICodecMeasurement measurement,
     AnalysePageViewModel analyse,
     ComparePageViewModel compare,
     CompressPageViewModel compress,
-    TransformLabPageViewModel lab) : ObservableObject
+    TransformLabPageViewModel lab,
+    NaiveVsOptimisedPageViewModel pairs) : ObservableObject
 {
-    /// <summary>Index of the open page in the side menu: 0 = Analyse, 1 = Compare, 2 = Compress, 3 = Transform lab.</summary>
+    /// <summary>Index of the open page in the side menu: 0 = Analyse, 1 = Compare, 2 = Compress, 3 = Transform lab, 4 = Naive vs optimised.</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CurrentPage))]
     private int _selectedPageIndex;
@@ -54,12 +56,16 @@ public partial class MainWindowViewModel(
     /// <summary>The "Transform lab" page.</summary>
     public TransformLabPageViewModel Lab { get; } = lab;
 
+    /// <summary>The "Naive vs optimised" page.</summary>
+    public NaiveVsOptimisedPageViewModel Pairs { get; } = pairs;
+
     /// <summary>The page shown in the content area; a data template picks its view.</summary>
     public object CurrentPage => SelectedPageIndex switch
     {
         1 => Compare,
         2 => Compress,
         3 => Lab,
+        4 => Pairs,
         _ => Analyse,
     };
 

@@ -20,6 +20,12 @@
     <PackageReference Include="Semi.Avalonia.DataGrid" Version="12.1.0.1" />
   </ItemGroup>
 
+  <!-- BenchmarkDotNet results for the "Naive vs optimised" page, committed in bench/results/. -->
+  <ItemGroup>
+    <None Include="..\..\bench\results\*.pairs.json" Link="benchmarks\%(Filename)%(Extension)"
+          CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\CryptArc.Core\CryptArc.Core.csproj" />
   </ItemGroup>

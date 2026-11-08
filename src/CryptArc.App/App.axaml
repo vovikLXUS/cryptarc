@@ -21,6 +21,9 @@
         <DataTemplate DataType="vm:TransformLabPageViewModel">
             <views:TransformLabView />
         </DataTemplate>
+        <DataTemplate DataType="vm:NaiveVsOptimisedPageViewModel">
+            <views:NaiveVsOptimisedView />
+        </DataTemplate>
     </Application.DataTemplates>
 
     <Application.Styles>
