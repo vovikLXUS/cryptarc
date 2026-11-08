@@ -7,6 +7,7 @@ BenchmarkDotNet suite. This is where the numbers in the report come from.
 | Class | Measures |
 |---|---|
 | `Crc32Benchmarks` | table-driven CRC vs the per-bit baseline |
+| `ByteHistogramBenchmarks` | byte counting: four interleaved tables vs one, on random and run-heavy data |
 | `MoveToFrontBenchmarks` | move-to-front: front check, vectorised search and block move vs plain loops |
 | `SuffixArrayBenchmarks` | BWT suffix sorting: prefix doubling vs comparison sort, on random and text |
 | `CodecBenchmarks` | encode/decode throughput per codec over random, run-heavy and text data |
