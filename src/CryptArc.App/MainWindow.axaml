@@ -3,91 +3,127 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:CryptArc.App.ViewModels"
-        mc:Ignorable="d" d:DesignWidth="820" d:DesignHeight="560"
+        mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="780"
         x:Class="CryptArc.App.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Width="820" Height="560"
+        Width="1200" Height="780" MinWidth="900" MinHeight="600"
+        Background="{DynamicResource SemiColorBackground1}"
         Title="CryptArc">
 
     <Window.Styles>
-        <Style Selector="TextBlock.label">
-            <Setter Property="Opacity" Value="0.6" />
-            <Setter Property="Width" Value="130" />
+        <Style Selector="ListBox.Nav > ListBoxItem">
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Margin" Value="0,2" />
+            <Setter Property="Padding" Value="12,10" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
         </Style>
-        <Style Selector="TextBlock.value">
-            <Setter Property="FontFamily" Value="Consolas, Menlo, monospace" />
+        <Style Selector="ListBox.Nav > ListBoxItem PathIcon">
+            <Setter Property="Width" Value="16" />
+            <Setter Property="Height" Value="16" />
+        </Style>
+        <Style Selector="Border.Soon">
+            <Setter Property="Background" Value="{DynamicResource SemiColorFill0}" />
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="Padding" Value="6,1" />
+            <Setter Property="Margin" Value="8,0,0,0" />
         </Style>
     </Window.Styles>
 
-    <DockPanel Margin="20">
+    <Grid ColumnDefinitions="264,*">
 
-        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="12">
-            <Button Name="ChooseFileButton"
-                    Content="Choose file…"
-                    IsEnabled="{Binding !IsBusy}" />
-            <TextBlock Text="{Binding Status}" VerticalAlignment="Center" Opacity="0.75" />
-        </StackPanel>
+        <!-- Side menu. Its items are a view concern, so they live here; the view
+             model only knows the selected index. -->
+        <Border Grid.Column="0" Background="{DynamicResource SemiColorBackground0}"
+                BorderBrush="{DynamicResource SemiColorBorder}" BorderThickness="0,0,1,0"
+                Padding="12,20">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="10" Margin="12,0,0,20">
+                    <Border Width="28" Height="28" CornerRadius="7" Background="{DynamicResource SemiColorPrimary}">
+                        <PathIcon Data="{StaticResource SemiIconArchive}" Width="15" Height="15" Foreground="White" />
+                    </Border>
+                    <TextBlock Text="CryptArc" FontSize="17" FontWeight="Bold" VerticalAlignment="Center" />
+                </StackPanel>
 
-        <Border DockPanel.Dock="Top" Margin="0,18,0,0" Padding="16"
-                CornerRadius="6" BorderThickness="1" BorderBrush="#33888888">
-            <StackPanel Spacing="6">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Classes="label" Text="File" />
-                    <TextBlock Classes="value" Text="{Binding FileName}" />
-                </StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Classes="label" Text="Size" />
-                    <TextBlock Classes="value" Text="{Binding FileSize}" />
-                </StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Classes="label" Text="CRC-32" />
-                    <TextBlock Classes="value" Text="{Binding Checksum}" />
-                </StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Classes="label" Text="Entropy" />
-                    <TextBlock Classes="value" Text="{Binding Entropy}" />
-                </StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Classes="label" Text="Repeat ratio" />
-                    <TextBlock Classes="value" Text="{Binding RepeatRatio}" />
-                </StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Classes="label" Text="Text ratio" />
-                    <TextBlock Classes="value" Text="{Binding TextRatio}" />
-                </StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Classes="label" Text="Recommended" />
-                    <TextBlock Classes="value" FontWeight="SemiBold" Text="{Binding Recommendation}" />
-                </StackPanel>
-            </StackPanel>
+                <ListBox Classes="Nav" SelectedIndex="{Binding SelectedPageIndex}" Background="Transparent">
+                    <ListBoxItem>
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <PathIcon Data="{StaticResource SemiIconSearch}" />
+                            <TextBlock Text="Analyse" />
+                        </StackPanel>
+                    </ListBoxItem>
+                    <ListBoxItem>
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <PathIcon Data="{StaticResource SemiIconHistogram}" />
+                            <TextBlock Text="Compare codecs" />
+                        </StackPanel>
+                    </ListBoxItem>
+                    <ListBoxItem IsEnabled="False">
+                        <DockPanel>
+                            <Border DockPanel.Dock="Right" Classes="Soon"><TextBlock Classes="Hint" Text="soon" /></Border>
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <PathIcon Data="{StaticResource SemiIconLayers}" />
+                                <TextBlock Text="Compress" />
+                            </StackPanel>
+                        </DockPanel>
+                    </ListBoxItem>
+                    <ListBoxItem IsEnabled="False">
+                        <DockPanel>
+                            <Border DockPanel.Dock="Right" Classes="Soon"><TextBlock Classes="Hint" Text="soon" /></Border>
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <PathIcon Data="{StaticResource SemiIconBeaker}" />
+                                <TextBlock Text="Transform lab" />
+                            </StackPanel>
+                        </DockPanel>
+                    </ListBoxItem>
+                    <ListBoxItem IsEnabled="False">
+                        <DockPanel>
+                            <Border DockPanel.Dock="Right" Classes="Soon"><TextBlock Classes="Hint" Text="soon" /></Border>
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <PathIcon Data="{StaticResource SemiIconBolt}" />
+                                <TextBlock Text="Naive vs optimised" />
+                            </StackPanel>
+                        </DockPanel>
+                    </ListBoxItem>
+                    <ListBoxItem IsEnabled="False">
+                        <DockPanel>
+                            <Border DockPanel.Dock="Right" Classes="Soon"><TextBlock Classes="Hint" Text="soon" /></Border>
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <PathIcon Data="{StaticResource SemiIconLock}" />
+                                <TextBlock Text="Encrypted archive" />
+                            </StackPanel>
+                        </DockPanel>
+                    </ListBoxItem>
+                </ListBox>
+            </DockPanel>
         </Border>
 
-        <TextBlock DockPanel.Dock="Top" Margin="0,20,0,8"
-                   FontWeight="SemiBold" Text="Codec comparison" />
+        <DockPanel Grid.Column="1" Margin="28,24">
 
-        <Grid DockPanel.Dock="Top" ColumnDefinitions="140,120,90,190,90" Margin="4,0,4,6">
-            <TextBlock Grid.Column="0" Text="Codec" Opacity="0.6" />
-            <TextBlock Grid.Column="1" Text="Compressed" Opacity="0.6" />
-            <TextBlock Grid.Column="2" Text="Ratio" Opacity="0.6" />
-            <TextBlock Grid.Column="3" Text="Encode / Decode" Opacity="0.6" />
-            <TextBlock Grid.Column="4" Text="Status" Opacity="0.6" />
-        </Grid>
+            <!-- The loaded file, shared by every page. -->
+            <Border DockPanel.Dock="Top" Classes="Card" Margin="0,0,0,24">
+                <DockPanel>
+                    <Button Name="ChooseFileButton" DockPanel.Dock="Right"
+                            Classes="Primary" Theme="{DynamicResource SolidButton}"
+                            Content="Choose file…" IsEnabled="{Binding !IsBusy}"
+                            VerticalAlignment="Center" />
+                    <PathIcon DockPanel.Dock="Left" Data="{StaticResource SemiIconFile}"
+                              Width="28" Height="28" Margin="0,0,14,0"
+                              Foreground="{DynamicResource SemiColorPrimary}" />
+                    <StackPanel Spacing="2" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock Text="{Binding FileName}" FontWeight="SemiBold" FontSize="15" />
+                            <TextBlock Classes="Hint" Text="{Binding FileSize}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <ProgressBar IsIndeterminate="True" Width="80" IsVisible="{Binding IsBusy}"
+                                         VerticalAlignment="Center" />
+                            <TextBlock Classes="Hint" Text="{Binding Status}" />
+                        </StackPanel>
+                    </StackPanel>
+                </DockPanel>
+            </Border>
 
-        <ScrollViewer>
-            <ItemsControl ItemsSource="{Binding Results}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate x:DataType="vm:CodecResult">
-                        <Grid ColumnDefinitions="140,120,90,190,90" Margin="4,3">
-                            <TextBlock Grid.Column="0" Text="{Binding Codec}" />
-                            <TextBlock Grid.Column="1" Classes="value" Text="{Binding SizeText}" />
-                            <TextBlock Grid.Column="2" Classes="value" Text="{Binding RatioText}" />
-                            <TextBlock Grid.Column="3" Classes="value" Text="{Binding SpeedText}" />
-                            <TextBlock Grid.Column="4" Text="{Binding StatusText}" />
-                        </Grid>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </ScrollViewer>
-
-    </DockPanel>
+            <TransitioningContentControl Content="{Binding CurrentPage}" />
+        </DockPanel>
+    </Grid>
 </Window>

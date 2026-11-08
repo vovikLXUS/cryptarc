@@ -53,7 +53,7 @@ and the same `Core` binary serves the GUI and the CLI.
 |---|---|---|---|
 | `CryptArc.Core` | class library | Argon2 (NuGet) | everything that matters |
 | `CryptArc.Cli` | console exe | Core | parse arguments, print tables |
-| `CryptArc.App` | Avalonia exe | Core, CommunityToolkit.Mvvm, Microsoft.Extensions.DependencyInjection | window, file picker, presentation |
+| `CryptArc.App` | Avalonia exe | Core, CommunityToolkit.Mvvm, Microsoft.Extensions.DependencyInjection, Semi.Avalonia, ScottPlot | window, file picker, presentation |
 | `CryptArc.Bench` | console exe | Core, BenchmarkDotNet | measure |
 | `CryptArc.Tests` | xUnit | Core | prove correctness |
 

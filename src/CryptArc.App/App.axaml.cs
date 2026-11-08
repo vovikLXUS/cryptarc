@@ -19,7 +19,13 @@ public partial class App : Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             ServiceProvider services = ConfigureServices();
-            desktop.MainWindow = services.GetRequiredService<MainWindow>();
+            MainWindow window = services.GetRequiredService<MainWindow>();
+            desktop.MainWindow = window;
+
+            // `CryptArc.App <file>` opens that file straight away, which is also
+            // what the OS passes for "Open with".
+            if (desktop.Args is [string path, ..])
+                window.Opened += async (_, _) => await window.OpenAsync(path);
             desktop.Exit += (_, _) => services.Dispose();
         }
 
@@ -31,6 +37,8 @@ public partial class App : Application
     private static ServiceProvider ConfigureServices() =>
         new ServiceCollection()
             .AddSingleton<ICodecMeasurement, CodecMeasurement>()
+            .AddTransient<AnalysePageViewModel>()
+            .AddTransient<ComparePageViewModel>()
             .AddTransient<MainWindowViewModel>()
             .AddTransient<MainWindow>()
             .BuildServiceProvider(new ServiceProviderOptions

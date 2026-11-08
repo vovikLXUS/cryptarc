@@ -1,0 +1,104 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CryptArc.App.ViewModels"
+             xmlns:conv="using:CryptArc.App.Converters"
+             x:Class="CryptArc.App.Views.AnalyseView"
+             x:DataType="vm:AnalysePageViewModel">
+
+    <ScrollViewer>
+        <StackPanel Spacing="16">
+
+            <StackPanel Spacing="4">
+                <TextBlock Classes="PageTitle" Text="Analyse a file" />
+                <TextBlock Classes="Secondary"
+                           Text="Entropy, repeats and the share of text decide which codec CryptArc picks for each block." />
+            </StackPanel>
+
+            <Border Classes="Card" IsVisible="{Binding !HasFile}" Padding="32">
+                <StackPanel Spacing="8" HorizontalAlignment="Center">
+                    <PathIcon Data="{StaticResource SemiIconFile}" Width="36" Height="36" Opacity="0.5" />
+                    <TextBlock HorizontalAlignment="Center" Text="No file yet" FontWeight="SemiBold" />
+                    <TextBlock Classes="Secondary" HorizontalAlignment="Center"
+                               Text="Use “Choose file…” above to load one." />
+                </StackPanel>
+            </Border>
+
+            <StackPanel Spacing="16" IsVisible="{Binding HasFile}">
+
+                <UniformGrid Columns="4" ColumnSpacing="12">
+                    <Border Classes="Card">
+                        <StackPanel Spacing="2">
+                            <TextBlock Classes="Secondary" Text="Entropy" />
+                            <TextBlock Classes="Metric" Text="{Binding Entropy}" />
+                            <TextBlock Classes="Hint" Text="bits/byte, mean of blocks" />
+                        </StackPanel>
+                    </Border>
+                    <Border Classes="Card">
+                        <StackPanel Spacing="2">
+                            <TextBlock Classes="Secondary" Text="Repeat ratio" />
+                            <TextBlock Classes="Metric" Text="{Binding RepeatRatio}" />
+                            <TextBlock Classes="Hint" Text="same byte as previous" />
+                        </StackPanel>
+                    </Border>
+                    <Border Classes="Card">
+                        <StackPanel Spacing="2">
+                            <TextBlock Classes="Secondary" Text="Text share" />
+                            <TextBlock Classes="Metric" Text="{Binding TextRatio}" />
+                            <TextBlock Classes="Hint" Text="printable, mean of blocks" />
+                        </StackPanel>
+                    </Border>
+                    <Border Classes="Card Accent">
+                        <StackPanel Spacing="2">
+                            <TextBlock Classes="Secondary" Text="Recommended codec" />
+                            <TextBlock Classes="Metric" Text="{Binding Recommendation}" />
+                            <TextBlock Classes="Hint" Text="{Binding RecommendationCaption}" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Border>
+                </UniformGrid>
+
+                <Border Classes="Card">
+                    <StackPanel Spacing="12">
+                        <DockPanel>
+                            <TextBlock DockPanel.Dock="Right" Classes="Hint" VerticalAlignment="Center"
+                                       Text="{Binding BlocksCaption}" />
+                            <TextBlock Classes="CardTitle" Text="Entropy by block" />
+                        </DockPanel>
+
+                        <ItemsControl ItemsSource="{Binding Blocks}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel ItemSpacing="4" LineSpacing="4" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:HeatmapCell">
+                                    <Border Width="22" Height="22" CornerRadius="4"
+                                            ToolTip.Tip="{Binding ToolTip}"
+                                            Background="{Binding Entropy, Converter={x:Static conv:EntropyToBrushConverter.Instance}}" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Classes="Hint" VerticalAlignment="Center" Text="compressible" />
+                            <ItemsControl Name="Legend" VerticalAlignment="Center">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal" Spacing="3" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="IBrush">
+                                        <Border Width="28" Height="10" CornerRadius="3" Background="{Binding}" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <TextBlock Classes="Hint" VerticalAlignment="Center" Text="near random" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
