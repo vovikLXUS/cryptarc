@@ -22,4 +22,18 @@ public interface ICodecMeasurement
 /// <param name="Profile">Entropy, repeat and text ratios from the analyzer.</param>
 /// <param name="Crc">CRC-32 of the original data.</param>
 /// <param name="Results">One row per registered codec, in registry order.</param>
-public sealed record MeasurementReport(DataProfile Profile, uint Crc, CodecResult[] Results);
+/// <param name="Blocks">
+/// Per-block profiles for the entropy heatmap, at most
+/// <see cref="CodecMeasurement.MaxHeatmapBlocks"/> of them, in file order.
+/// </param>
+public sealed record MeasurementReport(
+    DataProfile Profile,
+    uint Crc,
+    CodecResult[] Results,
+    BlockProfile[] Blocks);
+
+/// <summary>The analyzer's profile of one block of the file.</summary>
+/// <param name="Offset">Byte offset of the block in the file.</param>
+/// <param name="Length">Length of the block in bytes.</param>
+/// <param name="Profile">Entropy, repeat and text ratios of that block.</param>
+public readonly record struct BlockProfile(long Offset, int Length, DataProfile Profile);

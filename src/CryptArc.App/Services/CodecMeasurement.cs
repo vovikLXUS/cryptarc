@@ -15,10 +15,17 @@ namespace CryptArc.App.Services;
 /// <remarks>Stateless, so it is registered as a singleton.</remarks>
 public sealed class CodecMeasurement : ICodecMeasurement
 {
+    /// <summary>
+    /// Upper bound on heatmap cells. A larger file is sampled at evenly spaced blocks,
+    /// so the cost and the number of controls stay bounded on a multi-gigabyte input.
+    /// </summary>
+    public const int MaxHeatmapBlocks = 256;
+
     /// <inheritdoc />
     public MeasurementReport Measure(byte[] data)
     {
         DataProfile profile = DataAnalyzer.Analyze(data);
+        BlockProfile[] blocks = ProfileBlocks(data);
         uint crc = Crc32.Compute(data);
 
         var results = new CodecResult[CodecRegistry.All.Count];
@@ -55,7 +62,29 @@ public sealed class CodecMeasurement : ICodecMeasurement
                 ok);
         }
 
-        return new MeasurementReport(profile, crc, results);
+        return new MeasurementReport(profile, crc, results, blocks);
+    }
+
+    // Blocks are DataAnalyzer.SampleSize long, the same window the analyzer samples,
+    // so each cell shows exactly what the per-block codec choice would see.
+    private static BlockProfile[] ProfileBlocks(byte[] data)
+    {
+        const int blockSize = DataAnalyzer.SampleSize;
+        int blockCount = (int)((data.LongLength + blockSize - 1) / blockSize);
+        int cells = Math.Min(blockCount, MaxHeatmapBlocks);
+
+        var blocks = new BlockProfile[cells];
+
+        for (int i = 0; i < cells; i++)
+        {
+            long index = cells == blockCount ? i : (long)i * blockCount / cells;
+            long offset = index * blockSize;
+            int length = (int)Math.Min(blockSize, data.LongLength - offset);
+
+            blocks[i] = new BlockProfile(offset, length, DataAnalyzer.Analyze(data.AsSpan((int)offset, length)));
+        }
+
+        return blocks;
     }
 
     private static double Throughput(int bytes, TimeSpan elapsed) =>

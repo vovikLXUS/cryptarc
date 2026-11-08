@@ -1,0 +1,81 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CryptArc.App.ViewModels"
+             xmlns:sp="clr-namespace:ScottPlot.Avalonia;assembly=ScottPlot.Avalonia"
+             x:Class="CryptArc.App.Views.CompareView"
+             x:DataType="vm:ComparePageViewModel">
+
+    <UserControl.Styles>
+        <!-- Two radio buttons in a pill (a radio cannot uncheck itself, unlike a toggle): the checked one is a white chip. -->
+        <Style Selector="RadioButton.Segment">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="Padding" Value="16,6" />
+            <Setter Property="FontWeight" Value="Normal" />
+            <Setter Property="Foreground" Value="{DynamicResource SemiColorText1}" />
+        </Style>
+        <Style Selector="RadioButton.Segment:checked /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource SemiColorBackground0}" />
+            <Setter Property="Foreground" Value="{DynamicResource SemiColorText0}" />
+            <Setter Property="BoxShadow" Value="0 1 2 0 #22000000" />
+        </Style>
+        <Style Selector="RadioButton.Segment:checked">
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+    </UserControl.Styles>
+
+    <DockPanel>
+        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,16">
+            <Border DockPanel.Dock="Right" VerticalAlignment="Center" IsVisible="{Binding HasFile}"
+                    Background="{DynamicResource SemiColorFill0}" CornerRadius="8" Padding="3">
+                <StackPanel Orientation="Horizontal" Spacing="2">
+                    <RadioButton Classes="Segment" GroupName="Metric" Theme="{DynamicResource ButtonRadioButton}" Content="Size" IsChecked="{Binding !ShowSpeed}" />
+                    <RadioButton Classes="Segment" GroupName="Metric" Theme="{DynamicResource ButtonRadioButton}" Content="Speed" IsChecked="{Binding ShowSpeed}" />
+                </StackPanel>
+            </Border>
+            <StackPanel Spacing="4">
+                <TextBlock Classes="PageTitle" Text="Compare codecs" />
+                <TextBlock Classes="Secondary"
+                           Text="Every registered codec on the same file; each round trip is checked by CRC-32." />
+            </StackPanel>
+        </DockPanel>
+
+        <Border Classes="Card" DockPanel.Dock="Top" IsVisible="{Binding !HasFile}" Padding="32">
+            <StackPanel Spacing="8" HorizontalAlignment="Center">
+                <PathIcon Data="{StaticResource SemiIconHistogram}" Width="36" Height="36" Opacity="0.5" />
+                <TextBlock HorizontalAlignment="Center" Text="No file yet" FontWeight="SemiBold" />
+                <TextBlock Classes="Secondary" HorizontalAlignment="Center"
+                           Text="Load a file and the codecs are measured on it automatically." />
+            </StackPanel>
+        </Border>
+
+        <ScrollViewer IsVisible="{Binding HasFile}">
+        <StackPanel Spacing="16">
+            <Border Classes="Card" Height="320">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" Classes="CardTitle" Text="{Binding ChartTitle}" />
+                    <sp:AvaPlot Name="Chart" Margin="0,8,0,0" />
+                </DockPanel>
+            </Border>
+
+            <Border Classes="Card" Padding="0" ClipToBounds="True">
+                <DataGrid ItemsSource="{Binding Results}" IsReadOnly="True"
+                          AutoGenerateColumns="False" CanUserSortColumns="True"
+                          GridLinesVisibility="Horizontal" HeadersVisibility="Column">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Codec" Binding="{Binding Codec}" Width="*" />
+                        <DataGridTextColumn Header="Compressed" Binding="{Binding SizeText}" Width="*"
+                                            SortMemberPath="CompressedSize" />
+                        <DataGridTextColumn Header="Ratio" Binding="{Binding RatioText}" Width="*"
+                                            SortMemberPath="Ratio" />
+                        <DataGridTextColumn Header="Encode / decode" Binding="{Binding SpeedText}" Width="1.6*"
+                                            SortMemberPath="EncodeThroughput" />
+                        <DataGridTextColumn Header="Round trip" Binding="{Binding StatusText}" Width="*" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+        </StackPanel>
+        </ScrollViewer>
+    </DockPanel>
+</UserControl>

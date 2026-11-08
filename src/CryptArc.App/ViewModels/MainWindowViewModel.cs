@@ -1,51 +1,57 @@
 using System;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CryptArc.App.Services;
-using CryptArc.Core;
-using CryptArc.Core.Analysis;
 
 namespace CryptArc.App.ViewModels;
 
-/// <summary>State and logic behind the main window: load a file, measure it, show the results.</summary>
+/// <summary>
+/// The application shell: which page is open, which file is loaded, and the loading
+/// itself. The pages only display what the shell hands them.
+/// </summary>
 /// <param name="measurement">Does the analysis and the per-codec round trips.</param>
-public partial class MainWindowViewModel(ICodecMeasurement measurement) : ObservableObject
+/// <param name="analyse">The "Analyse" page.</param>
+/// <param name="compare">The "Compare codecs" page.</param>
+public partial class MainWindowViewModel(
+    ICodecMeasurement measurement,
+    AnalysePageViewModel analyse,
+    ComparePageViewModel compare) : ObservableObject
 {
+    /// <summary>Index of the open page in the side menu: 0 = Analyse, 1 = Compare.</summary>
     [ObservableProperty]
-    private string _status = "Pick a file to see which codec CryptArc would choose for it.";
+    [NotifyPropertyChangedFor(nameof(CurrentPage))]
+    private int _selectedPageIndex;
 
     [ObservableProperty]
-    private string _fileName = "—";
+    private string _status = "Choose a file to analyse it and compare every codec on it.";
 
     [ObservableProperty]
-    private string _fileSize = "—";
+    private string _fileName = "No file selected";
 
     [ObservableProperty]
-    private string _checksum = "—";
+    private string _fileSize = string.Empty;
 
     [ObservableProperty]
-    private string _entropy = "—";
-
-    [ObservableProperty]
-    private string _repeatRatio = "—";
-
-    [ObservableProperty]
-    private string _textRatio = "—";
-
-    [ObservableProperty]
-    private string _recommendation = "—";
+    private bool _hasFile;
 
     [ObservableProperty]
     private bool _isBusy;
 
-    public ObservableCollection<CodecResult> Results { get; } = [];
+    /// <summary>The "Analyse" page.</summary>
+    public AnalysePageViewModel Analyse { get; } = analyse;
+
+    /// <summary>The "Compare codecs" page.</summary>
+    public ComparePageViewModel Compare { get; } = compare;
+
+    /// <summary>The page shown in the content area; a data template picks its view.</summary>
+    public object CurrentPage => SelectedPageIndex == 1 ? Compare : Analyse;
 
     /// <summary>
     /// Profiles the file and round-trips it through every implemented codec.
     /// The work runs off the UI thread so the window stays responsive on large files.
     /// </summary>
+    /// <param name="path">Local path of the file to load.</param>
     public async Task LoadAsync(string path)
     {
         if (IsBusy)
@@ -53,7 +59,6 @@ public partial class MainWindowViewModel(ICodecMeasurement measurement) : Observ
 
         IsBusy = true;
         Status = "Reading…";
-        Results.Clear();
 
         try
         {
@@ -63,23 +68,15 @@ public partial class MainWindowViewModel(ICodecMeasurement measurement) : Observ
             FileSize = $"{data.Length:N0} bytes";
             Status = "Analysing…";
 
-            (DataProfile profile, uint crc, CodecResult[] results) =
-                await Task.Run(() => measurement.Measure(data));
+            MeasurementReport report = await Task.Run(() => measurement.Measure(data));
 
-            Checksum = $"{crc:X8}";
-            Entropy = $"{profile.Entropy:F3} bits/byte";
-            RepeatRatio = $"{profile.RepeatRatio:P1}";
-            TextRatio = $"{profile.TextRatio:P1}";
+            FileSummary summary = FileSummary.From(report);
 
-            CodecId recommended = DataAnalyzer.Recommend(profile);
-            Recommendation = CodecRegistry.TryGet(recommended, out _)
-                ? recommended.ToString()
-                : $"{recommended} (not implemented yet)";
+            Analyse.Show(report, summary);
+            Compare.Show(report.Results, summary.RecommendedName);
 
-            foreach (CodecResult result in results)
-                Results.Add(result);
-
-            Status = $"Done — {results.Length} codec(s) measured.";
+            HasFile = true;
+            Status = $"CRC-32 {report.Crc:X8} · {report.Results.Length} codecs measured";
         }
         catch (Exception exception)
         {

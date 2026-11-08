@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using System.Collections.Generic;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
@@ -25,9 +26,13 @@ public partial class MainWindow : Window
     /// need a public parameterless one. The application itself never calls it.
     /// </summary>
     public MainWindow()
-        : this(new MainWindowViewModel(new CodecMeasurement()))
+        : this(new MainWindowViewModel(new CodecMeasurement(), new AnalysePageViewModel(), new ComparePageViewModel()))
     {
     }
+
+    /// <summary>Loads a file as if it had been picked in the dialog.</summary>
+    /// <param name="path">Local path of the file.</param>
+    public Task OpenAsync(string path) => _viewModel.LoadAsync(path);
 
     // File dialogs are a view concern, so the picker lives here and the view model
     // only ever sees a path. Keeps MainWindowViewModel unit-testable.

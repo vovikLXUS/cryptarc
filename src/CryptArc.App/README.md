@@ -2,13 +2,19 @@
 
 Avalonia desktop application. Like the CLI, it is a thin shell over `Core`.
 
-## Current screen
+## Screens
 
-Pick a file and the window shows its size, CRC-32, entropy, repeat and text
-ratios, the codec the analyzer would choose, and a table comparing every
-implemented codec by size, ratio and throughput.
+A side menu switches between pages; the file card at the top is shared by all
+of them. Theme: Semi.Avalonia, charts: ScottPlot (ADR-0015).
 
-Planned: pack/unpack screens, password entry, progress and cancellation.
+| Page | Shows |
+|---|---|
+| Analyse | entropy, repeat ratio and text share as the mean over 64 KiB blocks, the codec picked for most blocks, and a heatmap of entropy per block |
+| Compare codecs | every registered codec on the file: a bar chart of size or encode speed, and a sortable table |
+
+Planned, shown as "soon" in the menu: compress/decompress with one codec, a
+transform lab (BWT → MTF → RLE step by step), naive versus optimised, and the
+encrypted archive.
 
 ## Structure
 
@@ -16,15 +22,18 @@ Planned: pack/unpack screens, password entry, progress and cancellation.
 |---|---|
 | `Program.cs` | entry point, Avalonia app builder |
 | `App.axaml(.cs)` | application-level styles and lifetime; DI composition root |
-| `MainWindow.axaml` | layout |
+| `MainWindow.axaml` | shell: side menu, file card, content area |
 | `MainWindow.axaml.cs` | code-behind; owns the file picker only |
-| `ViewModels/` | presentation state and logic |
+| `Views/` | one `UserControl` per page; `CompareView` draws its chart in code-behind |
+| `Converters/` | value-to-brush converters (heatmap colours) |
+| `ViewModels/` | presentation state and logic, one view model per page |
 | `Services/` | `ICodecMeasurement`: analysis and per-codec round trip, injected into the view model |
 
 ## Running
 
 ```bash
 dotnet run --project src/CryptArc.App -c Release
+dotnet run --project src/CryptArc.App -c Release -- path/to/file   # opens it straight away
 ```
 
 ## Dependency injection

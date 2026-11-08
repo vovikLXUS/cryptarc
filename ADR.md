@@ -35,6 +35,7 @@ For *what* the system looks like, see [ARCHITECTURE.md](ARCHITECTURE.md).
 | [0012](#adr-0012--trunk-based-git-with-releases-cut-from-tags) | Trunk-based git with releases cut from tags | Accepted |
 | [0013](#adr-0013--deflate-follows-rfc-1951-to-the-bit) | Deflate follows RFC 1951 to the bit | Accepted |
 | [0014](#adr-0014--plain-microsoftextensionsdependencyinjection-in-the-gui-not-prism) | Plain `Microsoft.Extensions.DependencyInjection` in the GUI, not Prism | Accepted |
+| [0015](#adr-0015--semiavalonia-for-the-look-scottplot-for-charts) | Semi.Avalonia for the look, ScottPlot for charts | Accepted |
 
 ---
 
@@ -588,3 +589,52 @@ dependencies through the constructor. The first injected service is
   regions and modules solve a problem a one-window app does not have.
 - **Keep `new` in code-behind** — no dependency, but the view model stays
   untestable in isolation.
+
+---
+
+## ADR-0015 — Semi.Avalonia for the look, ScottPlot for charts
+
+**Status:** Accepted · 2026-11-08
+
+### Context
+
+The GUI is going to grow from one window into several screens: analysis,
+codec comparison, compression, a transform lab and the naive-versus-optimised
+pairs. Avalonia's stock Fluent theme has no navigation menu, no cards and no
+charts, and the comparison numbers are hard to read as a table alone. The app
+is on Avalonia 12.1, so a candidate library needs a stable release for that
+version, and the coursework cannot depend on a nightly build.
+
+### Decision
+
+- **Semi.Avalonia** (theme, icons) and **Semi.Avalonia.DataGrid** replace the
+  Fluent theme. Colours come from Semi's `DynamicResource` keys, so the app can
+  follow a dark variant later without touching every view.
+- **ScottPlot.Avalonia** draws the charts. It is imperative, so a chart is
+  filled in its view's code-behind from view-model data; no plot object
+  appears in a view model.
+- The shell is a side menu plus one content area. Each page has its own view
+  model, mapped to its view by a data template in `App.axaml`.
+
+### Consequences
+
+- A coherent, modern look with no custom control templates beyond a few styles
+  in `App.axaml`.
+- Every package is MIT and has a stable release built against Avalonia 12.
+- Semi's community and part of its documentation are in Chinese. The resource
+  keys and control themes are discoverable from the package itself, and the
+  XAML here uses only a small, stable subset.
+- Chart code is not unit-testable; the data it plots is, through the view
+  models.
+
+### Alternatives
+
+- **FluentAvaloniaUI** — polished WinUI 3 controls, stable for Avalonia 12, but
+  it looks like a Windows app on macOS and Linux.
+- **Material.Avalonia** — stable, but Material Design suits mobile and web more
+  than a desktop analysis tool.
+- **SukiUI, ShadUI** — the most striking looks, but Avalonia 12 support is
+  nightly-only or a 0.x release.
+- **LiveCharts2** — animated charts, but only a dev build targets Avalonia 12.
+- **Ursa** (Semi's component library) — not needed yet; the shell uses a styled
+  `ListBox`. Worth adding when dialogs, toasts or step indicators are.

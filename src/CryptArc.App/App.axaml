@@ -1,10 +1,60 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:semi="https://irihi.tech/semi"
+             xmlns:vm="using:CryptArc.App.ViewModels"
+             xmlns:views="using:CryptArc.App.Views"
              x:Class="CryptArc.App.App"
-             RequestedThemeVariant="Default">
-             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+             RequestedThemeVariant="Light">
+
+    <!-- Each page view model is shown by its view. The shell sets CurrentPage
+         and this mapping does the rest, so no view model references a view. -->
+    <Application.DataTemplates>
+        <DataTemplate DataType="vm:AnalysePageViewModel">
+            <views:AnalyseView />
+        </DataTemplate>
+        <DataTemplate DataType="vm:ComparePageViewModel">
+            <views:CompareView />
+        </DataTemplate>
+    </Application.DataTemplates>
 
     <Application.Styles>
-        <FluentTheme />
+        <semi:SemiTheme Locale="en-US" />
+        <semi:DataGridSemiTheme />
+
+        <!-- App-wide text and card styles, on top of Semi's colours. -->
+        <Style Selector="TextBlock.PageTitle">
+            <Setter Property="FontSize" Value="24" />
+            <Setter Property="FontWeight" Value="Bold" />
+        </Style>
+        <Style Selector="TextBlock.CardTitle">
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style Selector="TextBlock.Secondary">
+            <Setter Property="Foreground" Value="{DynamicResource SemiColorText2}" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style Selector="TextBlock.Hint">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{DynamicResource SemiColorText2}" />
+        </Style>
+        <Style Selector="TextBlock.Metric">
+            <Setter Property="FontSize" Value="26" />
+            <Setter Property="FontWeight" Value="Bold" />
+        </Style>
+        <Style Selector="TextBlock.Mono">
+            <Setter Property="FontFamily" Value="Menlo, Consolas, monospace" />
+        </Style>
+        <Style Selector="Border.Card">
+            <Setter Property="Background" Value="{DynamicResource SemiColorBackground0}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource SemiColorBorder}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="12" />
+            <Setter Property="Padding" Value="18,16" />
+        </Style>
+        <Style Selector="Border.Card.Accent">
+            <Setter Property="Background" Value="{DynamicResource SemiColorPrimaryLight}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource SemiColorPrimaryLightHover}" />
+        </Style>
     </Application.Styles>
 </Application>
