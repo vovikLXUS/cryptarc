@@ -26,6 +26,8 @@ public sealed class CodecMeasurement : ICodecMeasurement
     {
         DataProfile profile = DataAnalyzer.Analyze(data);
         BlockProfile[] blocks = ProfileBlocks(data);
+        var histogram = new long[ByteHistogram.Size];
+        ByteHistogram.Count(data, histogram);
         uint crc = Crc32.Compute(data);
 
         var results = new CodecResult[CodecRegistry.All.Count];
@@ -62,7 +64,7 @@ public sealed class CodecMeasurement : ICodecMeasurement
                 ok);
         }
 
-        return new MeasurementReport(profile, crc, results, blocks);
+        return new MeasurementReport(profile, crc, results, blocks, histogram);
     }
 
     // Blocks are DataAnalyzer.SampleSize long, the same window the analyzer samples,

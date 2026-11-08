@@ -9,7 +9,7 @@ of them. Theme: Semi.Avalonia, charts: ScottPlot (ADR-0015).
 
 | Page | Shows |
 |---|---|
-| Analyse | entropy, repeat ratio and text share as the mean over 64 KiB blocks, the codec picked for most blocks, and a heatmap of entropy per block |
+| Analyse | entropy, repeat ratio and text share as the mean over 64 KiB blocks, the codec picked for most blocks, a heatmap of entropy per block, and a histogram of every byte value over the whole file |
 | Compare codecs | every registered codec on the file: a bar chart of size or encode speed, and a sortable table |
 | Compress | `BlockCompressor` on the file with a chosen codec or Auto, block size and thread count: progress, cancel, a live map of blocks coloured by codec, and a history of runs with speedup against the one-thread baseline. Nothing is written to disk until the container exists |
 

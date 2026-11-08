@@ -7,6 +7,7 @@ without compressing it several times to find out.
 |---|---|
 | `DataProfile` | immutable statistics of a block |
 | `DataAnalyzer` | computes the profile, and maps it to a `CodecId` |
+| `ByteHistogram` | counts every byte value over a whole buffer; `Count` uses four interleaved tables, `CountNaive` one |
 
 ## How it works
 
@@ -33,3 +34,12 @@ allowed selection logic to exist before the codecs did.
 
 See [ADR-0007](../../../ADR.md) for why selection is done by measurement rather
 than by trying every codec.
+
+## Byte histogram
+
+`ByteHistogram` counts the whole input, not a sample; the GUI draws it on the
+Analyse page. `CountNaive` increments one table per byte, which stalls on runs of
+equal bytes: each increment reads the counter the previous one has just written.
+`Count` spreads consecutive bytes over four tables and sums them at the end, so
+four equal bytes in a row hit four different addresses. `ByteHistogramBenchmarks`
+measures the pair on random and run-heavy data.

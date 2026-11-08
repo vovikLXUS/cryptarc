@@ -26,11 +26,13 @@ public interface ICodecMeasurement
 /// Per-block profiles for the entropy heatmap, at most
 /// <see cref="CodecMeasurement.MaxHeatmapBlocks"/> of them, in file order.
 /// </param>
+/// <param name="Histogram">How often each byte value occurs in the whole file; 256 entries.</param>
 public sealed record MeasurementReport(
     DataProfile Profile,
     uint Crc,
     CodecResult[] Results,
-    BlockProfile[] Blocks);
+    BlockProfile[] Blocks,
+    long[] Histogram);
 
 /// <summary>The analyzer's profile of one block of the file.</summary>
 /// <param name="Offset">Byte offset of the block in the file.</param>
