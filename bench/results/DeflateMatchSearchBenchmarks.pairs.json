@@ -1,0 +1,177 @@
+{
+  "formatVersion": 1,
+  "suite": "DeflateMatchSearchBenchmarks",
+  "measuredAt": "2026-11-08T17:44:36.672412+00:00",
+  "job": "DefaultJob",
+  "machine": {
+    "cpu": "Apple M5 Pro",
+    "os": "macOS 27.0.1",
+    "runtime": ".NET 10.0.14 (10.0.14, 10.0.1426.52326)",
+    "logicalCores": 18,
+    "benchmarkDotNet": "0.15.8"
+  },
+  "groups": [
+    {
+      "parameters": {
+        "Size": "16384",
+        "Shape": "Random"
+      },
+      "categories": [],
+      "results": [
+        {
+          "method": "LinearScan",
+          "baseline": true,
+          "meanNs": 67671022.83241758,
+          "allocatedBytes": 0
+        },
+        {
+          "method": "HashChainsExhaustive",
+          "baseline": false,
+          "meanNs": 73117.86901245118,
+          "allocatedBytes": 0
+        },
+        {
+          "method": "HashChainsLazy",
+          "baseline": false,
+          "meanNs": 72456.2149983724,
+          "allocatedBytes": 0
+        }
+      ]
+    },
+    {
+      "parameters": {
+        "Size": "16384",
+        "Shape": "Runs"
+      },
+      "categories": [],
+      "results": [
+        {
+          "method": "LinearScan",
+          "baseline": true,
+          "meanNs": 720857.7479717548,
+          "allocatedBytes": 0
+        },
+        {
+          "method": "HashChainsExhaustive",
+          "baseline": false,
+          "meanNs": 48405.52286638533,
+          "allocatedBytes": 0
+        },
+        {
+          "method": "HashChainsLazy",
+          "baseline": false,
+          "meanNs": 44877.95547921317,
+          "allocatedBytes": 0
+        }
+      ]
+    },
+    {
+      "parameters": {
+        "Size": "16384",
+        "Shape": "Text"
+      },
+      "categories": [],
+      "results": [
+        {
+          "method": "LinearScan",
+          "baseline": true,
+          "meanNs": 9521.483561924526,
+          "allocatedBytes": 0
+        },
+        {
+          "method": "HashChainsExhaustive",
+          "baseline": false,
+          "meanNs": 35308.06733703613,
+          "allocatedBytes": 0
+        },
+        {
+          "method": "HashChainsLazy",
+          "baseline": false,
+          "meanNs": 32419.821228027344,
+          "allocatedBytes": 0
+        }
+      ]
+    },
+    {
+      "parameters": {
+        "Size": "65536",
+        "Shape": "Random"
+      },
+      "categories": [],
+      "results": [
+        {
+          "method": "LinearScan",
+          "baseline": true,
+          "meanNs": 818923347.2,
+          "allocatedBytes": 0
+        },
+        {
+          "method": "HashChainsExhaustive",
+          "baseline": false,
+          "meanNs": 399477.7109375,
+          "allocatedBytes": 0
+        },
+        {
+          "method": "HashChainsLazy",
+          "baseline": false,
+          "meanNs": 406835.28432617185,
+          "allocatedBytes": 0
+        }
+      ]
+    },
+    {
+      "parameters": {
+        "Size": "65536",
+        "Shape": "Runs"
+      },
+      "categories": [],
+      "results": [
+        {
+          "method": "LinearScan",
+          "baseline": true,
+          "meanNs": 8099955.28125,
+          "allocatedBytes": 0
+        },
+        {
+          "method": "HashChainsExhaustive",
+          "baseline": false,
+          "meanNs": 251043.20891462054,
+          "allocatedBytes": 0
+        },
+        {
+          "method": "HashChainsLazy",
+          "baseline": false,
+          "meanNs": 212080.63553292412,
+          "allocatedBytes": 0
+        }
+      ]
+    },
+    {
+      "parameters": {
+        "Size": "65536",
+        "Shape": "Text"
+      },
+      "categories": [],
+      "results": [
+        {
+          "method": "LinearScan",
+          "baseline": true,
+          "meanNs": 29346.14337565104,
+          "allocatedBytes": 0
+        },
+        {
+          "method": "HashChainsExhaustive",
+          "baseline": false,
+          "meanNs": 128264.43635441706,
+          "allocatedBytes": 0
+        },
+        {
+          "method": "HashChainsLazy",
+          "baseline": false,
+          "meanNs": 126366.25030273438,
+          "allocatedBytes": 0
+        }
+      ]
+    }
+  ]
+}

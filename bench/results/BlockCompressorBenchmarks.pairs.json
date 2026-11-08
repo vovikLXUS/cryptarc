@@ -1,0 +1,141 @@
+{
+  "formatVersion": 1,
+  "suite": "BlockCompressorBenchmarks",
+  "measuredAt": "2026-11-08T14:52:11.762116+00:00",
+  "job": "DefaultJob",
+  "machine": {
+    "cpu": "Apple M5 Pro",
+    "os": "macOS 27.0.1",
+    "runtime": ".NET 10.0.14 (10.0.14, 10.0.1426.52326)",
+    "logicalCores": 18,
+    "benchmarkDotNet": "0.15.8"
+  },
+  "groups": [
+    {
+      "parameters": {
+        "Threads": "2",
+        "Codec": "Huffman"
+      },
+      "categories": [],
+      "results": [
+        {
+          "method": "Sequential",
+          "baseline": true,
+          "meanNs": 18792232.067708332,
+          "allocatedBytes": 2072
+        },
+        {
+          "method": "Parallel",
+          "baseline": false,
+          "meanNs": 9258672.528645834,
+          "allocatedBytes": 4027
+        }
+      ]
+    },
+    {
+      "parameters": {
+        "Threads": "2",
+        "Codec": "Deflate"
+      },
+      "categories": [],
+      "results": [
+        {
+          "method": "Sequential",
+          "baseline": true,
+          "meanNs": 220668126.7777778,
+          "allocatedBytes": 2072
+        },
+        {
+          "method": "Parallel",
+          "baseline": false,
+          "meanNs": 115089126.96923074,
+          "allocatedBytes": 3992
+        }
+      ]
+    },
+    {
+      "parameters": {
+        "Threads": "4",
+        "Codec": "Huffman"
+      },
+      "categories": [],
+      "results": [
+        {
+          "method": "Sequential",
+          "baseline": true,
+          "meanNs": 18093732.213541668,
+          "allocatedBytes": 2073
+        },
+        {
+          "method": "Parallel",
+          "baseline": false,
+          "meanNs": 4982851.844270834,
+          "allocatedBytes": 4510
+        }
+      ]
+    },
+    {
+      "parameters": {
+        "Threads": "4",
+        "Codec": "Deflate"
+      },
+      "categories": [],
+      "results": [
+        {
+          "method": "Sequential",
+          "baseline": true,
+          "meanNs": 214592200.2222222,
+          "allocatedBytes": 2072
+        },
+        {
+          "method": "Parallel",
+          "baseline": false,
+          "meanNs": 61229432.696296304,
+          "allocatedBytes": 4445
+        }
+      ]
+    },
+    {
+      "parameters": {
+        "Threads": "8",
+        "Codec": "Huffman"
+      },
+      "categories": [],
+      "results": [
+        {
+          "method": "Sequential",
+          "baseline": true,
+          "meanNs": 18764403.086458333,
+          "allocatedBytes": 2072
+        },
+        {
+          "method": "Parallel",
+          "baseline": false,
+          "meanNs": 3373245.927671371,
+          "allocatedBytes": 5417
+        }
+      ]
+    },
+    {
+      "parameters": {
+        "Threads": "8",
+        "Codec": "Deflate"
+      },
+      "categories": [],
+      "results": [
+        {
+          "method": "Sequential",
+          "baseline": true,
+          "meanNs": 225116317.19713268,
+          "allocatedBytes": 2072
+        },
+        {
+          "method": "Parallel",
+          "baseline": false,
+          "meanNs": 39167305.02597403,
+          "allocatedBytes": 5384
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,103 @@
+{
+  "formatVersion": 1,
+  "suite": "ArithmeticBenchmarks",
+  "measuredAt": "2026-11-08T18:34:52.940679+00:00",
+  "job": "DefaultJob",
+  "machine": {
+    "cpu": "Apple M5 Pro",
+    "os": "macOS 27.0.1",
+    "runtime": ".NET 10.0.14 (10.0.14, 10.0.1426.52326)",
+    "logicalCores": 18,
+    "benchmarkDotNet": "0.15.8"
+  },
+  "groups": [
+    {
+      "parameters": {
+        "Shape": "Random"
+      },
+      "categories": [
+        "Decode"
+      ],
+      "results": [
+        {
+          "method": "DecodeNaive",
+          "baseline": true,
+          "meanNs": 11619875.827604167,
+          "allocatedBytes": 0
+        },
+        {
+          "method": "DecodeFenwick",
+          "baseline": false,
+          "meanNs": 8003036.515625,
+          "allocatedBytes": 0
+        }
+      ]
+    },
+    {
+      "parameters": {
+        "Shape": "Text"
+      },
+      "categories": [
+        "Decode"
+      ],
+      "results": [
+        {
+          "method": "DecodeNaive",
+          "baseline": true,
+          "meanNs": 8298892.203125,
+          "allocatedBytes": 0
+        },
+        {
+          "method": "DecodeFenwick",
+          "baseline": false,
+          "meanNs": 3710771.2919585127,
+          "allocatedBytes": 0
+        }
+      ]
+    },
+    {
+      "parameters": {
+        "Shape": "Random"
+      },
+      "categories": [
+        "Encode"
+      ],
+      "results": [
+        {
+          "method": "EncodeNaive",
+          "baseline": true,
+          "meanNs": 14003878.25111607,
+          "allocatedBytes": 0
+        },
+        {
+          "method": "EncodeFenwick",
+          "baseline": false,
+          "meanNs": 6568772.015885416,
+          "allocatedBytes": 0
+        }
+      ]
+    },
+    {
+      "parameters": {
+        "Shape": "Text"
+      },
+      "categories": [
+        "Encode"
+      ],
+      "results": [
+        {
+          "method": "EncodeNaive",
+          "baseline": true,
+          "meanNs": 9457033.89955357,
+          "allocatedBytes": 0
+        },
+        {
+          "method": "EncodeFenwick",
+          "baseline": false,
+          "meanNs": 3932816.8427083334,
+          "allocatedBytes": 0
+        }
+      ]
+    }
+  ]
+}

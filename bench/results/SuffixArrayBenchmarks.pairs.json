@@ -1,0 +1,99 @@
+{
+  "formatVersion": 1,
+  "suite": "SuffixArrayBenchmarks",
+  "measuredAt": "2026-11-08T18:08:58.644348+00:00",
+  "job": "DefaultJob",
+  "machine": {
+    "cpu": "Apple M5 Pro",
+    "os": "macOS 27.0.1",
+    "runtime": ".NET 10.0.14 (10.0.14, 10.0.1426.52326)",
+    "logicalCores": 18,
+    "benchmarkDotNet": "0.15.8"
+  },
+  "groups": [
+    {
+      "parameters": {
+        "Size": "16384",
+        "Shape": "Random"
+      },
+      "categories": [],
+      "results": [
+        {
+          "method": "ComparisonSort",
+          "baseline": true,
+          "meanNs": 1222539.7875600962,
+          "allocatedBytes": 16496
+        },
+        {
+          "method": "PrefixDoubling",
+          "baseline": false,
+          "meanNs": 105768.4148123605,
+          "allocatedBytes": 0
+        }
+      ]
+    },
+    {
+      "parameters": {
+        "Size": "16384",
+        "Shape": "Text"
+      },
+      "categories": [],
+      "results": [
+        {
+          "method": "ComparisonSort",
+          "baseline": true,
+          "meanNs": 19698989.59375,
+          "allocatedBytes": 16496
+        },
+        {
+          "method": "PrefixDoubling",
+          "baseline": false,
+          "meanNs": 811060.9482421875,
+          "allocatedBytes": 0
+        }
+      ]
+    },
+    {
+      "parameters": {
+        "Size": "65536",
+        "Shape": "Random"
+      },
+      "categories": [],
+      "results": [
+        {
+          "method": "ComparisonSort",
+          "baseline": true,
+          "meanNs": 6218124.649939904,
+          "allocatedBytes": 65648
+        },
+        {
+          "method": "PrefixDoubling",
+          "baseline": false,
+          "meanNs": 632390.3272986779,
+          "allocatedBytes": 0
+        }
+      ]
+    },
+    {
+      "parameters": {
+        "Size": "65536",
+        "Shape": "Text"
+      },
+      "categories": [],
+      "results": [
+        {
+          "method": "ComparisonSort",
+          "baseline": true,
+          "meanNs": 356861836.46153843,
+          "allocatedBytes": 65648
+        },
+        {
+          "method": "PrefixDoubling",
+          "baseline": false,
+          "meanNs": 4461746.505108173,
+          "allocatedBytes": 0
+        }
+      ]
+    }
+  ]
+}

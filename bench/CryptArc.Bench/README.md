@@ -22,6 +22,10 @@ dotnet run -c Release -- --filter '*' --exporters github
 `--exporters github` writes a markdown table straight into
 `BenchmarkDotNet.Artifacts/results/`, ready to paste into the report.
 
+Every run also writes `<Class>.pairs.json` through `PairsJsonExporter`. Copied
+into `bench/results/`, those files feed the GUI's "Naive vs optimised" page; see
+[../results/README.md](../results/README.md).
+
 ## Rules
 
 - **Release only.** BenchmarkDotNet refuses Debug, and rightly so.
