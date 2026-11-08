@@ -28,6 +28,12 @@ public partial class CompareView : UserControl
     public CompareView()
     {
         InitializeComponent();
+
+        // The chart is a fixed picture of the results. ScottPlot pans on drag and
+        // zooms on scroll or pinch by default, and once moved there is nothing in
+        // the UI to put it back, so all mouse and trackpad input is switched off.
+        Chart.UserInputProcessor.Disable();
+
         StyleChart();
         DataContextChanged += OnDataContextChanged;
     }
