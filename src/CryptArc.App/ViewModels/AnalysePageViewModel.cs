@@ -29,6 +29,13 @@ public partial class AnalysePageViewModel : ObservableObject
     [ObservableProperty]
     private string _blocksCaption = string.Empty;
 
+    /// <summary>Whole-file byte counts, 256 entries; empty until a file is loaded.</summary>
+    [ObservableProperty]
+    private long[] _histogram = [];
+
+    [ObservableProperty]
+    private string _histogramCaption = string.Empty;
+
     /// <summary>One cell per profiled block, in file order.</summary>
     public ObservableCollection<HeatmapCell> Blocks { get; } = [];
 
@@ -57,7 +64,30 @@ public partial class AnalysePageViewModel : ObservableObject
             ? $"{report.Blocks.Length} sampled blocks of 64 KiB"
             : $"{report.Blocks.Length} blocks of 64 KiB";
 
+        Histogram = report.Histogram;
+        HistogramCaption = DescribeHistogram(report.Histogram);
+
         HasFile = true;
+    }
+
+    private static string DescribeHistogram(long[] counts)
+    {
+        long total = 0;
+        int distinct = 0, top = 0;
+        for (int value = 0; value < counts.Length; value++)
+        {
+            total += counts[value];
+            if (counts[value] > 0)
+                distinct++;
+            if (counts[value] > counts[top])
+                top = value;
+        }
+
+        if (total == 0)
+            return "empty file";
+
+        string symbol = top is >= 0x21 and <= 0x7E ? $" '{(char)top}'" : top == 0x20 ? " (space)" : string.Empty;
+        return $"{distinct} of 256 values occur · most common 0x{top:X2}{symbol}, {counts[top] / (double)total:P1}";
     }
 }
 

@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:CryptArc.App.ViewModels"
              xmlns:conv="using:CryptArc.App.Converters"
+             xmlns:sp="clr-namespace:ScottPlot.Avalonia;assembly=ScottPlot.Avalonia"
              x:Class="CryptArc.App.Views.AnalyseView"
              x:DataType="vm:AnalysePageViewModel">
 
@@ -96,6 +97,19 @@
                             <TextBlock Classes="Hint" VerticalAlignment="Center" Text="near random" />
                         </StackPanel>
                     </StackPanel>
+                </Border>
+
+                <Border Classes="Card" Height="300">
+                    <DockPanel>
+                        <DockPanel DockPanel.Dock="Top">
+                            <TextBlock DockPanel.Dock="Right" Classes="Hint" VerticalAlignment="Center"
+                                       Text="{Binding HistogramCaption}" />
+                            <TextBlock Classes="CardTitle" Text="Byte histogram, whole file" />
+                        </DockPanel>
+                        <TextBlock DockPanel.Dock="Bottom" Classes="Hint" Margin="0,4,0,0"
+                                   Text="Blue: printable ASCII and whitespace, what the text share counts. Grey: every other byte value." />
+                        <sp:AvaPlot Name="HistogramChart" Margin="0,8,0,0" />
+                    </DockPanel>
                 </Border>
 
             </StackPanel>
