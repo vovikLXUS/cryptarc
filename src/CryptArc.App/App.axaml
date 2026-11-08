@@ -15,6 +15,9 @@
         <DataTemplate DataType="vm:ComparePageViewModel">
             <views:CompareView />
         </DataTemplate>
+        <DataTemplate DataType="vm:CompressPageViewModel">
+            <views:CompressView />
+        </DataTemplate>
     </Application.DataTemplates>
 
     <Application.Styles>

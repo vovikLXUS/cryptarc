@@ -11,10 +11,10 @@ of them. Theme: Semi.Avalonia, charts: ScottPlot (ADR-0015).
 |---|---|
 | Analyse | entropy, repeat ratio and text share as the mean over 64 KiB blocks, the codec picked for most blocks, and a heatmap of entropy per block |
 | Compare codecs | every registered codec on the file: a bar chart of size or encode speed, and a sortable table |
+| Compress | `BlockCompressor` on the file with a chosen codec or Auto, block size and thread count: progress, cancel, a live map of blocks coloured by codec, and a history of runs with speedup against the one-thread baseline. Nothing is written to disk until the container exists |
 
-Planned, shown as "soon" in the menu: compress/decompress with one codec, a
-transform lab (BWT → MTF → RLE step by step), naive versus optimised, and the
-encrypted archive.
+Planned, shown as "soon" in the menu: a transform lab (BWT → MTF → RLE step by
+step), naive versus optimised, and the encrypted archive.
 
 ## Structure
 

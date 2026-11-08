@@ -57,14 +57,11 @@
                             <TextBlock Text="Compare codecs" />
                         </StackPanel>
                     </ListBoxItem>
-                    <ListBoxItem IsEnabled="False">
-                        <DockPanel>
-                            <Border DockPanel.Dock="Right" Classes="Soon"><TextBlock Classes="Hint" Text="soon" /></Border>
-                            <StackPanel Orientation="Horizontal" Spacing="10">
-                                <PathIcon Data="{StaticResource SemiIconLayers}" />
-                                <TextBlock Text="Compress" />
-                            </StackPanel>
-                        </DockPanel>
+                    <ListBoxItem>
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <PathIcon Data="{StaticResource SemiIconLayers}" />
+                            <TextBlock Text="Compress" />
+                        </StackPanel>
                     </ListBoxItem>
                     <ListBoxItem IsEnabled="False">
                         <DockPanel>

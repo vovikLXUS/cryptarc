@@ -7,6 +7,8 @@ Presentation state for the Avalonia UI.
 | `MainWindowViewModel` | the shell: selected page, loaded file, loading off the UI thread |
 | `AnalysePageViewModel` | summary cards and heatmap cells for the "Analyse" page |
 | `ComparePageViewModel` | codec rows and the size/speed switch for the "Compare codecs" page |
+| `CompressPageViewModel` | settings, run and cancel, block map and run history for the "Compress" page |
+| `BlockTile`, `CodecUsage`, `RunRecord`, `CodecChoice` | the Compress page's map tiles, legend, history rows and codec list |
 | `FileSummary` | whole-file figures aggregated over block profiles |
 | `HeatmapCell` | one heatmap square: entropy and tooltip |
 | `CodecResult` | one row of the codec comparison table, with display-formatted strings |

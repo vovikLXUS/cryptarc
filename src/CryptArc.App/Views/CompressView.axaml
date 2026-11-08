@@ -1,0 +1,173 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CryptArc.App.ViewModels"
+             xmlns:conv="using:CryptArc.App.Converters"
+             x:Class="CryptArc.App.Views.CompressView"
+             x:DataType="vm:CompressPageViewModel">
+
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Top" Spacing="4" Margin="0,0,0,16">
+            <TextBlock Classes="PageTitle" Text="Compress" />
+            <TextBlock Classes="Secondary"
+                       Text="Split the file into independent blocks and compress them in parallel. Nothing is written to disk until the archive container exists." />
+        </StackPanel>
+
+        <Border Classes="Card" DockPanel.Dock="Top" IsVisible="{Binding !HasFile}" Padding="32">
+            <StackPanel Spacing="8" HorizontalAlignment="Center">
+                <PathIcon Data="{StaticResource SemiIconLayers}" Width="36" Height="36" Opacity="0.5" />
+                <TextBlock HorizontalAlignment="Center" Text="No file yet" FontWeight="SemiBold" />
+                <TextBlock Classes="Secondary" HorizontalAlignment="Center"
+                           Text="Use “Choose file…” above to load one." />
+            </StackPanel>
+        </Border>
+
+        <Grid ColumnDefinitions="300,16,*" IsVisible="{Binding HasFile}">
+
+            <!-- Settings -->
+            <Border Grid.Column="0" Classes="Card" VerticalAlignment="Top">
+                <StackPanel Spacing="16" IsEnabled="{Binding !RunCommand.IsRunning}">
+                    <StackPanel Spacing="6">
+                        <TextBlock Classes="Secondary" Text="Codec" />
+                        <ComboBox ItemsSource="{Binding CodecChoices}" SelectedItem="{Binding SelectedCodec}"
+                                  HorizontalAlignment="Stretch" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="6">
+                        <TextBlock Classes="Secondary" Text="Block size, KiB" />
+                        <ComboBox ItemsSource="{Binding BlockSizesKiB}" SelectedItem="{Binding SelectedBlockSizeKiB}"
+                                  HorizontalAlignment="Stretch" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="6">
+                        <DockPanel>
+                            <TextBlock DockPanel.Dock="Right" FontWeight="SemiBold" Text="{Binding Threads}" />
+                            <TextBlock Classes="Secondary" Text="Threads" />
+                        </DockPanel>
+                        <Slider Minimum="1" Maximum="{Binding MaxThreads}" Value="{Binding Threads}"
+                                TickFrequency="1" IsSnapToTickEnabled="True" />
+                        <TextBlock Classes="Hint" TextWrapping="Wrap"
+                                   Text="1 thread runs the sequential baseline; compare it with more threads below." />
+                    </StackPanel>
+
+                    <CheckBox IsChecked="{Binding Verify}" Content="Verify every block" />
+                </StackPanel>
+            </Border>
+
+            <StackPanel Grid.Column="2" Spacing="16">
+
+                <!-- Run and progress -->
+                <Border Classes="Card">
+                    <StackPanel Spacing="12">
+                        <DockPanel>
+                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="8">
+                                <Button Content="Cancel" Command="{Binding RunCancelCommand}"
+                                        IsVisible="{Binding RunCommand.IsRunning}" />
+                                <Button Classes="Primary" Theme="{DynamicResource SolidButton}"
+                                        Content="Compress" Command="{Binding RunCommand}"
+                                        IsVisible="{Binding !RunCommand.IsRunning}" />
+                            </StackPanel>
+                            <StackPanel Spacing="2" VerticalAlignment="Center">
+                                <TextBlock Classes="CardTitle" Text="Blocks" />
+                                <TextBlock Classes="Hint" Text="{Binding Status}" />
+                            </StackPanel>
+                        </DockPanel>
+
+                        <ProgressBar Minimum="0" Maximum="{Binding BlockTotal}" Value="{Binding BlocksDone}"
+                                     Height="6" IsVisible="{Binding HasRun}" />
+
+                        <ItemsControl ItemsSource="{Binding Tiles}" IsVisible="{Binding ShowMap}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel ItemSpacing="3" LineSpacing="3" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:BlockTile">
+                                    <Border Width="14" Height="14" CornerRadius="3"
+                                            ToolTip.Tip="{Binding ToolTip}"
+                                            BorderBrush="#D9361E" BorderThickness="{Binding !Ok, Converter={x:Static conv:BoolToThicknessConverter.Instance}}"
+                                            Background="{Binding Codec, Converter={x:Static conv:CodecToBrushConverter.Instance}}" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock Classes="Hint" IsVisible="{Binding MapTooLarge}"
+                                   Text="Too many blocks to draw a map; pick a larger block size to see one." />
+
+                        <ItemsControl ItemsSource="{Binding Usage}" IsVisible="{Binding HasResult}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel ItemSpacing="16" LineSpacing="6" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:CodecUsage">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <Border Width="10" Height="10" CornerRadius="2" VerticalAlignment="Center"
+                                                Background="{Binding Codec, Converter={x:Static conv:CodecToBrushConverter.Instance}}" />
+                                        <TextBlock Classes="Hint" VerticalAlignment="Center">
+                                            <Run Text="{Binding Name}" />
+                                            <Run Text="·" />
+                                            <Run Text="{Binding Blocks}" />
+                                        </TextBlock>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <!-- Result of the last run -->
+                <UniformGrid Columns="4" ColumnSpacing="12" IsVisible="{Binding HasResult}">
+                    <Border Classes="Card">
+                        <StackPanel Spacing="2">
+                            <TextBlock Classes="Secondary" Text="Compressed" />
+                            <TextBlock Classes="Metric" FontSize="20" Text="{Binding CompressedSize}" />
+                            <TextBlock Classes="Hint" Text="{Binding Ratio, StringFormat='{}{0} of input'}" />
+                        </StackPanel>
+                    </Border>
+                    <Border Classes="Card">
+                        <StackPanel Spacing="2">
+                            <TextBlock Classes="Secondary" Text="Time" />
+                            <TextBlock Classes="Metric" FontSize="20" Text="{Binding Elapsed}" />
+                            <TextBlock Classes="Hint" Text="wall clock" />
+                        </StackPanel>
+                    </Border>
+                    <Border Classes="Card">
+                        <StackPanel Spacing="2">
+                            <TextBlock Classes="Secondary" Text="Throughput" />
+                            <TextBlock Classes="Metric" FontSize="20" Text="{Binding Throughput}" />
+                            <TextBlock Classes="Hint" Text="of input" />
+                        </StackPanel>
+                    </Border>
+                    <Border Classes="Card">
+                        <StackPanel Spacing="2">
+                            <TextBlock Classes="Secondary" Text="Verification" />
+                            <TextBlock Classes="Metric" FontSize="20" Text="{Binding Verification}" />
+                            <TextBlock Classes="Hint" Text="round trip" />
+                        </StackPanel>
+                    </Border>
+                </UniformGrid>
+
+                <!-- History -->
+                <Border Classes="Card" Padding="0" ClipToBounds="True" IsVisible="{Binding HasResult}">
+                    <StackPanel>
+                        <TextBlock Classes="CardTitle" Margin="18,14,18,6" Text="Runs" />
+                        <DataGrid ItemsSource="{Binding Runs}" IsReadOnly="True" AutoGenerateColumns="False"
+                                  GridLinesVisibility="Horizontal" HeadersVisibility="Column">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Codec" Binding="{Binding Codec}" Width="*" />
+                                <DataGridTextColumn Header="Block" Binding="{Binding BlockSizeKiB, StringFormat='{}{0} KiB'}" Width="Auto" />
+                                <DataGridTextColumn Header="Threads" Binding="{Binding Threads}" Width="Auto" />
+                                <DataGridTextColumn Header="Time" Binding="{Binding ElapsedText}" Width="Auto" />
+                                <DataGridTextColumn Header="Ratio" Binding="{Binding RatioText}" Width="Auto" />
+                                <DataGridTextColumn Header="Speedup" Binding="{Binding Speedup}" Width="*" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                        <TextBlock Classes="Hint" Margin="18,8,18,14" TextWrapping="Wrap"
+                                   Text="Speedup is against the latest 1-thread run with the same codec and block size. Wall-clock time is indicative; BlockCompressorBenchmarks in bench/ is the measurement for the report." />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+    </DockPanel>
+</UserControl>

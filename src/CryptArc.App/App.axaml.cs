@@ -39,6 +39,7 @@ public partial class App : Application
             .AddSingleton<ICodecMeasurement, CodecMeasurement>()
             .AddTransient<AnalysePageViewModel>()
             .AddTransient<ComparePageViewModel>()
+            .AddTransient<CompressPageViewModel>()
             .AddTransient<MainWindowViewModel>()
             .AddTransient<MainWindow>()
             .BuildServiceProvider(new ServiceProviderOptions

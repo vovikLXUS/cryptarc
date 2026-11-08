@@ -26,7 +26,7 @@ public partial class MainWindow : Window
     /// need a public parameterless one. The application itself never calls it.
     /// </summary>
     public MainWindow()
-        : this(new MainWindowViewModel(new CodecMeasurement(), new AnalysePageViewModel(), new ComparePageViewModel()))
+        : this(new MainWindowViewModel(new CodecMeasurement(), new AnalysePageViewModel(), new ComparePageViewModel(), new CompressPageViewModel()))
     {
     }
 
