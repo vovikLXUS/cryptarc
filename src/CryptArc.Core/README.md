@@ -18,9 +18,8 @@ the algorithms testable and benchmarkable on their own.
 | `Hashing/` | CRC-32 for block integrity |
 | `Analysis/` | entropy statistics and codec selection |
 | `Blocks/` | fixed-size blocks compressed in parallel, with a sequential baseline |
+| `Container/` | the encrypted `.cryptarc` archive: writer, reader, key derivation |
 | *(root)* | `ICodec`, `CodecId`, `CodecRegistry` — the contracts everything hangs off |
-
-Planned: `Container/` — archive header, file table, block index, encryption.
 
 ## The three root types
 

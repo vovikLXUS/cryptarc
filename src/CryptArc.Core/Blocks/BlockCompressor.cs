@@ -9,8 +9,8 @@ namespace CryptArc.Core.Blocks;
 /// </summary>
 /// <remarks>
 /// <para>
-/// This is the compression half of the planned container without the container:
-/// it produces per-block results, not an archive. Each block is compressed with
+/// This produces per-block results, not an archive; <c>Container/</c> writes those.
+/// Each block is compressed with
 /// either one fixed codec or, in automatic mode, the codec
 /// <see cref="DataAnalyzer.Recommend"/> picks for that block.
 /// </para>
@@ -159,13 +159,13 @@ public static class BlockCompressor
         }
     }
 
-    private static ICodec ChooseCodec(ReadOnlySpan<byte> block)
+    internal static ICodec ChooseCodec(ReadOnlySpan<byte> block)
     {
         CodecId recommended = DataAnalyzer.Recommend(DataAnalyzer.Analyze(block));
         return CodecRegistry.TryGet(recommended, out ICodec codec) ? codec : CodecRegistry.Get(CodecId.Store);
     }
 
-    private static bool RoundTrips(ICodec codec, ReadOnlySpan<byte> original, ReadOnlySpan<byte> compressed)
+    internal static bool RoundTrips(ICodec codec, ReadOnlySpan<byte> original, ReadOnlySpan<byte> compressed)
     {
         byte[] restored = ArrayPool<byte>.Shared.Rent(original.Length);
         try

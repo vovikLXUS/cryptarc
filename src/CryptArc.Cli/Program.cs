@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using CryptArc.Core;
 using CryptArc.Core.Analysis;
+using CryptArc.Core.Container;
 using CryptArc.Core.Hashing;
 
 if (args.Length == 0 || args[0] is "-h" or "--help" or "help")
@@ -15,6 +16,11 @@ try
     {
         "analyze" => Analyze(RequireFile(args)),
         "test" => TestCodecs(RequireFile(args)),
+        "pack" when args.Length >= 3 => Pack(args[1], args[2..]),
+        "unpack" when args.Length is 2 or 3 => Unpack(RequireFile(args), args.Length == 3 ? args[2] : "."),
+        "list" when args.Length == 2 => List(RequireFile(args)),
+        "verify" when args.Length == 2 => Verify(RequireFile(args)),
+        "pack" or "unpack" or "list" or "verify" => Fail($"Wrong arguments for '{args[0]}'."),
         _ => Fail($"Unknown command '{args[0]}'."),
     };
 }
@@ -32,8 +38,12 @@ static void PrintUsage()
         Usage:
           cryptarc analyze <file>   Report entropy, repetition and the recommended codec
           cryptarc test <file>      Round-trip the file through every implemented codec
+          cryptarc pack <archive> <path>...      Create an encrypted archive from files and folders
+          cryptarc unpack <archive> [directory]  Restore every file; never overwrites
+          cryptarc list <archive>                Show the files in an archive
+          cryptarc verify <archive>              Decrypt and check everything, writing nothing
 
-        Not implemented yet: pack, unpack, list, verify.
+        The password is asked for interactively, or read from a line of redirected stdin.
         """);
 }
 
@@ -54,6 +64,68 @@ static int Fail(string message)
     Console.Error.WriteLine();
     PrintUsage();
     return 2;
+}
+
+static string ReadPassword(string prompt)
+{
+    if (Console.IsInputRedirected)
+        return Console.ReadLine() ?? throw new ArgumentException("No password on standard input.");
+
+    Console.Error.Write(prompt);
+    var password = new System.Text.StringBuilder();
+
+    for (ConsoleKeyInfo key = Console.ReadKey(intercept: true); key.Key != ConsoleKey.Enter; key = Console.ReadKey(intercept: true))
+    {
+        if (key.Key == ConsoleKey.Backspace)
+            password.Length = Math.Max(0, password.Length - 1);
+        else if (!char.IsControl(key.KeyChar))
+            password.Append(key.KeyChar);
+    }
+
+    Console.Error.WriteLine();
+    return password.ToString();
+}
+
+static int Pack(string archive, string[] paths)
+{
+    var sources = new List<ArchiveSource>();
+    foreach (string path in paths)
+        sources.AddRange(ArchiveSource.FromPath(path));
+
+    string password = ReadPassword("Password: ");
+    if (!Console.IsInputRedirected && password != ReadPassword("Repeat password: "))
+        throw new ArgumentException("The passwords do not match.");
+
+    ArchiveWriter.CreateFile(archive, sources, password);
+    Console.WriteLine($"{archive}: {sources.Count:N0} files, {new FileInfo(archive).Length:N0} bytes");
+    return 0;
+}
+
+static int Unpack(string archive, string directory)
+{
+    using ArchiveReader reader = ArchiveReader.OpenFile(archive, ReadPassword("Password: "));
+    reader.ExtractAll(directory);
+    Console.WriteLine($"Restored {reader.Entries.Count:N0} files to {Path.GetFullPath(directory)}");
+    return 0;
+}
+
+static int List(string archive)
+{
+    using ArchiveReader reader = ArchiveReader.OpenFile(archive, ReadPassword("Password: "));
+
+    Console.WriteLine($"{"Size",14} {"Stored",14}  {"Modified (UTC)",-19}  Path");
+    foreach (ArchiveEntry entry in reader.Entries)
+        Console.WriteLine($"{entry.OriginalSize,14:N0} {entry.StoredSize,14:N0}  {entry.ModifiedUtc,-19:yyyy-MM-dd HH:mm:ss}  {entry.Path}");
+
+    return 0;
+}
+
+static int Verify(string archive)
+{
+    using ArchiveReader reader = ArchiveReader.OpenFile(archive, ReadPassword("Password: "));
+    reader.Verify();
+    Console.WriteLine($"OK: {reader.Entries.Count:N0} files");
+    return 0;
 }
 
 static int Analyze(string path)

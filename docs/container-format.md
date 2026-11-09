@@ -1,4 +1,4 @@
-# `.cryptarc` container format (draft v1)
+# `.cryptarc` container format (v1)
 
 All integers are little-endian. Offsets and sizes are in bytes.
 
@@ -19,8 +19,12 @@ All integers are little-endian. Offsets and sizes are in bytes.
 │ 44   4   entryCount     u32                                    │
 │ 48   8   tableOffset    u64                                    │
 │ 56   8   tableLength    u64  length on disk, compressed        │
-├── FILE TABLE ─ compressed, then encrypted ─────────────────────┤
-│ per entry:                                                     │
+├── DATA BLOCKS ─ compressed, then encrypted ───────────────────┤
+│ per block:  nonce[12] │ ciphertext[storedSize] │ gcmTag[16]    │
+├── TABLE ─ at tableOffset, tableLength bytes on disk ───────────┤
+│ nonce[12] │ ciphertext │ gcmTag[16], whose plaintext is:       │
+│   codecId u8, originalSize i32, then the compressed bytes of:  │
+│ FILE TABLE, entryCount times:                                  │
 │   pathLength   u16, path  UTF-8, '/' separated, relative       │
 │   originalSize u64                                             │
 │   storedSize   u64                                             │
@@ -29,16 +33,19 @@ All integers are little-endian. Offsets and sizes are in bytes.
 │   modifiedUtc  i64   ticks                                     │
 │   attributes   u32                                             │
 │   sha256       32 bytes, of the original contents              │
-├── BLOCK INDEX ─ compressed, then encrypted ────────────────────┤
-│ per block: offset u64, storedSize u32, originalSize u32,       │
-│            codecId u8, crc32 u32                               │
-├── DATA BLOCKS ─────────────────────────────────────────────────┤
-│ per block:  nonce[12] │ ciphertext[storedSize] │ gcmTag[16]    │
+│ BLOCK INDEX: blockCount u32, then per block:                   │
+│   offset u64 (of the nonce), storedSize u32, originalSize u32, │
+│   codecId u8, crc32 u32 (of the original block)                │
 ├── TRAILER ─────────────────────────────────────────────────────┤
 │ 32  hmacSha256 over everything above, key derived from the     │
 │     password with a separate info string                       │
 └────────────────────────────────────────────────────────────────┘
 ```
+
+The table follows the data because its size is known only once every block has
+been compressed; `tableOffset` is what makes that possible. Version 1 archives
+are always encrypted: `flags` is 1, `kdfId` 2 and `cipherId` 1, and a reader
+refuses anything else. The other values are reserved.
 
 ## Rules
 
@@ -53,6 +60,14 @@ All integers are little-endian. Offsets and sizes are in bytes.
   pick a different algorithm for a JPEG and for a log file inside one archive.
 - **A block that does not shrink is stored** with `codecId = Store`, bounding
   the worst-case archive size.
+- **Each GCM operation has associated data**: the block's index as a u32, or
+  `0xFFFFFFFF` for the table. A block cannot be moved or passed off as the table.
+- **Opening checks the HMAC first**, in constant time, before the table is
+  decrypted. KDF parameters are range-checked before that (1-64 passes, 32 KiB to
+  2 GiB), since they are still unauthenticated when Argon2 runs.
+- **Paths are checked on read and on write**: relative, `/` separated, no empty,
+  `.` or `..` segment, no backslash, `:` or NUL. Extraction never overwrites a file.
+- **Entries partition the block index** exactly and in order.
 - **`formatVersion` is checked on read.** Any change to the field layout bumps it,
   and readers keep support for older versions.
 
@@ -63,5 +78,8 @@ masterKey  = Argon2id(password, salt, t = kdfIterations, m = kdfMemoryKiB, p = 4
 contentKey = HKDF-SHA256(masterKey, info = "cryptarc:content:v1")
 macKey     = HKDF-SHA256(masterKey, info = "cryptarc:mac:v1")
 ```
+
+The password is normalised to Unicode NFC and encoded as UTF-8 first. The HKDF
+step is Expand only, because the Argon2 output is already uniform.
 
 Separate keys for encryption and authentication; never the same bytes for both.
