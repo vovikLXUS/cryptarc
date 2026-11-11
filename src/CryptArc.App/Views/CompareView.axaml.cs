@@ -16,9 +16,9 @@ namespace CryptArc.App.Views;
 /// </summary>
 public partial class CompareView : UserControl
 {
-    private static readonly Color Primary = Color.FromHex("#0064FA");
-    private static readonly Color PrimaryLight = Color.FromHex("#A9CBFF");
-    private static readonly Color Neutral = Color.FromHex("#8A9099");
+    private static readonly Color Primary = Color.FromHex(ThemePalette.PrimaryHex);
+    private static readonly Color PrimaryLight = Color.FromHex("#93B4DB");
+    private static readonly Color Neutral = Color.FromHex(ThemePalette.SecondaryTextHex);
 
     private static readonly string StoreName = CodecRegistry.Get(CodecId.Store).Name;
 

@@ -22,11 +22,11 @@ public sealed class EntropyToBrushConverter : IValueConverter
 
     private static readonly IBrush[] Steps =
     [
-        new ImmutableSolidColorBrush(Color.Parse("#D6E8FF")), // < 3   text, logs, sparse data
-        new ImmutableSolidColorBrush(Color.Parse("#8DBDFF")), // < 5
-        new ImmutableSolidColorBrush(Color.Parse("#3F8CFF")), // < 6.5 typical binaries
-        new ImmutableSolidColorBrush(Color.Parse("#FF9A3C")), // < 7.5
-        new ImmutableSolidColorBrush(Color.Parse("#D9361E")), // ≥ 7.5 compressed or encrypted
+        new ImmutableSolidColorBrush(Color.Parse(ThemePalette.ActiveBgHex)), // < 3   text, logs, sparse data
+        new ImmutableSolidColorBrush(Color.Parse("#84A8D1")),                // < 5
+        new ImmutableSolidColorBrush(Color.Parse(ThemePalette.SecondaryHex)),// < 6.5 typical binaries
+        new ImmutableSolidColorBrush(Color.Parse("#E58E3C")),                // < 7.5
+        new ImmutableSolidColorBrush(Color.Parse("#C93B2B")),                // ≥ 7.5 compressed or encrypted
     ];
 
     /// <summary>The legend's colours, low to high entropy.</summary>
