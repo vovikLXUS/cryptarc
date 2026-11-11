@@ -8,7 +8,7 @@
         x:DataType="vm:MainWindowViewModel"
         Width="1200" Height="780" MinWidth="900" MinHeight="600"
         Background="{DynamicResource SemiColorBackground1}"
-        Title="CryptArc">
+        Title="CryptArc" Icon="avares://CryptArc.App/Assets/icon.png">
 
     <Window.Styles>
         <Style Selector="ListBox.Nav > ListBoxItem">
@@ -38,9 +38,7 @@
                 Padding="12,20">
             <DockPanel>
                 <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="10" Margin="12,0,0,20">
-                    <Border Width="28" Height="28" CornerRadius="7" Background="{DynamicResource SemiColorPrimary}">
-                        <PathIcon Data="{StaticResource SemiIconArchive}" Width="15" Height="15" Foreground="White" />
-                    </Border>
+                    <Image Source="avares://CryptArc.App/Assets/logo.png" Width="28" Height="28" />
                     <TextBlock Text="CryptArc" FontSize="17" FontWeight="Bold" VerticalAlignment="Center" />
                 </StackPanel>
 
