@@ -13,9 +13,9 @@ namespace CryptArc.App.Views;
 /// </summary>
 public partial class NaiveVsOptimisedView : UserControl
 {
-    private static readonly Color Faster = Color.FromHex("#0064FA");
-    private static readonly Color Slower = Color.FromHex("#E8590C");
-    private static readonly Color Neutral = Color.FromHex("#8A9099");
+    private static readonly Color Faster = Color.FromHex(ThemePalette.PrimaryHex);
+    private static readonly Color Slower = Color.FromHex("#D9534F");
+    private static readonly Color Neutral = Color.FromHex(ThemePalette.SecondaryTextHex);
 
     private NaiveVsOptimisedPageViewModel? _viewModel;
 

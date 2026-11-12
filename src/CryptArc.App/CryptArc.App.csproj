@@ -2,7 +2,13 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\icon.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\icon.png" />
+    <AvaloniaResource Include="Assets\logo.png" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="12.1.2" />

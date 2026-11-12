@@ -14,9 +14,9 @@ namespace CryptArc.App.Views;
 /// </summary>
 public partial class AnalyseView : UserControl
 {
-    private static readonly Color Text = Color.FromHex("#0064FA");
-    private static readonly Color Other = Color.FromHex("#B8BEC7");
-    private static readonly Color Neutral = Color.FromHex("#8A9099");
+    private static readonly Color Text = Color.FromHex(ThemePalette.PrimaryHex);
+    private static readonly Color Other = Color.FromHex(ThemePalette.OtherByteHex);
+    private static readonly Color Neutral = Color.FromHex(ThemePalette.SecondaryTextHex);
 
     private AnalysePageViewModel? _viewModel;
 

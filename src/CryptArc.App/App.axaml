@@ -6,6 +6,73 @@
              x:Class="CryptArc.App.App"
              RequestedThemeVariant="Light">
 
+    <Application.Resources>
+        <Color x:Key="BrandMidnightPrimary">#334E75</Color>
+        <Color x:Key="BrandMidnightPrimaryHover">#293F61</Color>
+        <Color x:Key="BrandMidnightPrimaryActive">#1F304A</Color>
+        <Color x:Key="BrandMidnightSecondary">#47678F</Color>
+        <Color x:Key="BrandMidnightActiveBg">#E6EDF6</Color>
+        <Color x:Key="BrandMidnightHoverBg">#F0F4F9</Color>
+        <Color x:Key="BrandMidnightMainBg">#F8FAFC</Color>
+        <Color x:Key="BrandMidnightSurface">#FFFFFF</Color>
+        <Color x:Key="BrandMidnightBorder">#E2E8F0</Color>
+        <Color x:Key="BrandMidnightPrimaryText">#1E293B</Color>
+        <Color x:Key="BrandMidnightSecondaryText">#64748B</Color>
+
+        <SolidColorBrush x:Key="SemiColorPrimary" Color="{StaticResource BrandMidnightPrimary}" />
+        <SolidColorBrush x:Key="SemiColorPrimaryPointerover" Color="{StaticResource BrandMidnightPrimaryHover}" />
+        <SolidColorBrush x:Key="SemiColorPrimaryActive" Color="{StaticResource BrandMidnightPrimaryActive}" />
+        <SolidColorBrush x:Key="SemiColorPrimaryLight" Color="{StaticResource BrandMidnightActiveBg}" />
+        <SolidColorBrush x:Key="SemiColorPrimaryLightPointerover" Color="{StaticResource BrandMidnightHoverBg}" />
+        <SolidColorBrush x:Key="SemiColorPrimaryLightActive" Color="#D5E2F1" />
+
+        <SolidColorBrush x:Key="SemiColorSecondary" Color="{StaticResource BrandMidnightSecondary}" />
+        <SolidColorBrush x:Key="SemiColorBackground0" Color="{StaticResource BrandMidnightSurface}" />
+        <SolidColorBrush x:Key="SemiColorBackground1" Color="{StaticResource BrandMidnightMainBg}" />
+        <SolidColorBrush x:Key="SemiColorBackground2" Color="{StaticResource BrandMidnightHoverBg}" />
+        <SolidColorBrush x:Key="SemiColorBackground3" Color="{StaticResource BrandMidnightActiveBg}" />
+
+        <SolidColorBrush x:Key="SemiColorBorder" Color="{StaticResource BrandMidnightBorder}" />
+        <SolidColorBrush x:Key="SemiColorFill0" Color="{StaticResource BrandMidnightHoverBg}" />
+        <SolidColorBrush x:Key="SemiColorFill1" Color="{StaticResource BrandMidnightActiveBg}" />
+
+        <SolidColorBrush x:Key="SemiColorText0" Color="{StaticResource BrandMidnightPrimaryText}" />
+        <SolidColorBrush x:Key="SemiColorText1" Color="#334155" />
+        <SolidColorBrush x:Key="SemiColorText2" Color="{StaticResource BrandMidnightSecondaryText}" />
+
+        <SolidColorBrush x:Key="ButtonSolidPrimaryBackground" Color="{StaticResource BrandMidnightPrimary}" />
+        <SolidColorBrush x:Key="ButtonSolidPrimaryBorderBrush" Color="{StaticResource BrandMidnightPrimary}" />
+        <SolidColorBrush x:Key="ButtonSolidPrimaryPointeroverBackground" Color="{StaticResource BrandMidnightPrimaryHover}" />
+        <SolidColorBrush x:Key="ButtonSolidPrimaryPointeroverBorderBrush" Color="{StaticResource BrandMidnightPrimaryHover}" />
+        <SolidColorBrush x:Key="ButtonSolidPrimaryPressedBackground" Color="{StaticResource BrandMidnightPrimaryActive}" />
+        <SolidColorBrush x:Key="ButtonSolidPrimaryPressedBorderBrush" Color="{StaticResource BrandMidnightPrimaryActive}" />
+        <SolidColorBrush x:Key="ButtonSolidForeground" Color="#FFFFFF" />
+        <SolidColorBrush x:Key="ButtonSolidPrimaryPressedForeground" Color="#FFFFFF" />
+
+        <SolidColorBrush x:Key="ButtonDefaultPrimaryForeground" Color="{StaticResource BrandMidnightPrimary}" />
+        <SolidColorBrush x:Key="ButtonOutlineColorfulPrimaryBorderBrush" Color="{StaticResource BrandMidnightPrimary}" />
+        <SolidColorBrush x:Key="ButtonOutlineColorfulPrimaryForeground" Color="{StaticResource BrandMidnightPrimary}" />
+
+        <SolidColorBrush x:Key="ListBoxItemPointeroverBackground" Color="{StaticResource BrandMidnightHoverBg}" />
+        <SolidColorBrush x:Key="ListBoxItemPointeroverForeground" Color="{StaticResource BrandMidnightPrimaryText}" />
+        <SolidColorBrush x:Key="ListBoxItemSelectedBackground" Color="{StaticResource BrandMidnightActiveBg}" />
+        <SolidColorBrush x:Key="ListBoxItemSelectedPointeroverBackground" Color="{StaticResource BrandMidnightActiveBg}" />
+        <SolidColorBrush x:Key="ListBoxItemSelectedForeground" Color="{StaticResource BrandMidnightPrimary}" />
+
+        <SolidColorBrush x:Key="ProgressBarPrimaryForeground" Color="{StaticResource BrandMidnightPrimary}" />
+        <SolidColorBrush x:Key="ProgressBarIndicatorBrush" Color="{StaticResource BrandMidnightPrimary}" />
+        <SolidColorBrush x:Key="SliderTrackForeground" Color="{StaticResource BrandMidnightPrimary}" />
+        <SolidColorBrush x:Key="SliderThumbBorderBrush" Color="{StaticResource BrandMidnightPrimary}" />
+        <SolidColorBrush x:Key="SliderThumbPointeroverBorderBrush" Color="{StaticResource BrandMidnightPrimaryHover}" />
+        <SolidColorBrush x:Key="SliderThumbPressedBorderBrush" Color="{StaticResource BrandMidnightPrimaryActive}" />
+        <SolidColorBrush x:Key="CheckBoxCheckedDefaultBackground" Color="{StaticResource BrandMidnightPrimary}" />
+        <SolidColorBrush x:Key="CheckBoxCheckedDefaultBorderBrush" Color="{StaticResource BrandMidnightPrimary}" />
+        <SolidColorBrush x:Key="CheckBoxCheckedPointeroverBackground" Color="{StaticResource BrandMidnightPrimaryHover}" />
+        <SolidColorBrush x:Key="CheckBoxCheckedPointeroverBorderBrush" Color="{StaticResource BrandMidnightPrimaryHover}" />
+        <SolidColorBrush x:Key="CheckBoxCheckedPressedBackground" Color="{StaticResource BrandMidnightPrimaryActive}" />
+        <SolidColorBrush x:Key="CheckBoxCheckedPressedBorderBrush" Color="{StaticResource BrandMidnightPrimaryActive}" />
+    </Application.Resources>
+
     <!-- Each page view model is shown by its view. The shell sets CurrentPage
          and this mapping does the rest, so no view model references a view. -->
     <Application.DataTemplates>
@@ -34,10 +101,12 @@
         <Style Selector="TextBlock.PageTitle">
             <Setter Property="FontSize" Value="24" />
             <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Foreground" Value="{DynamicResource SemiColorText0}" />
         </Style>
         <Style Selector="TextBlock.CardTitle">
             <Setter Property="FontSize" Value="15" />
             <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{DynamicResource SemiColorText0}" />
         </Style>
         <Style Selector="TextBlock.Secondary">
             <Setter Property="Foreground" Value="{DynamicResource SemiColorText2}" />
@@ -50,6 +119,7 @@
         <Style Selector="TextBlock.Metric">
             <Setter Property="FontSize" Value="26" />
             <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Foreground" Value="{DynamicResource SemiColorText0}" />
         </Style>
         <Style Selector="TextBlock.Mono">
             <Setter Property="FontFamily" Value="Menlo, Consolas, monospace" />
@@ -63,7 +133,7 @@
         </Style>
         <Style Selector="Border.Card.Accent">
             <Setter Property="Background" Value="{DynamicResource SemiColorPrimaryLight}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource SemiColorPrimaryLightHover}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource SemiColorPrimaryLightPointerover}" />
         </Style>
     </Application.Styles>
 </Application>
