@@ -7,6 +7,9 @@ Avalonia desktop application. Like the CLI, it is a thin shell over `Core`.
 A side menu switches between pages; the file card at the top is shared by all
 of them. Theme: Semi.Avalonia, charts: ScottPlot (ADR-0015).
 
+A file is opened with "Choose file…", by dropping it anywhere on the window, or
+by passing its path on the command line.
+
 | Page | Shows |
 |---|---|
 | Analyse | entropy, repeat ratio and text share as the mean over 64 KiB blocks, the codec picked for most blocks, a heatmap of entropy per block, and a histogram of every byte value over the whole file |
@@ -27,7 +30,7 @@ side menu and takes effect at once, without a restart; see
 | `Program.cs` | entry point, Avalonia app builder |
 | `App.axaml(.cs)` | application-level styles and lifetime; DI composition root |
 | `MainWindow.axaml` | shell: side menu, file card, content area |
-| `MainWindow.axaml.cs` | code-behind; owns the file picker only |
+| `MainWindow.axaml.cs` | code-behind; owns the file picker and the drag-and-drop handlers |
 | `Views/ArchiveView.axaml.cs` | the archive page's file, folder and save dialogs, and its password boxes |
 | `Views/` | one `UserControl` per page; `CompareView` draws its chart in code-behind |
 | `Converters/` | value-to-brush converters (heatmap colours) |
@@ -77,3 +80,9 @@ ADR-0014 for why this is not Prism.
 Opening a dialog needs a `TopLevel`, which is a view concept. Keeping it in the
 window means `MainWindowViewModel` only ever receives a path, so it stays plain
 and unit-testable without an Avalonia harness.
+
+Drag-and-drop follows the same rule: the window turns the drop into a local path
+and calls the same `LoadAsync`. A drag is accepted only when it carries a file on
+disk and nothing is loading; folders, text and other data are refused, and the
+cursor shows it. When several items are dropped, the first file among them is
+opened and folders are skipped.
