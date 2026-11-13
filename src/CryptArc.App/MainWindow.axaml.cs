@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using CryptArc.App.Services;
@@ -19,6 +20,13 @@ public partial class MainWindow : Window
         InitializeComponent();
         DataContext = _viewModel;
         ChooseFileButton.Click += OnChooseFileClick;
+
+        // DragDrop.AllowDrop is set on the window in XAML, so a file can be dropped
+        // anywhere on it, whichever page is open.
+        AddHandler(DragDrop.DragEnterEvent, OnDragOver);
+        AddHandler(DragDrop.DragOverEvent, OnDragOver);
+        AddHandler(DragDrop.DragLeaveEvent, OnDragLeave);
+        AddHandler(DragDrop.DropEvent, OnDrop);
     }
 
     /// <summary>
@@ -54,5 +62,48 @@ public partial class MainWindow : Window
         string? path = files[0].TryGetLocalPath();
         if (path is not null)
             await _viewModel.LoadAsync(path);
+    }
+
+    // Dropping is the picker without the dialog: the view model still only sees a path.
+    // Enter and over share a handler because both decide the cursor and the overlay.
+    private void OnDragOver(object? sender, DragEventArgs e)
+    {
+        bool accept = !_viewModel.IsBusy && DroppedFilePath(e) is not null;
+
+        e.DragEffects = accept ? DragDropEffects.Copy : DragDropEffects.None;
+        DropOverlay.IsVisible = accept;
+        e.Handled = true;
+    }
+
+    private void OnDragLeave(object? sender, DragEventArgs e) => DropOverlay.IsVisible = false;
+
+    private async void OnDrop(object? sender, DragEventArgs e)
+    {
+        DropOverlay.IsVisible = false;
+        e.Handled = true;
+
+        if (_viewModel.IsBusy || DroppedFilePath(e) is not { } path)
+            return;
+
+        // The drag came from another application, which still has the focus.
+        Activate();
+        await _viewModel.LoadAsync(path);
+    }
+
+    // The first local file of the drag. Folders and anything that is not a file on
+    // disk (text, a browser image) give null, and the drop is refused.
+    private static string? DroppedFilePath(DragEventArgs e)
+    {
+        IStorageItem[]? items = e.DataTransfer.TryGetFiles();
+        if (items is null)
+            return null;
+
+        foreach (IStorageItem item in items)
+        {
+            if (item is IStorageFile && item.TryGetLocalPath() is { } path)
+                return path;
+        }
+
+        return null;
     }
 }
