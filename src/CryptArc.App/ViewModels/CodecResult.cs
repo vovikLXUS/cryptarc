@@ -14,6 +14,8 @@ namespace CryptArc.App.ViewModels;
 /// and are part of the record's equality. A data grid keeps the cells of a row it
 /// considers unchanged, so after a language switch the rows are created again
 /// (<see cref="Retranslated"/>) rather than asked for their texts a second time.
+/// For the same reason a <c>with</c> copy keeps the texts of the original: change a
+/// value by creating a new row, not with <c>with</c>.
 /// </remarks>
 public sealed record CodecResult(
     string Codec,

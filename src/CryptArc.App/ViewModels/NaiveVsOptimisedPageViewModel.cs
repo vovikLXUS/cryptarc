@@ -167,7 +167,10 @@ public sealed record SuiteItem(string Name, string Title, string Headline);
 /// <param name="MeanNs">Method mean, ns per operation.</param>
 /// <param name="BaselineAllocated">Baseline allocation per operation, bytes.</param>
 /// <param name="Allocated">Method allocation per operation, bytes.</param>
-/// <remarks>The display texts are fixed when the row is created, in the language of that moment.</remarks>
+/// <remarks>
+/// The display texts are fixed when the row is created, in the language of that moment.
+/// A <c>with</c> copy keeps them, so change a value by creating a new row.
+/// </remarks>
 public sealed record PairRow(
     string Case,
     string BaselineMethod,

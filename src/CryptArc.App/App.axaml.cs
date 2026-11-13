@@ -48,13 +48,15 @@ public partial class App : Application
             .AddSingleton<ICodecMeasurement, CodecMeasurement>()
             .AddSingleton<IBenchmarkResults, BenchmarkResults>()
             .AddSingleton<ILanguagePreference, LanguagePreference>()
-            .AddTransient<AnalysePageViewModel>()
-            .AddTransient<ComparePageViewModel>()
-            .AddTransient<CompressPageViewModel>()
-            .AddTransient<TransformLabPageViewModel>()
-            .AddTransient<NaiveVsOptimisedPageViewModel>()
-            .AddTransient<ArchivePageViewModel>()
-            .AddTransient<MainWindowViewModel>()
+            // One of each, for the life of the app: they subscribe to Localizer.LanguageChanged
+            // and never unsubscribe, so a second instance would be kept alive by the first's event.
+            .AddSingleton<AnalysePageViewModel>()
+            .AddSingleton<ComparePageViewModel>()
+            .AddSingleton<CompressPageViewModel>()
+            .AddSingleton<TransformLabPageViewModel>()
+            .AddSingleton<NaiveVsOptimisedPageViewModel>()
+            .AddSingleton<ArchivePageViewModel>()
+            .AddSingleton<MainWindowViewModel>()
             .AddTransient<MainWindow>()
             .BuildServiceProvider(new ServiceProviderOptions
             {

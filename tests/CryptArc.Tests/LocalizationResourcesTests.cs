@@ -81,9 +81,17 @@ public partial class LocalizationResourcesTests
         var literals = new SortedSet<string>();
 
         foreach (string path in SourceFiles("*.axaml"))
-            foreach (Match match in LiteralText().Matches(File.ReadAllText(path)))
+        {
+            string xaml = XamlComment().Replace(File.ReadAllText(path), string.Empty);
+            foreach (Match match in LiteralText().Matches(xaml).Concat(ElementText().Matches(xaml)))
                 if (match.Groups[1].Value != "CryptArc") // the product name is the same in every language
                     literals.Add($"\"{match.Groups[1].Value}\" ({Path.GetFileName(path)})");
+        }
+
+        // Code-behind owns the dialogs, and a dialog title is user-facing text too.
+        foreach (string path in SourceFiles("*.axaml.cs"))
+            foreach (Match match in DialogTitle().Matches(File.ReadAllText(path)))
+                literals.Add($"\"{match.Groups[1].Value}\" ({Path.GetFileName(path)})");
 
         Assert.True(literals.Count == 0, $"Use {{loc:T Key}} instead of: {string.Join("; ", literals)}");
     }
@@ -113,7 +121,8 @@ public partial class LocalizationResourcesTests
         throw new DirectoryNotFoundException("CryptArc.slnx not found above the test assembly.");
     }
 
-    [GeneratedRegex(@"\{[0-9]+(?::[^}]*)?\}")]
+    // {0}, {0:N1}, {0,5} and {0,-5:N1}: alignment is part of what a translation must keep.
+    [GeneratedRegex(@"\{[0-9]+(?:,[^}:]*)?(?::[^}]*)?\}")]
     private static partial Regex Placeholder();
 
     [GeneratedRegex(@"\{loc:T\s+([A-Za-z0-9.]+)\}")]
@@ -124,6 +133,17 @@ public partial class LocalizationResourcesTests
     [GeneratedRegex(@"\b(?:L|l|Instance)(?:\[|\.Format\(|\.TryGet\()\s*""([A-Za-z0-9.]+)""")]
     private static partial Regex CodeKey();
 
-    [GeneratedRegex(@"\b(?:Text|Content|Header|Watermark|Title)=""([^""{]*\p{L}{2}[^""]*)""")]
+    [GeneratedRegex(@"\b(?:Text|Content|Header|Watermark|PlaceholderText|Title|ToolTip\.Tip)=""([^""{]*\p{L}{2}[^""]*)""")]
     private static partial Regex LiteralText();
+
+    // Text written between the tags: <TextBlock>Some text</TextBlock>.
+    [GeneratedRegex(@"<(?:TextBlock|SelectableTextBlock|Run|Label|Button|CheckBox|RadioButton|ToggleButton)\b[^>]*(?<!/)>\s*([^<{]*\p{L}{2}[^<]*?)\s*<")]
+    private static partial Regex ElementText();
+
+    [GeneratedRegex(@"<!--.*?-->", RegexOptions.Singleline)]
+    private static partial Regex XamlComment();
+
+    // A dialog title set in code-behind: Title = "Choose a file".
+    [GeneratedRegex(@"\bTitle\s*=\s*""([^""]*\p{L}{2}[^""]*)""")]
+    private static partial Regex DialogTitle();
 }

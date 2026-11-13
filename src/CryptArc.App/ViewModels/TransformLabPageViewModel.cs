@@ -178,6 +178,10 @@ public sealed record StageChip(string Name, string Size, string Entropy, string 
 /// <param name="Count">Occurrences.</param>
 /// <param name="Length">Code length in bits.</param>
 /// <param name="Code">The code, most significant bit first.</param>
+/// <remarks>
+/// <see cref="Meaning"/> is fixed when the row is created, in the language of that moment.
+/// A <c>with</c> copy keeps it, so change a value by creating a new row.
+/// </remarks>
 public sealed record HuffmanRowView(int Symbol, int Count, int Length, string Code)
 {
     /// <summary>

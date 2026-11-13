@@ -448,7 +448,7 @@
     <value>RUNB (цифра серії нулів)</value>
   </data>
   <data name="Lab.Meaning.Escape" xml:space="preserve">
-    <value>escape: далі йде ранг 254 або 255</value>
+    <value>екранування: далі йде ранг 254 або 255</value>
   </data>
   <data name="Lab.Meaning.Rank" xml:space="preserve">
     <value>ранг MTF {0}</value>
