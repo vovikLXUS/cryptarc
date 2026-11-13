@@ -16,15 +16,20 @@ namespace CryptArc.App.ViewModels;
 /// <param name="compress">The "Compress" page.</param>
 /// <param name="lab">The "Transform lab" page.</param>
 /// <param name="pairs">The "Naive vs optimised" page.</param>
+/// <param name="archive">The "Encrypted archive" page.</param>
 public partial class MainWindowViewModel(
     ICodecMeasurement measurement,
     AnalysePageViewModel analyse,
     ComparePageViewModel compare,
     CompressPageViewModel compress,
     TransformLabPageViewModel lab,
-    NaiveVsOptimisedPageViewModel pairs) : ObservableObject
+    NaiveVsOptimisedPageViewModel pairs,
+    ArchivePageViewModel archive) : ObservableObject
 {
-    /// <summary>Index of the open page in the side menu: 0 = Analyse, 1 = Compare, 2 = Compress, 3 = Transform lab, 4 = Naive vs optimised.</summary>
+    private const string ArchiveExtension = ".cryptarc";
+    private const int ArchivePageIndex = 5;
+
+    /// <summary>Index of the open page in the side menu: 0 = Analyse, 1 = Compare, 2 = Compress, 3 = Transform lab, 4 = Naive vs optimised, 5 = Encrypted archive.</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CurrentPage))]
     private int _selectedPageIndex;
@@ -59,6 +64,9 @@ public partial class MainWindowViewModel(
     /// <summary>The "Naive vs optimised" page.</summary>
     public NaiveVsOptimisedPageViewModel Pairs { get; } = pairs;
 
+    /// <summary>The "Encrypted archive" page.</summary>
+    public ArchivePageViewModel Archive { get; } = archive;
+
     /// <summary>The page shown in the content area; a data template picks its view.</summary>
     public object CurrentPage => SelectedPageIndex switch
     {
@@ -66,18 +74,28 @@ public partial class MainWindowViewModel(
         2 => Compress,
         3 => Lab,
         4 => Pairs,
+        5 => Archive,
         _ => Analyse,
     };
 
     /// <summary>
     /// Profiles the file and round-trips it through every implemented codec.
     /// The work runs off the UI thread so the window stays responsive on large files.
+    /// A <c>.cryptarc</c> archive goes to the "Encrypted archive" page instead:
+    /// its contents are ciphertext, and there is nothing to learn from analysing that.
     /// </summary>
     /// <param name="path">Local path of the file to load.</param>
     public async Task LoadAsync(string path)
     {
         if (IsBusy)
             return;
+
+        if (string.Equals(Path.GetExtension(path), ArchiveExtension, StringComparison.OrdinalIgnoreCase))
+        {
+            Archive.SelectArchive(path);
+            SelectedPageIndex = ArchivePageIndex;
+            return;
+        }
 
         IsBusy = true;
         Status = "Reading…";

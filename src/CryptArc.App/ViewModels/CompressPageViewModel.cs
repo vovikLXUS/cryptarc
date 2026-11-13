@@ -16,8 +16,8 @@ namespace CryptArc.App.ViewModels;
 /// <see cref="BlockCompressor"/>, watch the blocks finish, and compare runs.
 /// </summary>
 /// <remarks>
-/// Nothing is written to disk: the archive container does not exist yet. The page
-/// shows what compressing would cost and save.
+/// Nothing is written to disk: the page shows what compressing would cost and save.
+/// <see cref="ArchivePageViewModel"/> is the page that produces an archive.
 /// </remarks>
 public partial class CompressPageViewModel : ObservableObject
 {
