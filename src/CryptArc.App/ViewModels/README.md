@@ -29,5 +29,8 @@ Presentation state for the Avalonia UI.
   in XAML converters and not in `Core`. Colours are the exception: a brush is an
   Avalonia type, so the view model exposes the number and a converter in
   `Converters/` picks the colour.
+- Display text is translated here too: strings come from `Localizer.Instance`,
+  and a view model rebuilds its text properties when the language changes
+  (ADR-0016).
 - Whole-file numbers come from `FileSummary`, not from `DataAnalyzer.Analyze` on
   the whole buffer: the analyzer samples only the first 64 KiB.

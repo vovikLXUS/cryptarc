@@ -47,7 +47,8 @@ public partial class AnalyseView : UserControl
 
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(AnalysePageViewModel.Histogram))
+        if (e.PropertyName is nameof(AnalysePageViewModel.Histogram)
+            or nameof(AnalysePageViewModel.HistogramAxisTitle))
             Redraw();
     }
 
@@ -99,7 +100,7 @@ public partial class AnalyseView : UserControl
             bar.Size = 1;
         }
 
-        plot.Axes.Left.Label.Text = "% of file";
+        plot.Axes.Left.Label.Text = _viewModel?.HistogramAxisTitle ?? string.Empty;
         plot.Axes.Left.Label.FontSize = 12;
         plot.Axes.Left.Label.ForeColor = Neutral;
         plot.Axes.Margins(bottom: 0, top: 0.1);

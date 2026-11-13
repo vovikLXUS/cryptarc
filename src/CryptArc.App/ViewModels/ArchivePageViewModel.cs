@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CryptArc.App.Localization;
 using CryptArc.Core;
 using CryptArc.Core.Container;
 
@@ -23,15 +24,20 @@ namespace CryptArc.App.ViewModels;
 /// </remarks>
 public sealed partial class ArchivePageViewModel : ObservableObject, IDisposable
 {
+    private static readonly Localizer L = Localizer.Instance;
+
     private ArchiveReader? _reader;
     private CancellationTokenSource? _cancellation;
+
+    // What Status was built from, kept so that a language switch can build it again.
+    private Func<string> _statusText = () => L["Archive.Status.Initial"];
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsIdle), nameof(CanCreate), nameof(CanUnlock), nameof(CanUseArchive))]
     private bool _isBusy;
 
     [ObservableProperty]
-    private string _status = "Add files to pack, or choose an archive to open.";
+    private string _status = L["Archive.Status.Initial"];
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanCreate))]
@@ -49,7 +55,7 @@ public sealed partial class ArchivePageViewModel : ObservableObject, IDisposable
     private string? _archivePath;
 
     [ObservableProperty]
-    private string _archiveName = "No archive chosen";
+    private string _archiveName = L["Archive.NoArchive"];
 
     /// <summary>The chosen archive has been unlocked and its file table is shown.</summary>
     [ObservableProperty]
@@ -62,12 +68,13 @@ public sealed partial class ArchivePageViewModel : ObservableObject, IDisposable
     /// <summary>Creates the page with "Auto" selected.</summary>
     public ArchivePageViewModel()
     {
-        var choices = new List<CodecChoice> { new("Auto (per block)", null) };
+        var choices = new List<CodecChoice> { new(null, null) };
         foreach (ICodec codec in CodecRegistry.All)
             choices.Add(new CodecChoice(codec.Name, codec.Id));
 
         CodecChoices = choices;
         _selectedCodec = choices[0];
+        L.LanguageChanged += (_, _) => Retranslate();
     }
 
     /// <summary>"Auto" followed by every registered codec.</summary>
@@ -121,13 +128,13 @@ public sealed partial class ArchivePageViewModel : ObservableObject, IDisposable
     {
         if (string.IsNullOrEmpty(password))
         {
-            Status = "Enter a password for the new archive.";
+            SetStatus(() => L["Archive.Status.NeedNewPassword"]);
             return false;
         }
 
         if (!string.Equals(password, repeat, StringComparison.Ordinal))
         {
-            Status = "The passwords do not match.";
+            SetStatus(() => L["Archive.Status.Mismatch"]);
             return false;
         }
 
@@ -149,7 +156,7 @@ public sealed partial class ArchivePageViewModel : ObservableObject, IDisposable
             Codec = SelectedCodec.Id,
         };
 
-        (bool ok, (int Files, long Size, TimeSpan Elapsed) result) = await RunAsync("Deriving the key and packing…", token =>
+        (bool ok, (int Files, long Size, TimeSpan Elapsed) result) = await RunAsync("Archive.Status.Packing", token =>
         {
             var sources = new List<ArchiveSource>();
             foreach (string path in paths)
@@ -163,7 +170,10 @@ public sealed partial class ArchivePageViewModel : ObservableObject, IDisposable
         });
 
         if (ok)
-            Status = $"Created {Path.GetFileName(archivePath)}: {result.Files:N0} files, {FormatSize(result.Size)} in {result.Elapsed.TotalSeconds:F1} s.";
+        {
+            SetStatus(() => L.Format("Archive.Status.Created", Path.GetFileName(archivePath), result.Files,
+                FormatSize(result.Size), result.Elapsed.TotalSeconds));
+        }
     }
 
     /// <summary>Chooses the archive to open; it stays locked until <see cref="UnlockAsync"/>.</summary>
@@ -176,7 +186,7 @@ public sealed partial class ArchivePageViewModel : ObservableObject, IDisposable
         CloseArchive();
         ArchivePath = path;
         ArchiveName = Path.GetFileName(path);
-        Status = "Enter the password and press Unlock.";
+        SetStatus(() => L["Archive.Status.EnterAndUnlock"]);
     }
 
     /// <summary>
@@ -191,19 +201,26 @@ public sealed partial class ArchivePageViewModel : ObservableObject, IDisposable
 
         if (string.IsNullOrEmpty(password))
         {
-            Status = "Enter the password.";
+            SetStatus(() => L["Archive.Status.EnterPassword"]);
             return;
         }
 
         (bool ok, ArchiveReader reader) = await RunAsync(
-            "Deriving the key and checking integrity…",
+            "Archive.Status.Unlocking",
             token => ArchiveReader.OpenFile(path, password, token));
 
         if (!ok)
             return;
 
         _reader = reader;
+        ShowEntries(reader);
+        IsOpen = true;
+        SetStatus(() => L["Archive.Status.Unlocked"]);
+    }
 
+    // The file table and the summary line of the opened archive, in the current language.
+    private void ShowEntries(ArchiveReader reader)
+    {
         long original = 0;
         long stored = 0;
         Entries.Clear();
@@ -214,10 +231,10 @@ public sealed partial class ArchivePageViewModel : ObservableObject, IDisposable
             Entries.Add(ArchiveEntryRow.From(entry));
         }
 
-        string ratio = original == 0 ? string.Empty : $" ({stored / (double)original:P1})";
-        Summary = $"{reader.Entries.Count:N0} files · {FormatSize(original)} original · {FormatSize(stored)} stored{ratio}";
-        IsOpen = true;
-        Status = "Unlocked: the archive passed its integrity check.";
+        Summary = original == 0
+            ? L.Format("Archive.Summary", reader.Entries.Count, FormatSize(original), FormatSize(stored))
+            : L.Format("Archive.SummaryRatio", reader.Entries.Count, FormatSize(original), FormatSize(stored),
+                L.Number(stored / (double)original, "P1"));
     }
 
     /// <summary>Decrypts, decompresses and checks every file of the opened archive, writing nothing.</summary>
@@ -227,7 +244,7 @@ public sealed partial class ArchivePageViewModel : ObservableObject, IDisposable
         if (!CanUseArchive || _reader is not { } reader)
             return;
 
-        (bool ok, TimeSpan elapsed) = await RunAsync("Verifying every block…", token =>
+        (bool ok, TimeSpan elapsed) = await RunAsync("Archive.Status.Verifying", token =>
         {
             var timer = Stopwatch.StartNew();
             reader.Verify(token);
@@ -235,7 +252,7 @@ public sealed partial class ArchivePageViewModel : ObservableObject, IDisposable
         });
 
         if (ok)
-            Status = $"Verified: all {reader.Entries.Count:N0} files decode and match their checksums ({elapsed.TotalSeconds:F1} s).";
+            SetStatus(() => L.Format("Archive.Status.Verified", reader.Entries.Count, elapsed.TotalSeconds));
     }
 
     /// <summary>Restores every file of the opened archive below a folder. Existing files are never replaced.</summary>
@@ -245,7 +262,7 @@ public sealed partial class ArchivePageViewModel : ObservableObject, IDisposable
         if (!CanUseArchive || _reader is not { } reader)
             return;
 
-        (bool ok, TimeSpan elapsed) = await RunAsync("Extracting…", token =>
+        (bool ok, TimeSpan elapsed) = await RunAsync("Archive.Status.Extracting", token =>
         {
             var timer = Stopwatch.StartNew();
             reader.ExtractAll(directory, token);
@@ -253,7 +270,7 @@ public sealed partial class ArchivePageViewModel : ObservableObject, IDisposable
         });
 
         if (ok)
-            Status = $"Restored {reader.Entries.Count:N0} files to {directory} ({elapsed.TotalSeconds:F1} s).";
+            SetStatus(() => L.Format("Archive.Status.Restored", reader.Entries.Count, directory, elapsed.TotalSeconds));
     }
 
     /// <inheritdoc />
@@ -296,8 +313,8 @@ public sealed partial class ArchivePageViewModel : ObservableObject, IDisposable
 
         CloseArchive();
         ArchivePath = null;
-        ArchiveName = "No archive chosen";
-        Status = "Archive closed.";
+        ArchiveName = L["Archive.NoArchive"];
+        SetStatus(() => L["Archive.Status.Closed"]);
     }
 
     private void CloseArchive()
@@ -311,13 +328,13 @@ public sealed partial class ArchivePageViewModel : ObservableObject, IDisposable
 
     // Runs the work off the UI thread and turns every failure into Status text, so the
     // async void handlers that call in can never bring the process down.
-    private async Task<(bool Ok, T Value)> RunAsync<T>(string busyStatus, Func<CancellationToken, T> work)
+    private async Task<(bool Ok, T Value)> RunAsync<T>(string busyStatusKey, Func<CancellationToken, T> work)
     {
         if (IsBusy)
             return (false, default!);
 
         IsBusy = true;
-        Status = busyStatus;
+        SetStatus(() => L[busyStatusKey]);
 
         using var cancellation = new CancellationTokenSource();
         _cancellation = cancellation;
@@ -328,11 +345,12 @@ public sealed partial class ArchivePageViewModel : ObservableObject, IDisposable
         }
         catch (OperationCanceledException)
         {
-            Status = "Cancelled.";
+            SetStatus(() => L["Archive.Status.Cancelled"]);
         }
         catch (Exception exception)
         {
-            Status = $"Failed: {exception.Message}";
+            // The message comes from the runtime or from Core and stays in its language.
+            SetStatus(() => L.Format("Common.Failed", exception.Message));
         }
         finally
         {
@@ -343,12 +361,31 @@ public sealed partial class ArchivePageViewModel : ObservableObject, IDisposable
         return (false, default!);
     }
 
+    private void SetStatus(Func<string> text)
+    {
+        _statusText = text;
+        Status = text();
+    }
+
+    // Everything on the page that was built from translated text is built again.
+    private void Retranslate()
+    {
+        Status = _statusText();
+        CodecChoices[0].Retranslate();
+
+        if (ArchivePath is null)
+            ArchiveName = L["Archive.NoArchive"];
+
+        if (_reader is { } reader && IsOpen)
+            ShowEntries(reader);
+    }
+
     internal static string FormatSize(long bytes) => bytes switch
     {
-        < 1024 => $"{bytes:N0} B",
-        < 1024 * 1024 => $"{bytes / 1024.0:N1} KiB",
-        < 1024L * 1024 * 1024 => $"{bytes / (1024.0 * 1024):N1} MiB",
-        _ => $"{bytes / (1024.0 * 1024 * 1024):N2} GiB",
+        < 1024 => L.Format("Unit.Bytes", bytes),
+        < 1024 * 1024 => L.Format("Unit.KiB", bytes / 1024.0),
+        < 1024L * 1024 * 1024 => L.Format("Unit.MiB", bytes / (1024.0 * 1024)),
+        _ => L.Format("Unit.GiB", bytes / (1024.0 * 1024 * 1024)),
     };
 }
 
@@ -367,6 +404,6 @@ public sealed record ArchiveEntryRow(string Path, string Size, string Stored, st
         entry.Path,
         ArchivePageViewModel.FormatSize(entry.OriginalSize),
         ArchivePageViewModel.FormatSize(entry.StoredSize),
-        entry.OriginalSize == 0 ? "—" : $"{entry.StoredSize / (double)entry.OriginalSize:P1}",
-        $"{entry.ModifiedUtc:yyyy-MM-dd HH:mm}");
+        entry.OriginalSize == 0 ? "—" : Localizer.Instance.Number(entry.StoredSize / (double)entry.OriginalSize, "P1"),
+        entry.ModifiedUtc.ToString("yyyy-MM-dd HH:mm", System.Globalization.CultureInfo.InvariantCulture));
 }

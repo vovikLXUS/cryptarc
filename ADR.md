@@ -638,3 +638,60 @@ version, and the coursework cannot depend on a nightly build.
 - **LiveCharts2** — animated charts, but only a dev build targets Avalonia 12.
 - **Ursa** (Semi's component library) — not needed yet; the shell uses a styled
   `ListBox`. Worth adding when dialogs, toasts or step indicators are.
+
+## ADR-0016 — Interface strings in `.resx`, switched at run time through one `Localizer`
+
+**Status:** Accepted · 2026-11-13
+
+### Context
+
+The GUI was English only, with its text written straight into XAML and into
+view-model code. It now has to offer English and Ukrainian and switch between
+them from the window, without a restart. Roughly half of the text is not static:
+status lines, captions and table cells are built in view models from numbers,
+so a mechanism that only covers XAML attributes would leave the window in two
+languages after a switch.
+
+### Decision
+
+- Strings live in `Localization/Strings.resx` (English, the fallback) and
+  `Strings.uk.resx`, addressed by key through `ResourceManager`. No generated
+  designer class: keys are plain strings.
+- One static `Localizer.Instance` holds the current language and raises
+  `LanguageChanged`. XAML uses the `{loc:T Key}` markup extension, which binds
+  to a per-key `LocalizedString`; view models read `Localizer.Instance` and
+  rebuild their text properties when the event fires.
+- Numbers are formatted with the language's culture, passed explicitly
+  (`Localizer.Format`, `Localizer.Number`).
+- The choice is saved through `ILanguagePreference`; the first start follows
+  the operating system's language.
+
+### Consequences
+
+- The whole window, including text already on screen, changes language at once.
+- Adding a language is one `.resx` file and one line in `Localizer.Languages`.
+- A key is not checked by the compiler. `LocalizationResourcesTests` covers the
+  gap: both files must have the same keys and placeholders, every key used in
+  the app must exist, and a view may not contain literal text.
+- `Localizer` is a static, which ADR-0014 otherwise avoids. A markup extension
+  has no constructor to inject into, so XAML needs a static entry point anyway;
+  a second, injected copy of "the current language" would be worse than one static.
+- Every view model that keeps translated text has to keep what it was built
+  from. That is extra state, and a new view model can forget it; the rule is in
+  `ViewModels/AGENTS.md`.
+- The ambient thread culture is not relied on. It is captured by pending async
+  continuations, and during development it left numbers in the old format after
+  a switch.
+
+### Alternatives
+
+- **Restart to apply.** Far simpler: no rebuilding of text. Rejected because
+  the request was a switch in the window, and losing the loaded file and the
+  run history to change language is a poor trade.
+- **A generated strongly typed resource class.** Compile-time keys, but its
+  static properties do not notify, so XAML could not follow a switch without
+  the same binding layer on top.
+- **Strings in JSON or a C# dictionary.** No satellite assemblies, but `.resx`
+  is what .NET tooling and translators expect, and it costs nothing here.
+- **Injecting `ILocalizer` into every view model.** Consistent with ADR-0014,
+  but XAML would still need the static, giving two ways to reach one object.

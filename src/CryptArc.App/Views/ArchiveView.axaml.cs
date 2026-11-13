@@ -4,6 +4,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
+using CryptArc.App.Localization;
 using CryptArc.App.ViewModels;
 
 namespace CryptArc.App.Views;
@@ -17,7 +18,8 @@ public partial class ArchiveView : UserControl
 {
     private const string Extension = "cryptarc";
 
-    private static readonly FilePickerFileType ArchiveType = new("CryptArc archive")
+    // Built for each dialog rather than once: its name follows the language.
+    private static FilePickerFileType ArchiveType => new(Localizer.Instance["Archive.Dialog.FileType"])
     {
         Patterns = [$"*.{Extension}"],
     };
@@ -59,7 +61,7 @@ public partial class ArchiveView : UserControl
 
         IReadOnlyList<IStorageFile> files = await storage.OpenFilePickerAsync(new FilePickerOpenOptions
         {
-            Title = "Add files to the archive",
+            Title = Localizer.Instance["Archive.Dialog.AddFiles"],
             AllowMultiple = true,
         });
 
@@ -73,7 +75,7 @@ public partial class ArchiveView : UserControl
 
         IReadOnlyList<IStorageFolder> folders = await storage.OpenFolderPickerAsync(new FolderPickerOpenOptions
         {
-            Title = "Add folders to the archive",
+            Title = Localizer.Instance["Archive.Dialog.AddFolders"],
             AllowMultiple = true,
         });
 
@@ -90,7 +92,7 @@ public partial class ArchiveView : UserControl
 
         IStorageFile? file = await storage.SaveFilePickerAsync(new FilePickerSaveOptions
         {
-            Title = "Create archive",
+            Title = Localizer.Instance["Archive.Dialog.Create"],
             SuggestedFileName = SuggestedName(viewModel),
             DefaultExtension = Extension,
             FileTypeChoices = [ArchiveType],
@@ -122,7 +124,7 @@ public partial class ArchiveView : UserControl
 
         IReadOnlyList<IStorageFile> files = await storage.OpenFilePickerAsync(new FilePickerOpenOptions
         {
-            Title = "Choose an archive",
+            Title = Localizer.Instance["Archive.Dialog.Choose"],
             AllowMultiple = false,
             FileTypeFilter = [ArchiveType, FilePickerFileTypes.All],
         });
@@ -164,7 +166,7 @@ public partial class ArchiveView : UserControl
 
         IReadOnlyList<IStorageFolder> folders = await storage.OpenFolderPickerAsync(new FolderPickerOpenOptions
         {
-            Title = "Extract to",
+            Title = Localizer.Instance["Archive.Dialog.ExtractTo"],
             AllowMultiple = false,
         });
 

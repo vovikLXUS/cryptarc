@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CryptArc.App.Localization;
 using CryptArc.Core;
 using CryptArc.Core.Blocks;
 
@@ -27,7 +28,16 @@ public partial class CompressPageViewModel : ObservableObject
     /// </summary>
     public const int MaxMapTiles = 2048;
 
+    private const string NoValue = "—";
+
+    private static readonly Localizer L = Localizer.Instance;
+
     private byte[]? _data;
+
+    // What the text properties were built from, kept so that a language switch can
+    // build them again.
+    private Func<string> _statusText = () => string.Empty;
+    private RunSummary? _lastRun;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(RunCommand))]
@@ -69,29 +79,31 @@ public partial class CompressPageViewModel : ObservableObject
     private string _status = string.Empty;
 
     [ObservableProperty]
-    private string _compressedSize = "—";
+    private string _compressedSize = NoValue;
+
+    /// <summary>The ratio of the last run as a caption, e.g. "42.0 % of input".</summary>
+    [ObservableProperty]
+    private string _ratioCaption = NoValue;
 
     [ObservableProperty]
-    private string _ratio = "—";
+    private string _elapsed = NoValue;
 
     [ObservableProperty]
-    private string _elapsed = "—";
+    private string _throughput = NoValue;
 
     [ObservableProperty]
-    private string _throughput = "—";
-
-    [ObservableProperty]
-    private string _verification = "—";
+    private string _verification = NoValue;
 
     /// <summary>Creates the page with "Auto" selected.</summary>
     public CompressPageViewModel()
     {
-        var choices = new List<CodecChoice> { new("Auto (per block)", null) };
+        var choices = new List<CodecChoice> { new(null, null) };
         foreach (ICodec codec in CodecRegistry.All)
             choices.Add(new CodecChoice(codec.Name, codec.Id));
 
         CodecChoices = choices;
         _selectedCodec = choices[0];
+        L.LanguageChanged += (_, _) => Retranslate();
     }
 
     /// <summary>"Auto" followed by every registered codec.</summary>
@@ -120,6 +132,7 @@ public partial class CompressPageViewModel : ObservableObject
             RunCommand.Cancel();
 
         _data = data;
+        _lastRun = null;
         Tiles.Clear();
         Usage.Clear();
         Runs.Clear();
@@ -129,7 +142,7 @@ public partial class CompressPageViewModel : ObservableObject
         HasRun = false;
         ShowMap = false;
         MapTooLarge = false;
-        Status = "Pick the settings and press Compress.";
+        SetStatus(() => L["Compress.Status.Ready"]);
         HasFile = true;
     }
 
@@ -143,11 +156,12 @@ public partial class CompressPageViewModel : ObservableObject
         if (_data is not { } data)
             return;
 
+        CodecChoice choice = SelectedCodec;
         var options = new BlockCompressionOptions
         {
             BlockSize = SelectedBlockSizeKiB * 1024,
             MaxDegreeOfParallelism = Threads,
-            Codec = SelectedCodec.Id,
+            Codec = choice.Id,
             Verify = Verify,
         };
 
@@ -156,11 +170,14 @@ public partial class CompressPageViewModel : ObservableObject
         HasResult = false;
         HasRun = true;
         PrepareTiles();
-        Status = Threads == 1 ? "Compressing on one thread (sequential baseline)…" : $"Compressing on {Threads} threads…";
+
+        int threads = Threads;
+        SetStatus(() => threads == 1
+            ? L["Compress.Status.OneThread"]
+            : L.Format("Compress.Status.Threads", threads));
 
         // Created on the UI thread, so its callback runs there and may touch the tiles.
         var progress = new Progress<BlockResult>(OnBlockDone);
-        int threads = Threads;
 
         try
         {
@@ -170,16 +187,23 @@ public partial class CompressPageViewModel : ObservableObject
                 : BlockCompressor.Compress(data, options, progress, cancellationToken), cancellationToken);
             timer.Stop();
 
-            ShowResult(data.LongLength, blocks, timer.Elapsed, options);
+            ShowResult(data.LongLength, blocks, timer.Elapsed, options, choice);
         }
         catch (OperationCanceledException)
         {
-            Status = $"Cancelled after {BlocksDone} of {BlockTotal} blocks.";
+            int done = BlocksDone, total = BlockTotal;
+            SetStatus(() => L.Format("Compress.Status.Cancelled", done, total));
         }
         catch (Exception exception)
         {
-            Status = $"Failed: {exception.Message}";
+            SetStatus(() => L.Format("Common.Failed", exception.Message));
         }
+    }
+
+    private void SetStatus(Func<string> text)
+    {
+        _statusText = text;
+        Status = text();
     }
 
     private void PrepareTiles()
@@ -201,7 +225,7 @@ public partial class CompressPageViewModel : ObservableObject
             Tiles[block.Index].Complete(block, Verify);
     }
 
-    private void ShowResult(long originalLength, BlockResult[] blocks, TimeSpan elapsed, BlockCompressionOptions options)
+    private void ShowResult(long originalLength, BlockResult[] blocks, TimeSpan elapsed, BlockCompressionOptions options, CodecChoice choice)
     {
         long compressed = 0;
         bool allVerified = true;
@@ -217,56 +241,102 @@ public partial class CompressPageViewModel : ObservableObject
         double ratio = originalLength == 0 ? 1 : compressed / (double)originalLength;
         double megabytesPerSecond = elapsed.TotalSeconds <= 0 ? 0 : originalLength / elapsed.TotalSeconds / (1024 * 1024);
 
-        CompressedSize = $"{compressed / (1024.0 * 1024.0):N1} MiB";
-        Ratio = $"{ratio:P1}";
-        Elapsed = $"{elapsed.TotalMilliseconds:N0} ms";
-        Throughput = $"{megabytesPerSecond:N0} MB/s";
-        Verification = !options.Verify ? "Off" : allVerified ? "All OK" : "FAILED";
+        _lastRun = new RunSummary(compressed, ratio, elapsed, megabytesPerSecond, options.Verify ? allVerified : null);
+        ShowLastRun();
 
         Usage.Clear();
         for (int id = 0; id < counts.Length; id++)
             if (counts[id] > 0)
                 Usage.Add(new CodecUsage((CodecId)id, CodecName((CodecId)id), counts[id]));
 
+        int blockSizeKiB = options.BlockSize / 1024;
         Runs.Insert(0, new RunRecord(
-            SelectedCodec.ShortName,
-            options.BlockSize / 1024,
+            choice,
+            blockSizeKiB,
             options.MaxDegreeOfParallelism,
             elapsed,
             ratio,
-            SpeedupAgainstBaseline(options, elapsed)));
+            SpeedupAgainstBaseline(choice, blockSizeKiB, options.MaxDegreeOfParallelism, elapsed)));
 
         HasResult = true;
-        Status = $"Done: {blocks.Length} blocks.";
+        SetStatus(() => L.Format("Compress.Status.Done", blocks.Length));
     }
 
-    // Speedup against the latest one-thread run with the same codec and block size.
-    // Wall-clock and indicative only; BlockCompressorBenchmarks is the real measurement.
-    private string SpeedupAgainstBaseline(BlockCompressionOptions options, TimeSpan elapsed)
+    private void ShowLastRun()
     {
-        if (options.MaxDegreeOfParallelism == 1)
-            return "baseline";
+        if (_lastRun is not { } run)
+            return;
+
+        CompressedSize = L.Format("Unit.MiB", run.CompressedBytes / (1024.0 * 1024.0));
+        RatioCaption = L.Format("Compress.Result.Ratio", L.Number(run.Ratio, "P1"));
+        Elapsed = L.Format("Unit.Ms", run.Elapsed.TotalMilliseconds);
+        Throughput = L.Format("Unit.MBps", run.MegabytesPerSecond);
+        Verification = run.Verified switch
+        {
+            null => L["Compress.Verification.Off"],
+            true => L["Compress.Verification.AllOk"],
+            false => L["Compress.Verification.Failed"],
+        };
+    }
+
+    // Speedup against the latest one-thread run with the same codec and block size:
+    // null for the baseline itself or when there is none yet, NaN when the run was too
+    // short to time. Wall-clock and indicative only; BlockCompressorBenchmarks is the
+    // real measurement.
+    private double? SpeedupAgainstBaseline(CodecChoice choice, int blockSizeKiB, int threads, TimeSpan elapsed)
+    {
+        if (threads == 1)
+            return null;
 
         foreach (RunRecord run in Runs)
         {
-            if (run.Threads == 1 && run.Codec == SelectedCodec.ShortName && run.BlockSizeKiB == options.BlockSize / 1024)
-                return elapsed.TotalSeconds <= 0 ? "—" : $"{run.Elapsed.TotalSeconds / elapsed.TotalSeconds:F2}×";
+            if (run.Threads == 1 && ReferenceEquals(run.Choice, choice) && run.BlockSizeKiB == blockSizeKiB)
+                return elapsed.TotalSeconds <= 0 ? double.NaN : run.Elapsed.TotalSeconds / elapsed.TotalSeconds;
         }
 
-        return "needs 1-thread run";
+        return null;
+    }
+
+    // Everything on the page that was built from translated text is built again.
+    private void Retranslate()
+    {
+        Status = _statusText();
+        ShowLastRun();
+        CodecChoices[0].Retranslate();
+
+        foreach (BlockTile tile in Tiles)
+            tile.Retranslate();
+
+        for (int i = 0; i < Runs.Count; i++)
+            Runs[i] = Runs[i].Retranslated();
     }
 
     private static string CodecName(CodecId id) =>
         CodecRegistry.TryGet(id, out ICodec codec) ? codec.Name : id.ToString();
+
+    private sealed record RunSummary(long CompressedBytes, double Ratio, TimeSpan Elapsed, double MegabytesPerSecond, bool? Verified);
 }
 
 /// <summary>An entry of the codec drop-down.</summary>
-/// <param name="Name">Shown in the list.</param>
-/// <param name="Id">The codec, or null for automatic choice per block.</param>
-public sealed record CodecChoice(string Name, CodecId? Id)
+/// <param name="codecName">The codec's name, or null for the automatic choice, whose name is translated.</param>
+/// <param name="id">The codec, or null for automatic choice per block.</param>
+public sealed class CodecChoice(string? codecName, CodecId? id) : ObservableObject
 {
+    /// <summary>The codec, or null for automatic choice per block.</summary>
+    public CodecId? Id { get; } = id;
+
+    /// <summary>Shown in the list.</summary>
+    public string Name => codecName ?? Localizer.Instance["Compress.Auto"];
+
     /// <summary>Name for narrow places such as the runs table: "Auto" instead of the full label.</summary>
-    public string ShortName => Id is null ? "Auto" : Name;
+    public string ShortName => codecName ?? Localizer.Instance["Compress.Auto.Short"];
+
+    /// <summary>Tells the list that the names may have changed with the language.</summary>
+    public void Retranslate()
+    {
+        OnPropertyChanged(nameof(Name));
+        OnPropertyChanged(nameof(ShortName));
+    }
 
     /// <inheritdoc />
     public override string ToString() => Name;
@@ -279,25 +349,57 @@ public sealed record CodecChoice(string Name, CodecId? Id)
 public sealed record CodecUsage(CodecId Codec, string Name, int Blocks);
 
 /// <summary>One completed run, for the history table.</summary>
-/// <param name="Codec">Codec setting: a codec name or "Auto".</param>
+/// <param name="Choice">Codec setting of the run.</param>
 /// <param name="BlockSizeKiB">Block size in KiB.</param>
 /// <param name="Threads">Worker threads.</param>
 /// <param name="Elapsed">Wall-clock time of the run.</param>
 /// <param name="Ratio">Compressed size as a fraction of the original.</param>
-/// <param name="Speedup">Against the matching one-thread run, as display text.</param>
-public sealed record RunRecord(string Codec, int BlockSizeKiB, int Threads, TimeSpan Elapsed, double Ratio, string Speedup)
+/// <param name="Speedup">
+/// Against the matching one-thread run; null when there is nothing to compare with,
+/// NaN when the run was too short to time.
+/// </param>
+/// <remarks>
+/// The display texts are fixed when the row is created, in the language of that moment,
+/// and are part of the record's equality. A data grid keeps the cells of a row it
+/// considers unchanged, so after a language switch the rows are created again
+/// (<see cref="Retranslated"/>) rather than asked for their texts a second time.
+/// For the same reason a <c>with</c> copy keeps the texts of the original: change a
+/// value by creating a new row, not with <c>with</c>.
+/// </remarks>
+public sealed record RunRecord(CodecChoice Choice, int BlockSizeKiB, int Threads, TimeSpan Elapsed, double Ratio, double? Speedup)
 {
+    /// <summary>Codec setting for display: a codec name or "Auto".</summary>
+    public string Codec { get; } = Choice.ShortName;
+
+    /// <summary>Block size for display.</summary>
+    public string BlockText { get; } = Localizer.Instance.Format("Compress.Runs.BlockSize", BlockSizeKiB);
+
     /// <summary>Elapsed time for display.</summary>
-    public string ElapsedText => $"{Elapsed.TotalMilliseconds:N0} ms";
+    public string ElapsedText { get; } = Localizer.Instance.Format("Unit.Ms", Elapsed.TotalMilliseconds);
 
     /// <summary>Ratio for display.</summary>
-    public string RatioText => $"{Ratio:P1}";
+    public string RatioText { get; } = Localizer.Instance.Number(Ratio, "P1");
+
+    /// <summary>Speedup for display, or why there is none.</summary>
+    public string SpeedupText { get; } = Speedup switch
+    {
+        null when Threads == 1 => Localizer.Instance["Compress.Speedup.Baseline"],
+        null => Localizer.Instance["Compress.Speedup.NeedsBaseline"],
+        double.NaN => "—",
+        { } speedup => Localizer.Instance.Number(speedup, "F2") + "×",
+    };
+
+    /// <summary>The same run with its texts in the current language.</summary>
+    /// <returns>A new row.</returns>
+    public RunRecord Retranslated() => new(Choice, BlockSizeKiB, Threads, Elapsed, Ratio, Speedup);
 }
 
 /// <summary>One square of the block map. Pending until its block finishes.</summary>
 /// <param name="index">Block number.</param>
 public partial class BlockTile(int index) : ObservableObject
 {
+    private BlockResult? _result;
+
     /// <summary>Block number.</summary>
     public int Index { get; } = index;
 
@@ -310,17 +412,31 @@ public partial class BlockTile(int index) : ObservableObject
     private bool _ok = true;
 
     [ObservableProperty]
-    private string _toolTip = $"Block {index}: pending";
+    private string _toolTip = Localizer.Instance.Format("Compress.Tile.Pending", index);
 
     /// <summary>Marks the block done.</summary>
     /// <param name="block">Its result.</param>
     /// <param name="verified">Whether verification was on.</param>
     public void Complete(BlockResult block, bool verified)
     {
+        _result = block;
         Codec = block.Codec;
         Ok = !verified || block.Verified;
+        Retranslate();
+    }
+
+    /// <summary>Builds the tooltip again in the current language.</summary>
+    public void Retranslate()
+    {
+        Localizer l = Localizer.Instance;
+        if (_result is not { } block)
+        {
+            ToolTip = l.Format("Compress.Tile.Pending", Index);
+            return;
+        }
+
         double ratio = block.OriginalLength == 0 ? 1 : block.CompressedLength / (double)block.OriginalLength;
-        ToolTip = $"Block {block.Index} · offset {block.Offset:N0}\n{block.Codec} · {ratio:P1}" +
-                  (Ok ? string.Empty : "\nround trip FAILED");
+        ToolTip = l.Format("Compress.Tile.Done", block.Index, block.Offset, block.Codec, ratio) +
+                  (Ok ? string.Empty : "\n" + l["Compress.Tile.Failed"]);
     }
 }

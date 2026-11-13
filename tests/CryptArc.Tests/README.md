@@ -9,6 +9,7 @@ xUnit suite over `CryptArc.Core`.
 | `IO/BitStreamTests.cs` | bit writer/reader round-trip, overflow, zero-extension |
 | `Crc32Tests.cs` | standard check value, and table vs naive agreement |
 | `DataAnalyzerTests.cs` | entropy extremes and the selection thresholds |
+| `LocalizationResourcesTests.cs` | the GUI's `Strings.resx` files: same keys and placeholders in both languages, every key used in the app exists, no literal text in a view |
 | `TestData.cs` | shared deterministic sample buffers |
 
 ## The central test

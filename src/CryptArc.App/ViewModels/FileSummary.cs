@@ -1,3 +1,4 @@
+using CryptArc.App.Localization;
 using CryptArc.App.Services;
 using CryptArc.Core;
 using CryptArc.Core.Analysis;
@@ -82,5 +83,5 @@ public sealed record FileSummary(
     private static string? NameOf(CodecId id) =>
         CodecRegistry.TryGet(id, out ICodec? codec) ? codec.Name : null;
 
-    private static string Display(CodecId id) => NameOf(id) ?? $"{id} (not implemented yet)";
+    private static string Display(CodecId id) => NameOf(id) ?? Localizer.Instance.Format("Analyse.NotImplemented", id);
 }

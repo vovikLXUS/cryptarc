@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Specialized;
 using Avalonia.Controls;
+using CryptArc.App.Localization;
 using CryptArc.App.ViewModels;
 using ScottPlot;
 using ScottPlot.Plottables;
@@ -116,7 +117,9 @@ public partial class NaiveVsOptimisedView : UserControl
             bar.FillColor = speedups[i] >= 1 ? Faster : Slower;
             bar.LineWidth = 0;
             bar.Size = 0.6;
-            bar.Label = speedups[i] >= 1 ? $"{speedups[i]:0.##}×" : $"{1 / speedups[i]:0.##}× slower";
+            bar.Label = speedups[i] >= 1
+                ? Localizer.Instance.Number(speedups[i], "0.##") + "×"
+                : Localizer.Instance.Format("Pairs.Chart.Slower", 1 / speedups[i]);
         }
 
         bars.ValueLabelStyle.ForeColor = Neutral;
@@ -137,7 +140,7 @@ public partial class NaiveVsOptimisedView : UserControl
         {
             double exponent = min + d;
             tickPositions[d] = exponent;
-            tickLabels[d] = exponent >= 0 ? $"{Math.Pow(10, exponent):0}×" : $"{Math.Pow(10, exponent):0.###}×";
+            tickLabels[d] = Localizer.Instance.Number(Math.Pow(10, exponent), exponent >= 0 ? "0" : "0.###") + "×";
         }
 
         plot.Axes.Bottom.SetTicks(tickPositions, tickLabels);

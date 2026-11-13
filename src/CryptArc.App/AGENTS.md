@@ -13,3 +13,7 @@
 - Passwords, once added: `char[]` or `SecureString`, cleared with `Array.Clear`
   after key derivation. Never log them, never put them in an observable property
   that survives the dialog.
+- **No literal user-facing text.** Every string goes through `Localization/`
+  (ADR-0016): `{loc:T Key}` in XAML, `Localizer.Instance` in a view model, and
+  the key added to both `Strings.resx` and `Strings.uk.resx`. Format numbers
+  with `Localizer.Format` or `Localizer.Number`, not a bare interpolated string.

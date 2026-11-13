@@ -1,0 +1,732 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Nav.Analyse" xml:space="preserve">
+    <value>Аналіз</value>
+  </data>
+  <data name="Nav.Compare" xml:space="preserve">
+    <value>Порівняння кодеків</value>
+  </data>
+  <data name="Nav.Compress" xml:space="preserve">
+    <value>Стиснення</value>
+  </data>
+  <data name="Nav.Lab" xml:space="preserve">
+    <value>Лабораторія перетворень</value>
+  </data>
+  <data name="Nav.Pairs" xml:space="preserve">
+    <value>Наївний і оптимізований</value>
+  </data>
+  <data name="Nav.Archive" xml:space="preserve">
+    <value>Зашифрований архів</value>
+  </data>
+  <data name="Shell.ChooseFile" xml:space="preserve">
+    <value>Вибрати файл…</value>
+  </data>
+  <data name="Shell.Language" xml:space="preserve">
+    <value>Мова</value>
+  </data>
+  <data name="Shell.PickerTitle" xml:space="preserve">
+    <value>Виберіть файл для аналізу</value>
+  </data>
+  <data name="Shell.NoFile" xml:space="preserve">
+    <value>Файл не вибрано</value>
+  </data>
+  <data name="Shell.FileSize" xml:space="preserve">
+    <value>{0:N0} байт</value>
+  </data>
+  <data name="Shell.Status.Initial" xml:space="preserve">
+    <value>Виберіть файл, щоб проаналізувати його й порівняти на ньому всі кодеки.</value>
+  </data>
+  <data name="Shell.Status.Reading" xml:space="preserve">
+    <value>Читання…</value>
+  </data>
+  <data name="Shell.Status.Analysing" xml:space="preserve">
+    <value>Аналіз…</value>
+  </data>
+  <data name="Shell.Status.Done" xml:space="preserve">
+    <value>CRC-32 {0:X8} · виміряно кодеків: {1}</value>
+  </data>
+  <data name="Common.Failed" xml:space="preserve">
+    <value>Помилка: {0}</value>
+  </data>
+  <data name="Common.NoFileYet" xml:space="preserve">
+    <value>Файлу ще немає</value>
+  </data>
+  <data name="Common.UseChooseFile" xml:space="preserve">
+    <value>Натисніть «Вибрати файл…» угорі, щоб завантажити файл.</value>
+  </data>
+  <data name="Unit.Bytes" xml:space="preserve">
+    <value>{0:N0} Б</value>
+  </data>
+  <data name="Unit.B" xml:space="preserve">
+    <value>{0} Б</value>
+  </data>
+  <data name="Unit.KiB" xml:space="preserve">
+    <value>{0:F1} КіБ</value>
+  </data>
+  <data name="Unit.MiB" xml:space="preserve">
+    <value>{0:N1} МіБ</value>
+  </data>
+  <data name="Unit.Ms" xml:space="preserve">
+    <value>{0:N0} мс</value>
+  </data>
+  <data name="Unit.MBps" xml:space="preserve">
+    <value>{0:N0} МБ/с</value>
+  </data>
+  <data name="Unit.BitsPerByte" xml:space="preserve">
+    <value>{0:F2} біт/байт</value>
+  </data>
+  <data name="Unit.Time.S" xml:space="preserve">
+    <value>{0:F2} с</value>
+  </data>
+  <data name="Unit.Time.Ms" xml:space="preserve">
+    <value>{0:F2} мс</value>
+  </data>
+  <data name="Unit.Time.Us" xml:space="preserve">
+    <value>{0:F2} мкс</value>
+  </data>
+  <data name="Unit.Time.Ns" xml:space="preserve">
+    <value>{0:F1} нс</value>
+  </data>
+  <data name="Analyse.Title" xml:space="preserve">
+    <value>Аналіз файлу</value>
+  </data>
+  <data name="Analyse.Subtitle" xml:space="preserve">
+    <value>Ентропія, повтори та частка тексту визначають, який кодек CryptArc обирає для кожного блока.</value>
+  </data>
+  <data name="Analyse.Entropy" xml:space="preserve">
+    <value>Ентропія</value>
+  </data>
+  <data name="Analyse.Entropy.Hint" xml:space="preserve">
+    <value>біт/байт, середнє по блоках</value>
+  </data>
+  <data name="Analyse.Repeat" xml:space="preserve">
+    <value>Частка повторів</value>
+  </data>
+  <data name="Analyse.Repeat.Hint" xml:space="preserve">
+    <value>байт збігається з попереднім</value>
+  </data>
+  <data name="Analyse.Text" xml:space="preserve">
+    <value>Частка тексту</value>
+  </data>
+  <data name="Analyse.Text.Hint" xml:space="preserve">
+    <value>друковані, середнє по блоках</value>
+  </data>
+  <data name="Analyse.Recommended" xml:space="preserve">
+    <value>Рекомендований кодек</value>
+  </data>
+  <data name="Analyse.Recommended.Empty" xml:space="preserve">
+    <value>порожній файл</value>
+  </data>
+  <data name="Analyse.Recommended.All" xml:space="preserve">
+    <value>усі блоки ({0})</value>
+  </data>
+  <data name="Analyse.Recommended.Some" xml:space="preserve">
+    <value>{0} з {1} блоків, решта переважно {2}</value>
+  </data>
+  <data name="Analyse.NotImplemented" xml:space="preserve">
+    <value>{0} (ще не реалізовано)</value>
+  </data>
+  <data name="Analyse.Heatmap.Title" xml:space="preserve">
+    <value>Ентропія по блоках</value>
+  </data>
+  <data name="Analyse.Heatmap.Blocks" xml:space="preserve">
+    <value>блоків по 64 КіБ: {0}</value>
+  </data>
+  <data name="Analyse.Heatmap.Sampled" xml:space="preserve">
+    <value>вибіркових блоків по 64 КіБ: {0}</value>
+  </data>
+  <data name="Analyse.Heatmap.ToolTip" xml:space="preserve">
+    <value>Зміщення {0:N0}
+{1:F2} біт/байт · {2:P0} тексту
+Кодек: {3}</value>
+  </data>
+  <data name="Analyse.Heatmap.Low" xml:space="preserve">
+    <value>добре стискається</value>
+  </data>
+  <data name="Analyse.Heatmap.High" xml:space="preserve">
+    <value>майже випадкові</value>
+  </data>
+  <data name="Analyse.Histogram.Title" xml:space="preserve">
+    <value>Гістограма байтів, увесь файл</value>
+  </data>
+  <data name="Analyse.Histogram.Legend" xml:space="preserve">
+    <value>Синій: друковані символи ASCII та пробільні символи, тобто те, що враховує частка тексту. Сірий: усі інші значення байтів.</value>
+  </data>
+  <data name="Analyse.Histogram.Axis" xml:space="preserve">
+    <value>% файлу</value>
+  </data>
+  <data name="Analyse.Histogram.Caption" xml:space="preserve">
+    <value>трапляється {0} з 256 значень · найчастіше 0x{1:X2}{2}, {3:P1}</value>
+  </data>
+  <data name="Analyse.Histogram.Space" xml:space="preserve">
+    <value>(пробіл)</value>
+  </data>
+  <data name="Compare.Title" xml:space="preserve">
+    <value>Порівняння кодеків</value>
+  </data>
+  <data name="Compare.Subtitle" xml:space="preserve">
+    <value>Усі зареєстровані кодеки на одному файлі; кожне стиснення й відновлення перевіряється за CRC-32.</value>
+  </data>
+  <data name="Compare.Size" xml:space="preserve">
+    <value>Розмір</value>
+  </data>
+  <data name="Compare.Speed" xml:space="preserve">
+    <value>Швидкість</value>
+  </data>
+  <data name="Compare.Empty.Hint" xml:space="preserve">
+    <value>Завантажте файл, і кодеки буде виміряно на ньому автоматично.</value>
+  </data>
+  <data name="Compare.Chart.Speed" xml:space="preserve">
+    <value>Швидкість кодування, МБ/с (більше — краще; Store лише копіює дані, тому його не показано)</value>
+  </data>
+  <data name="Compare.Chart.Size" xml:space="preserve">
+    <value>Стиснений розмір, % від початкового (менше — краще)</value>
+  </data>
+  <data name="Compare.Col.Codec" xml:space="preserve">
+    <value>Кодек</value>
+  </data>
+  <data name="Compare.Col.Compressed" xml:space="preserve">
+    <value>Стиснено</value>
+  </data>
+  <data name="Compare.Col.Ratio" xml:space="preserve">
+    <value>Коефіцієнт</value>
+  </data>
+  <data name="Compare.Col.Speed" xml:space="preserve">
+    <value>Кодування / декодування</value>
+  </data>
+  <data name="Compare.Col.RoundTrip" xml:space="preserve">
+    <value>Перевірка</value>
+  </data>
+  <data name="Compare.Speed.Value" xml:space="preserve">
+    <value>{0:F1} / {1:F1} МБ/с</value>
+  </data>
+  <data name="Compare.Ok" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Compare.Mismatch" xml:space="preserve">
+    <value>РОЗБІЖНІСТЬ</value>
+  </data>
+  <data name="Compress.Title" xml:space="preserve">
+    <value>Стиснення</value>
+  </data>
+  <data name="Compress.Subtitle" xml:space="preserve">
+    <value>Файл ділиться на незалежні блоки, які стискаються паралельно. Тут на диск нічого не записується; справжнє пакування файлів — на сторінці «Зашифрований архів».</value>
+  </data>
+  <data name="Compress.Codec" xml:space="preserve">
+    <value>Кодек</value>
+  </data>
+  <data name="Compress.BlockSize" xml:space="preserve">
+    <value>Розмір блока, КіБ</value>
+  </data>
+  <data name="Compress.Threads" xml:space="preserve">
+    <value>Потоки</value>
+  </data>
+  <data name="Compress.Threads.Hint" xml:space="preserve">
+    <value>1 потік — це послідовний базовий запуск; порівняйте його нижче із запусками на кількох потоках.</value>
+  </data>
+  <data name="Compress.Verify" xml:space="preserve">
+    <value>Перевіряти кожен блок</value>
+  </data>
+  <data name="Compress.Cancel" xml:space="preserve">
+    <value>Скасувати</value>
+  </data>
+  <data name="Compress.Run" xml:space="preserve">
+    <value>Стиснути</value>
+  </data>
+  <data name="Compress.Blocks" xml:space="preserve">
+    <value>Блоки</value>
+  </data>
+  <data name="Compress.MapTooLarge" xml:space="preserve">
+    <value>Блоків забагато, щоб намалювати карту; виберіть більший розмір блока.</value>
+  </data>
+  <data name="Compress.Result.Compressed" xml:space="preserve">
+    <value>Стиснено</value>
+  </data>
+  <data name="Compress.Result.Ratio" xml:space="preserve">
+    <value>{0} від вхідних даних</value>
+  </data>
+  <data name="Compress.Result.Time" xml:space="preserve">
+    <value>Час</value>
+  </data>
+  <data name="Compress.Result.WallClock" xml:space="preserve">
+    <value>фактичний час</value>
+  </data>
+  <data name="Compress.Result.Throughput" xml:space="preserve">
+    <value>Пропускна здатність</value>
+  </data>
+  <data name="Compress.Result.OfInput" xml:space="preserve">
+    <value>вхідних даних</value>
+  </data>
+  <data name="Compress.Result.Verification" xml:space="preserve">
+    <value>Перевірка</value>
+  </data>
+  <data name="Compress.Result.RoundTrip" xml:space="preserve">
+    <value>стиснення й відновлення</value>
+  </data>
+  <data name="Compress.Runs" xml:space="preserve">
+    <value>Запуски</value>
+  </data>
+  <data name="Compress.Runs.BlockSize" xml:space="preserve">
+    <value>{0} КіБ</value>
+  </data>
+  <data name="Compress.Runs.Hint" xml:space="preserve">
+    <value>Прискорення рахується відносно останнього запуску на 1 потоці з тим самим кодеком і розміром блока. Фактичний час є орієнтовним; вимірюванням для звіту є BlockCompressorBenchmarks у bench/.</value>
+  </data>
+  <data name="Compress.Col.Codec" xml:space="preserve">
+    <value>Кодек</value>
+  </data>
+  <data name="Compress.Col.Block" xml:space="preserve">
+    <value>Блок</value>
+  </data>
+  <data name="Compress.Col.Threads" xml:space="preserve">
+    <value>Потоки</value>
+  </data>
+  <data name="Compress.Col.Time" xml:space="preserve">
+    <value>Час</value>
+  </data>
+  <data name="Compress.Col.Ratio" xml:space="preserve">
+    <value>Коефіцієнт</value>
+  </data>
+  <data name="Compress.Col.Speedup" xml:space="preserve">
+    <value>Прискорення</value>
+  </data>
+  <data name="Compress.Auto" xml:space="preserve">
+    <value>Авто (для кожного блока)</value>
+  </data>
+  <data name="Compress.Auto.Short" xml:space="preserve">
+    <value>Авто</value>
+  </data>
+  <data name="Compress.Status.Ready" xml:space="preserve">
+    <value>Виберіть параметри й натисніть «Стиснути».</value>
+  </data>
+  <data name="Compress.Status.OneThread" xml:space="preserve">
+    <value>Стиснення на одному потоці (послідовний базовий запуск)…</value>
+  </data>
+  <data name="Compress.Status.Threads" xml:space="preserve">
+    <value>Стиснення на кількох потоках ({0})…</value>
+  </data>
+  <data name="Compress.Status.Cancelled" xml:space="preserve">
+    <value>Скасовано після {0} з {1} блоків.</value>
+  </data>
+  <data name="Compress.Status.Done" xml:space="preserve">
+    <value>Готово, блоків: {0}.</value>
+  </data>
+  <data name="Compress.Verification.Off" xml:space="preserve">
+    <value>Вимкнено</value>
+  </data>
+  <data name="Compress.Verification.AllOk" xml:space="preserve">
+    <value>Усе гаразд</value>
+  </data>
+  <data name="Compress.Verification.Failed" xml:space="preserve">
+    <value>ПОМИЛКА</value>
+  </data>
+  <data name="Compress.Speedup.Baseline" xml:space="preserve">
+    <value>базовий</value>
+  </data>
+  <data name="Compress.Speedup.NeedsBaseline" xml:space="preserve">
+    <value>потрібен запуск на 1 потоці</value>
+  </data>
+  <data name="Compress.Tile.Pending" xml:space="preserve">
+    <value>Блок {0}: очікує</value>
+  </data>
+  <data name="Compress.Tile.Done" xml:space="preserve">
+    <value>Блок {0} · зміщення {1:N0}
+{2} · {3:P1}</value>
+  </data>
+  <data name="Compress.Tile.Failed" xml:space="preserve">
+    <value>перевірку НЕ ПРОЙДЕНО</value>
+  </data>
+  <data name="Lab.Title" xml:space="preserve">
+    <value>Лабораторія перетворень</value>
+  </data>
+  <data name="Lab.Subtitle" xml:space="preserve">
+    <value>Етапи кодека BWT по одному: перетворення Барроуза — Вілера групує схожі контексти, move-to-front перетворює їх на малі числа, кодування серій нулів стискає нулі, а код Гаффмана кодує решту.</value>
+  </data>
+  <data name="Lab.Input" xml:space="preserve">
+    <value>Вхідний текст</value>
+  </data>
+  <data name="Lab.Input.Truncated" xml:space="preserve">
+    <value>Використовуються лише перші {0:N0} байт.</value>
+  </data>
+  <data name="Lab.Input.Size" xml:space="preserve">
+    <value>{0:N0} байт</value>
+  </data>
+  <data name="Lab.Preset.English" xml:space="preserve">
+    <value>Англійський текст</value>
+  </data>
+  <data name="Lab.Preset.Code" xml:space="preserve">
+    <value>Програмний код</value>
+  </data>
+  <data name="Lab.Preset.Random" xml:space="preserve">
+    <value>Випадковий</value>
+  </data>
+  <data name="Lab.Stage.Input" xml:space="preserve">
+    <value>Вхід</value>
+  </data>
+  <data name="Lab.Stage.Rle" xml:space="preserve">
+    <value>Серії нулів</value>
+  </data>
+  <data name="Lab.Stage.Zeros" xml:space="preserve">
+    <value>{0:P0} нулів</value>
+  </data>
+  <data name="Lab.Bwt.Title" xml:space="preserve">
+    <value>1 · Барроуз — Вілер: сортуємо всі циклічні зсуви, беремо останній стовпець</value>
+  </data>
+  <data name="Lab.Bwt.RowsFirst" xml:space="preserve">
+    <value>Перші {0} з {1} рядків. Початковий текст — рядок {2}.</value>
+  </data>
+  <data name="Lab.Bwt.RowsAll" xml:space="preserve">
+    <value>Усі рядки ({0}). Початковий текст — рядок {1}, його виділено.</value>
+  </data>
+  <data name="Lab.Bwt.Output" xml:space="preserve">
+    <value>Останній стовпець — результат BWT. Однакові літери збираються разом, бо після них іде схожий текст:</value>
+  </data>
+  <data name="Lab.Mtf.Title" xml:space="preserve">
+    <value>2 · Move-to-front: кожен байт замінюється своєю позицією у списку нещодавно вжитих</value>
+  </data>
+  <data name="Lab.Mtf.Hint" xml:space="preserve">
+    <value>Повтор попереднього байта дає 0, а байт, що траплявся щойно, — мале число. Скупчення після BWT перетворюються на серії нулів.</value>
+  </data>
+  <data name="Lab.Rle.Title" xml:space="preserve">
+    <value>3 · Серії нулів: серія нулів замінюється кількома цифрами RUNA/RUNB (0 та 1)</value>
+  </data>
+  <data name="Lab.Rle.Hint" xml:space="preserve">
+    <value>Інші значення зсуваються на одиницю вгору, щоб звільнити місце для двох цифр, як у bzip2.</value>
+  </data>
+  <data name="Lab.Huffman.Title" xml:space="preserve">
+    <value>4 · Гаффман: короткі коди для частих символів</value>
+  </data>
+  <data name="Lab.Huffman.Raw" xml:space="preserve">
+    <value>Гаффман на вхідному тексті</value>
+  </data>
+  <data name="Lab.Huffman.Pipeline" xml:space="preserve">
+    <value>Після перетворень</value>
+  </data>
+  <data name="Lab.Huffman.Size" xml:space="preserve">
+    <value>{0:N0} Б · {1:P0}</value>
+  </data>
+  <data name="Lab.Verdict.SavesOne" xml:space="preserve">
+    <value>Перетворення заощаджують 1 байт порівняно із самим кодом Гаффмана. Заголовки таблиць не враховано.</value>
+  </data>
+  <data name="Lab.Verdict.Saves" xml:space="preserve">
+    <value>Перетворення заощаджують {0:N0} байт порівняно із самим кодом Гаффмана. Заголовки таблиць не враховано.</value>
+  </data>
+  <data name="Lab.Verdict.NoHelp" xml:space="preserve">
+    <value>На цьому тексті перетворення не допомагають: повторів замало, щоб BWT було що групувати. Заголовки таблиць не враховано.</value>
+  </data>
+  <data name="Lab.Col.Symbol" xml:space="preserve">
+    <value>Символ</value>
+  </data>
+  <data name="Lab.Col.Means" xml:space="preserve">
+    <value>Значення</value>
+  </data>
+  <data name="Lab.Col.Count" xml:space="preserve">
+    <value>Кількість</value>
+  </data>
+  <data name="Lab.Col.Bits" xml:space="preserve">
+    <value>Біти</value>
+  </data>
+  <data name="Lab.Col.Code" xml:space="preserve">
+    <value>Код</value>
+  </data>
+  <data name="Lab.Meaning.RunA" xml:space="preserve">
+    <value>RUNA (цифра серії нулів)</value>
+  </data>
+  <data name="Lab.Meaning.RunB" xml:space="preserve">
+    <value>RUNB (цифра серії нулів)</value>
+  </data>
+  <data name="Lab.Meaning.Escape" xml:space="preserve">
+    <value>екранування: далі йде ранг 254 або 255</value>
+  </data>
+  <data name="Lab.Meaning.Rank" xml:space="preserve">
+    <value>ранг MTF {0}</value>
+  </data>
+  <data name="Pairs.Title" xml:space="preserve">
+    <value>Наївний і оптимізований</value>
+  </data>
+  <data name="Pairs.Subtitle" xml:space="preserve">
+    <value>Кожна оптимізована процедура зберігає свій прямолінійний варіант (жорстке правило 4). Тут показано їхні результати BenchmarkDotNet у конфігурації Release; сам застосунок тут нічого не вимірює.</value>
+  </data>
+  <data name="Pairs.Empty.Title" xml:space="preserve">
+    <value>Немає результатів бенчмарків</value>
+  </data>
+  <data name="Pairs.Empty.Hint" xml:space="preserve">
+    <value>Запустіть бенчмарки в Release, скопіюйте файли *.pairs.json із BenchmarkDotNet.Artifacts/results до bench/results/ і зберіть проєкт заново. Пошук виконувався в:</value>
+  </data>
+  <data name="Pairs.QuickRun" xml:space="preserve">
+    <value>Ці числа отримано в короткому або пробному запуску. Перезапустіть без --job short, перш ніж наводити їх у звіті.</value>
+  </data>
+  <data name="Pairs.Chart.Title" xml:space="preserve">
+    <value>Прискорення відносно наївної версії, логарифмічна шкала (штрихова лінія = однакова швидкість)</value>
+  </data>
+  <data name="Pairs.Chart.Slower" xml:space="preserve">
+    <value>{0:0.##}× повільніше</value>
+  </data>
+  <data name="Pairs.Col.Case" xml:space="preserve">
+    <value>Випадок</value>
+  </data>
+  <data name="Pairs.Col.Method" xml:space="preserve">
+    <value>Оптимізований</value>
+  </data>
+  <data name="Pairs.Col.Naive" xml:space="preserve">
+    <value>Наївний</value>
+  </data>
+  <data name="Pairs.Col.Optimised" xml:space="preserve">
+    <value>Оптимізований</value>
+  </data>
+  <data name="Pairs.Col.Speedup" xml:space="preserve">
+    <value>Прискорення</value>
+  </data>
+  <data name="Pairs.Col.Allocated" xml:space="preserve">
+    <value>Виділено пам’яті</value>
+  </data>
+  <data name="Pairs.Hint" xml:space="preserve">
+    <value>Час — це середнє BenchmarkDotNet на одну операцію; наївний метод кожного рядка є [Baseline] своєї групи.</value>
+  </data>
+  <data name="Pairs.Machine" xml:space="preserve">
+    <value>{0}, логічних ядер: {1} · {2} · {3} · BenchmarkDotNet {4} · виміряно {5:yyyy-MM-dd HH:mm}</value>
+  </data>
+  <data name="Pairs.Headline.Faster" xml:space="preserve">
+    <value>до {0:F1}× швидше</value>
+  </data>
+  <data name="Pairs.Headline.Slower" xml:space="preserve">
+    <value>{0:F1}× повільніше</value>
+  </data>
+  <data name="Pairs.Row.Faster" xml:space="preserve">
+    <value>{0:F2}× швидше</value>
+  </data>
+  <data name="Pairs.Row.Slower" xml:space="preserve">
+    <value>{0:F2}× повільніше</value>
+  </data>
+  <data name="Pairs.Suite.Crc32Benchmarks.Title" xml:space="preserve">
+    <value>CRC-32</value>
+  </data>
+  <data name="Pairs.Suite.Crc32Benchmarks.Story" xml:space="preserve">
+    <value>Побітовий цикл → таблиця пошуку на 256 записів.</value>
+  </data>
+  <data name="Pairs.Suite.HuffmanBenchmarks.Title" xml:space="preserve">
+    <value>Декодування Гаффмана</value>
+  </data>
+  <data name="Pairs.Suite.HuffmanBenchmarks.Story" xml:space="preserve">
+    <value>Побітовий обхід дерева → дворівнева таблиця пошуку.</value>
+  </data>
+  <data name="Pairs.Suite.SuffixArrayBenchmarks.Title" xml:space="preserve">
+    <value>Суфіксний масив (BWT)</value>
+  </data>
+  <data name="Pairs.Suite.SuffixArrayBenchmarks.Story" xml:space="preserve">
+    <value>Сортування суфіксів порівняннями → подвоєння префіксів із порозрядним сортуванням. Наївне сортування на тексті майже квадратичне.</value>
+  </data>
+  <data name="Pairs.Suite.MoveToFrontBenchmarks.Title" xml:space="preserve">
+    <value>Move-to-front</value>
+  </data>
+  <data name="Pairs.Suite.MoveToFrontBenchmarks.Story" xml:space="preserve">
+    <value>Побайтові цикли → перевірка початку списку, векторизований пошук і блокове переміщення.</value>
+  </data>
+  <data name="Pairs.Suite.LzssMatchSearchBenchmarks.Title" xml:space="preserve">
+    <value>Пошук збігів LZSS</value>
+  </data>
+  <data name="Pairs.Suite.LzssMatchSearchBenchmarks.Story" xml:space="preserve">
+    <value>Лінійний перегляд вікна 32 КіБ → хеш-ланцюжки.</value>
+  </data>
+  <data name="Pairs.Suite.LzssMatchLengthBenchmarks.Title" xml:space="preserve">
+    <value>Довжина збігу LZSS</value>
+  </data>
+  <data name="Pairs.Suite.LzssMatchLengthBenchmarks.Story" xml:space="preserve">
+    <value>Один байт за крок → 8 байт за крок із TrailingZeroCount.</value>
+  </data>
+  <data name="Pairs.Suite.DeflateMatchSearchBenchmarks.Title" xml:space="preserve">
+    <value>Пошук збігів Deflate</value>
+  </data>
+  <data name="Pairs.Suite.DeflateMatchSearchBenchmarks.Story" xml:space="preserve">
+    <value>Лінійний перегляд вікна 32 КіБ → хеш-ланцюжки, для збігів завдовжки 3…258 байт.</value>
+  </data>
+  <data name="Pairs.Suite.BackReferenceBenchmarks.Title" xml:space="preserve">
+    <value>Копіювання зворотних посилань</value>
+  </data>
+  <data name="Pairs.Suite.BackReferenceBenchmarks.Story" xml:space="preserve">
+    <value>По одному байту → векторизоване копіювання блоками, що дорівнюють відстані збігу.</value>
+  </data>
+  <data name="Pairs.Suite.LzwBenchmarks.Title" xml:space="preserve">
+    <value>Словник LZW</value>
+  </data>
+  <data name="Pairs.Suite.LzwBenchmarks.Story" xml:space="preserve">
+    <value>Лінійний пошук → хеш-таблиця з відкритою адресацією.</value>
+  </data>
+  <data name="Pairs.Suite.ArithmeticBenchmarks.Title" xml:space="preserve">
+    <value>Арифметичне кодування</value>
+  </data>
+  <data name="Pairs.Suite.ArithmeticBenchmarks.Story" xml:space="preserve">
+    <value>Перегляд накопичених частот за O(k) → дерево Фенвіка з двійковим підйомом.</value>
+  </data>
+  <data name="Pairs.Suite.BlockCompressorBenchmarks.Title" xml:space="preserve">
+    <value>Паралельні блоки</value>
+  </data>
+  <data name="Pairs.Suite.BlockCompressorBenchmarks.Story" xml:space="preserve">
+    <value>Блок за блоком → незалежні блоки на кількох потоках (ADR-0005).</value>
+  </data>
+  <data name="Unit.GiB" xml:space="preserve">
+    <value>{0:N2} ГіБ</value>
+  </data>
+  <data name="Archive.Title" xml:space="preserve">
+    <value>Зашифрований архів</value>
+  </data>
+  <data name="Archive.Subtitle" xml:space="preserve">
+    <value>Запакуйте файли в архів .cryptarc або відкрийте наявний, щоб переглянути, перевірити й відновити його вміст. Кожен блок стискається, а потім шифрується AES-256-GCM ключем, виведеним із пароля за допомогою Argon2id.</value>
+  </data>
+  <data name="Archive.Cancel" xml:space="preserve">
+    <value>Скасувати</value>
+  </data>
+  <data name="Archive.Create" xml:space="preserve">
+    <value>Створення</value>
+  </data>
+  <data name="Archive.AddFiles" xml:space="preserve">
+    <value>Додати файли…</value>
+  </data>
+  <data name="Archive.AddFolder" xml:space="preserve">
+    <value>Додати теку…</value>
+  </data>
+  <data name="Archive.Clear" xml:space="preserve">
+    <value>Очистити</value>
+  </data>
+  <data name="Archive.NothingAdded" xml:space="preserve">
+    <value>Ще нічого не додано.</value>
+  </data>
+  <data name="Archive.Codec" xml:space="preserve">
+    <value>Кодек</value>
+  </data>
+  <data name="Archive.Threads" xml:space="preserve">
+    <value>Потоки</value>
+  </data>
+  <data name="Archive.Password" xml:space="preserve">
+    <value>Пароль</value>
+  </data>
+  <data name="Archive.RepeatPassword" xml:space="preserve">
+    <value>Повторіть пароль</value>
+  </data>
+  <data name="Archive.NoRecovery" xml:space="preserve">
+    <value>Відновлення неможливе: без пароля архів не відкрити.</value>
+  </data>
+  <data name="Archive.CreateButton" xml:space="preserve">
+    <value>Створити архів…</value>
+  </data>
+  <data name="Archive.Open" xml:space="preserve">
+    <value>Відкриття</value>
+  </data>
+  <data name="Archive.Choose" xml:space="preserve">
+    <value>Вибрати архів…</value>
+  </data>
+  <data name="Archive.Unlock" xml:space="preserve">
+    <value>Розблокувати</value>
+  </data>
+  <data name="Archive.UnlockHint" xml:space="preserve">
+    <value>Під час розблокування перевіряється HMAC усього файлу, перш ніж довіряти будь-чому в ньому. Неправильний пароль і змінений архів виглядають однаково.</value>
+  </data>
+  <data name="Archive.ExtractAll" xml:space="preserve">
+    <value>Розпакувати все…</value>
+  </data>
+  <data name="Archive.Verify" xml:space="preserve">
+    <value>Перевірити</value>
+  </data>
+  <data name="Archive.Close" xml:space="preserve">
+    <value>Закрити</value>
+  </data>
+  <data name="Archive.Col.Path" xml:space="preserve">
+    <value>Шлях</value>
+  </data>
+  <data name="Archive.Col.Size" xml:space="preserve">
+    <value>Розмір</value>
+  </data>
+  <data name="Archive.Col.Stored" xml:space="preserve">
+    <value>Збережено</value>
+  </data>
+  <data name="Archive.Col.Ratio" xml:space="preserve">
+    <value>Коефіцієнт</value>
+  </data>
+  <data name="Archive.Col.Modified" xml:space="preserve">
+    <value>Змінено (UTC)</value>
+  </data>
+  <data name="Archive.NoArchive" xml:space="preserve">
+    <value>Архів не вибрано</value>
+  </data>
+  <data name="Archive.Summary" xml:space="preserve">
+    <value>Файлів: {0:N0} · початковий розмір {1} · збережено {2}</value>
+  </data>
+  <data name="Archive.SummaryRatio" xml:space="preserve">
+    <value>Файлів: {0:N0} · початковий розмір {1} · збережено {2} ({3})</value>
+  </data>
+  <data name="Archive.Status.Initial" xml:space="preserve">
+    <value>Додайте файли для пакування або виберіть архів, щоб відкрити його.</value>
+  </data>
+  <data name="Archive.Status.NeedNewPassword" xml:space="preserve">
+    <value>Введіть пароль для нового архіву.</value>
+  </data>
+  <data name="Archive.Status.Mismatch" xml:space="preserve">
+    <value>Паролі не збігаються.</value>
+  </data>
+  <data name="Archive.Status.Packing" xml:space="preserve">
+    <value>Виведення ключа й пакування…</value>
+  </data>
+  <data name="Archive.Status.Created" xml:space="preserve">
+    <value>Створено {0}: файлів — {1:N0}, {2} за {3:F1} с.</value>
+  </data>
+  <data name="Archive.Status.EnterAndUnlock" xml:space="preserve">
+    <value>Введіть пароль і натисніть «Розблокувати».</value>
+  </data>
+  <data name="Archive.Status.EnterPassword" xml:space="preserve">
+    <value>Введіть пароль.</value>
+  </data>
+  <data name="Archive.Status.Unlocking" xml:space="preserve">
+    <value>Виведення ключа й перевірка цілісності…</value>
+  </data>
+  <data name="Archive.Status.Unlocked" xml:space="preserve">
+    <value>Розблоковано: архів пройшов перевірку цілісності.</value>
+  </data>
+  <data name="Archive.Status.Verifying" xml:space="preserve">
+    <value>Перевірка кожного блока…</value>
+  </data>
+  <data name="Archive.Status.Verified" xml:space="preserve">
+    <value>Перевірено: усі файли ({0:N0}) декодуються й відповідають контрольним сумам ({1:F1} с).</value>
+  </data>
+  <data name="Archive.Status.Extracting" xml:space="preserve">
+    <value>Розпакування…</value>
+  </data>
+  <data name="Archive.Status.Restored" xml:space="preserve">
+    <value>Відновлено файлів: {0:N0}, до {1} ({2:F1} с).</value>
+  </data>
+  <data name="Archive.Status.Closed" xml:space="preserve">
+    <value>Архів закрито.</value>
+  </data>
+  <data name="Archive.Status.Cancelled" xml:space="preserve">
+    <value>Скасовано.</value>
+  </data>
+  <data name="Archive.Dialog.AddFiles" xml:space="preserve">
+    <value>Додати файли до архіву</value>
+  </data>
+  <data name="Archive.Dialog.AddFolders" xml:space="preserve">
+    <value>Додати теки до архіву</value>
+  </data>
+  <data name="Archive.Dialog.Create" xml:space="preserve">
+    <value>Створити архів</value>
+  </data>
+  <data name="Archive.Dialog.Choose" xml:space="preserve">
+    <value>Виберіть архів</value>
+  </data>
+  <data name="Archive.Dialog.ExtractTo" xml:space="preserve">
+    <value>Розпакувати до</value>
+  </data>
+  <data name="Archive.Dialog.FileType" xml:space="preserve">
+    <value>Архів CryptArc</value>
+  </data>
+</root>

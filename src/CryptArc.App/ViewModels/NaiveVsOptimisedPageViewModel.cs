@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Globalization;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CryptArc.App.Localization;
 using CryptArc.App.Services;
 
 namespace CryptArc.App.ViewModels;
@@ -14,21 +14,7 @@ namespace CryptArc.App.ViewModels;
 /// </summary>
 public partial class NaiveVsOptimisedPageViewModel : ObservableObject
 {
-    // What each suite compares, in a line. Taken from the benchmark classes' summaries.
-    private static readonly Dictionary<string, (string Title, string Story)> Stories = new()
-    {
-        ["Crc32Benchmarks"] = ("CRC-32", "Per-bit loop → 256-entry lookup table."),
-        ["HuffmanBenchmarks"] = ("Huffman decoding", "Bit-by-bit tree walk → two-level lookup table."),
-        ["SuffixArrayBenchmarks"] = ("Suffix array (BWT)", "Comparison sort of suffixes → prefix doubling with radix sort. The naive sort is near-quadratic on text."),
-        ["MoveToFrontBenchmarks"] = ("Move-to-front", "Byte-by-byte loops → front check, vectorised search and block move."),
-        ["LzssMatchSearchBenchmarks"] = ("LZSS match search", "Linear scan of the 32 KiB window → hash chains."),
-        ["LzssMatchLengthBenchmarks"] = ("LZSS match length", "One byte per step → 8 bytes per step with TrailingZeroCount."),
-        ["DeflateMatchSearchBenchmarks"] = ("Deflate match search", "Linear scan of the 32 KiB window → hash chains, over 3…258 byte matches."),
-        ["BackReferenceBenchmarks"] = ("Back-reference copy", "One byte at a time → vectorised copy in blocks of the match distance."),
-        ["LzwBenchmarks"] = ("LZW dictionary", "Linear search → open-addressing hash table."),
-        ["ArithmeticBenchmarks"] = ("Arithmetic coding", "O(k) cumulative-frequency scans → Fenwick tree with binary lifting."),
-        ["BlockCompressorBenchmarks"] = ("Parallel blocks", "One block after another → independent blocks on several threads (ADR-0005)."),
-    };
+    private static readonly Localizer L = Localizer.Instance;
 
     private readonly IBenchmarkResults _results;
     private IReadOnlyList<BenchmarkSuite> _suites = [];
@@ -57,6 +43,7 @@ public partial class NaiveVsOptimisedPageViewModel : ObservableObject
     {
         _results = results;
         Reload();
+        L.LanguageChanged += (_, _) => Show(SelectedSuite?.Name);
     }
 
     /// <summary>Folder the results are read from, for the empty-state hint.</summary>
@@ -72,6 +59,16 @@ public partial class NaiveVsOptimisedPageViewModel : ObservableObject
     public void Reload()
     {
         _suites = _results.Load();
+        Show(selectName: null);
+    }
+
+    // Fills the list and the selected suite's rows from what was read. Titles,
+    // stories and speedups are translated text, so this also runs on a language switch.
+    private void Show(string? selectName)
+    {
+        // Cleared first: an entry equal to the old one would not count as a change,
+        // and the rows would keep the previous language.
+        SelectedSuite = null;
 
         Suites.Clear();
         foreach (BenchmarkSuite suite in _suites)
@@ -81,7 +78,7 @@ public partial class NaiveVsOptimisedPageViewModel : ObservableObject
         }
 
         HasResults = Suites.Count > 0;
-        SelectedSuite = Suites.Count > 0 ? Suites[0] : null;
+        SelectedSuite = Suites.FirstOrDefault(s => s.Name == selectName) ?? Suites.FirstOrDefault();
     }
 
     partial void OnSelectedSuiteChanged(SuiteItem? value)
@@ -96,9 +93,8 @@ public partial class NaiveVsOptimisedPageViewModel : ObservableObject
         }
 
         Story = Describe(suite.Suite).Story;
-        Machine = $"{suite.Machine.Cpu}, {suite.Machine.LogicalCores} logical cores · {suite.Machine.Os} · " +
-                  $"{suite.Machine.Runtime} · BenchmarkDotNet {suite.Machine.BenchmarkDotNet} · " +
-                  $"measured {suite.MeasuredAt.ToLocalTime():yyyy-MM-dd HH:mm}";
+        Machine = L.Format("Pairs.Machine", suite.Machine.Cpu, suite.Machine.LogicalCores, suite.Machine.Os,
+            suite.Machine.Runtime, suite.Machine.BenchmarkDotNet, suite.MeasuredAt.ToLocalTime());
         IsQuickRun = suite.IsQuickRun;
 
         List<PairRow> pairs = Pairs(suite);
@@ -138,7 +134,7 @@ public partial class NaiveVsOptimisedPageViewModel : ObservableObject
             return "—";
 
         double best = pairs.Max(p => p.Speedup);
-        return best >= 1 ? $"up to {best:F1}× faster" : $"{1 / best:F1}× slower";
+        return best >= 1 ? L.Format("Pairs.Headline.Faster", best) : L.Format("Pairs.Headline.Slower", 1 / best);
     }
 
     private static string Label(BenchmarkGroup group)
@@ -149,8 +145,12 @@ public partial class NaiveVsOptimisedPageViewModel : ObservableObject
         return parts.Count == 0 ? "—" : string.Join(" · ", parts);
     }
 
+    // What each suite compares, in a line: Pairs.Suite.<class>.Title and .Story in the
+    // resources, taken from the benchmark classes' summaries. A suite without them
+    // still shows, under its class name.
     private static (string Title, string Story) Describe(string suite) =>
-        Stories.TryGetValue(suite, out var story) ? story : (suite.Replace("Benchmarks", string.Empty), string.Empty);
+        (L.TryGet($"Pairs.Suite.{suite}.Title") ?? suite.Replace("Benchmarks", string.Empty),
+         L.TryGet($"Pairs.Suite.{suite}.Story") ?? string.Empty);
 }
 
 /// <summary>An entry of the suite list.</summary>
@@ -167,6 +167,10 @@ public sealed record SuiteItem(string Name, string Title, string Headline);
 /// <param name="MeanNs">Method mean, ns per operation.</param>
 /// <param name="BaselineAllocated">Baseline allocation per operation, bytes.</param>
 /// <param name="Allocated">Method allocation per operation, bytes.</param>
+/// <remarks>
+/// The display texts are fixed when the row is created, in the language of that moment.
+/// A <c>with</c> copy keeps them, so change a value by creating a new row.
+/// </remarks>
 public sealed record PairRow(
     string Case,
     string BaselineMethod,
@@ -180,31 +184,32 @@ public sealed record PairRow(
     public double Speedup => BaselineNs / MeanNs;
 
     /// <summary>Speedup for display.</summary>
-    public string SpeedupText => Speedup >= 1 ? $"{Speedup:F2}× faster" : $"{1 / Speedup:F2}× slower";
+    public string SpeedupText { get; } = BaselineNs >= MeanNs
+        ? Localizer.Instance.Format("Pairs.Row.Faster", BaselineNs / MeanNs)
+        : Localizer.Instance.Format("Pairs.Row.Slower", MeanNs / BaselineNs);
 
     /// <summary>Baseline time for display.</summary>
-    public string BaselineText => Time(BaselineNs);
+    public string BaselineText { get; } = Time(BaselineNs);
 
     /// <summary>Method time for display.</summary>
-    public string MeanText => Time(MeanNs);
+    public string MeanText { get; } = Time(MeanNs);
 
     /// <summary>Allocations, baseline → method, for display.</summary>
-    public string AllocatedText => $"{Bytes(BaselineAllocated)} → {Bytes(Allocated)}";
+    public string AllocatedText { get; } = $"{Bytes(BaselineAllocated)} → {Bytes(Allocated)}";
 
     private static string Time(double ns) => ns switch
     {
-        >= 1e9 => $"{ns / 1e9:F2} s",
-        >= 1e6 => $"{ns / 1e6:F2} ms",
-        >= 1e3 => $"{ns / 1e3:F2} µs",
-        _ => $"{ns:F1} ns",
+        >= 1e9 => Localizer.Instance.Format("Unit.Time.S", ns / 1e9),
+        >= 1e6 => Localizer.Instance.Format("Unit.Time.Ms", ns / 1e6),
+        >= 1e3 => Localizer.Instance.Format("Unit.Time.Us", ns / 1e3),
+        _ => Localizer.Instance.Format("Unit.Time.Ns", ns),
     };
 
     private static string Bytes(long? bytes) => bytes switch
     {
         null => "?",
-        0 => "0 B",
-        >= 1024 * 1024 => $"{bytes / (1024.0 * 1024):F1} MiB",
-        >= 1024 => $"{bytes / 1024.0:F1} KiB",
-        _ => string.Create(CultureInfo.InvariantCulture, $"{bytes} B"),
+        >= 1024 * 1024 => Localizer.Instance.Format("Unit.MiB", bytes / (1024.0 * 1024)),
+        >= 1024 => Localizer.Instance.Format("Unit.KiB", bytes / 1024.0),
+        _ => Localizer.Instance.Format("Unit.B", bytes),
     };
 }

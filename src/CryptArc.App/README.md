@@ -19,6 +19,10 @@ by passing its path on the command line.
 | Naive vs optimised | the optimisation pairs of hard rule 4 as measured by BenchmarkDotNet in Release: speedup chart, times and allocations per case, and the machine. Reads `bench/results/*.pairs.json`, copied beside the executable at build time; the app times nothing here |
 | Encrypted archive | create a `.cryptarc` archive from files and folders with a codec or Auto, a thread count and a password; open one to see its file table, verify every block and extract everything. Needs no loaded file; opening the app on a `.cryptarc` file lands here |
 
+The interface is in English and Ukrainian. The switch is at the bottom of the
+side menu and takes effect at once, without a restart; see
+[Languages](#languages) below.
+
 ## Structure
 
 | Path | Role |
@@ -30,8 +34,9 @@ by passing its path on the command line.
 | `Views/ArchiveView.axaml.cs` | the archive page's file, folder and save dialogs, and its password boxes |
 | `Views/` | one `UserControl` per page; `CompareView` draws its chart in code-behind |
 | `Converters/` | value-to-brush converters (heatmap colours) |
+| `Localization/` | `Strings.resx` (English) and `Strings.uk.resx` (Ukrainian), `Localizer`, and the `{loc:T Key}` markup extension |
 | `ViewModels/` | presentation state and logic, one view model per page |
-| `Services/` | `ICodecMeasurement`: analysis and per-codec round trip, injected into the view model; `TransformLab`: the BWT codec's stages run one by one for the lab; `IBenchmarkResults`: reads the committed benchmark results |
+| `Services/` | `ICodecMeasurement`: analysis and per-codec round trip, injected into the view model; `TransformLab`: the BWT codec's stages run one by one for the lab; `IBenchmarkResults`: reads the committed benchmark results; `ILanguagePreference`: remembers the chosen language |
 
 ## Running
 
@@ -39,6 +44,28 @@ by passing its path on the command line.
 dotnet run --project src/CryptArc.App -c Release
 dotnet run --project src/CryptArc.App -c Release -- path/to/file   # opens it straight away
 ```
+
+## Languages
+
+Every string the user sees comes from `Localization/Strings.resx` (English, the
+fallback) or `Strings.uk.resx` (Ukrainian), by key. See ADR-0016.
+
+- In XAML: `Text="{loc:T Shell.ChooseFile}"`. The binding follows the language.
+- In a view model: `Localizer.Instance["Key"]`, or `Format("Key", args)` when the
+  string has `{0}` placeholders. A view model that keeps such text in a property
+  subscribes to `Localizer.LanguageChanged` and builds the text again.
+- Numbers go through `Localizer.Format` or `Localizer.Number`, which use the
+  language's culture, never through a bare `$"{x:N0}"`.
+- The first start follows the operating system's language; after that the choice
+  is read from `CryptArc/language` in the user's application-data folder.
+
+To add a string, add the key to **both** files. To add a language, add
+`Strings.<code>.resx` and one entry to `Localizer.Languages`.
+`LocalizationResourcesTests` fails when a key is missing from one file, when a
+translation drops a placeholder, or when a view has literal text.
+
+Not translated: codec names (they come from `CodecRegistry`), method and class
+names from the benchmark results, and exception messages from the runtime.
 
 ## Dependency injection
 

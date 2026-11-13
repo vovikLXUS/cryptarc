@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using Avalonia.Controls;
+using CryptArc.App.Localization;
 using CryptArc.App.ViewModels;
 using CryptArc.Core;
 using ScottPlot;
@@ -125,7 +126,8 @@ public partial class CompareView : UserControl
             bar.FillColor = recommended ? Primary : PrimaryLight;
             bar.LineWidth = 0;
             bar.Size = 0.6;
-            bar.Label = _viewModel.ShowSpeed ? $"{values[i]:F1}" : $"{values[i]:F1} %";
+            string value = Localizer.Instance.Number(values[i], "F1");
+            bar.Label = _viewModel.ShowSpeed ? value : value + " %";
         }
 
         bars.ValueLabelStyle.ForeColor = Neutral;

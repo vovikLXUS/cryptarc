@@ -1,6 +1,8 @@
+using System.Globalization;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using CryptArc.App.Localization;
 using CryptArc.App.Services;
 using CryptArc.App.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,6 +21,13 @@ public partial class App : Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             ServiceProvider services = ConfigureServices();
+
+            // Before anything is resolved: view models read their first strings in
+            // their constructors. The saved choice wins, then the system language.
+            Localizer localizer = Localizer.Instance;
+            string? saved = services.GetRequiredService<ILanguagePreference>().Load();
+            localizer.Use(localizer.FindLanguage(saved) ?? localizer.Match(CultureInfo.CurrentUICulture));
+
             MainWindow window = services.GetRequiredService<MainWindow>();
             desktop.MainWindow = window;
 
@@ -38,13 +47,16 @@ public partial class App : Application
         new ServiceCollection()
             .AddSingleton<ICodecMeasurement, CodecMeasurement>()
             .AddSingleton<IBenchmarkResults, BenchmarkResults>()
-            .AddTransient<AnalysePageViewModel>()
-            .AddTransient<ComparePageViewModel>()
-            .AddTransient<CompressPageViewModel>()
-            .AddTransient<TransformLabPageViewModel>()
-            .AddTransient<NaiveVsOptimisedPageViewModel>()
-            .AddTransient<ArchivePageViewModel>()
-            .AddTransient<MainWindowViewModel>()
+            .AddSingleton<ILanguagePreference, LanguagePreference>()
+            // One of each, for the life of the app: they subscribe to Localizer.LanguageChanged
+            // and never unsubscribe, so a second instance would be kept alive by the first's event.
+            .AddSingleton<AnalysePageViewModel>()
+            .AddSingleton<ComparePageViewModel>()
+            .AddSingleton<CompressPageViewModel>()
+            .AddSingleton<TransformLabPageViewModel>()
+            .AddSingleton<NaiveVsOptimisedPageViewModel>()
+            .AddSingleton<ArchivePageViewModel>()
+            .AddSingleton<MainWindowViewModel>()
             .AddTransient<MainWindow>()
             .BuildServiceProvider(new ServiceProviderOptions
             {
