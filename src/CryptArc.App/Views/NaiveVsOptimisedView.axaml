@@ -1,5 +1,6 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="using:CryptArc.App.Localization"
              xmlns:vm="using:CryptArc.App.ViewModels"
              xmlns:sp="clr-namespace:ScottPlot.Avalonia;assembly=ScottPlot.Avalonia"
              x:Class="CryptArc.App.Views.NaiveVsOptimisedView"
@@ -7,17 +8,17 @@
 
     <DockPanel>
         <StackPanel DockPanel.Dock="Top" Spacing="4" Margin="0,0,0,16">
-            <TextBlock Classes="PageTitle" Text="Naive vs optimised" />
+            <TextBlock Classes="PageTitle" Text="{loc:T Pairs.Title}" />
             <TextBlock Classes="Secondary"
-                       Text="Every optimised routine keeps its straightforward counterpart (hard rule 4). These are their Release BenchmarkDotNet results; the app does not time anything here." />
+                       Text="{loc:T Pairs.Subtitle}" />
         </StackPanel>
 
         <Border Classes="Card" DockPanel.Dock="Top" IsVisible="{Binding !HasResults}" Padding="32">
             <StackPanel Spacing="8" HorizontalAlignment="Center" MaxWidth="640">
                 <PathIcon Data="{StaticResource SemiIconBolt}" Width="36" Height="36" Opacity="0.5" />
-                <TextBlock HorizontalAlignment="Center" Text="No benchmark results" FontWeight="SemiBold" />
+                <TextBlock HorizontalAlignment="Center" Text="{loc:T Pairs.Empty.Title}" FontWeight="SemiBold" />
                 <TextBlock Classes="Secondary" TextAlignment="Center"
-                           Text="Run the benchmarks in Release, copy the *.pairs.json files from BenchmarkDotNet.Artifacts/results into bench/results/, and rebuild. Looked in:" />
+                           Text="{loc:T Pairs.Empty.Hint}" />
                 <SelectableTextBlock HorizontalAlignment="Center" FontFamily="Menlo, Consolas, monospace" FontSize="12"
                                      Text="{Binding ResultsFolder}" />
             </StackPanel>
@@ -30,7 +31,7 @@
                     <ListBox.ItemTemplate>
                         <DataTemplate x:DataType="vm:SuiteItem">
                             <StackPanel Spacing="2" Margin="4,2">
-                                <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                                <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap" />
                                 <TextBlock Classes="Hint" Text="{Binding Headline}" />
                             </StackPanel>
                         </DataTemplate>
@@ -51,14 +52,14 @@
                             <Border IsVisible="{Binding IsQuickRun}" CornerRadius="6" Padding="10,6" Margin="0,4,0,0"
                                     Background="{DynamicResource SemiColorWarningLight}">
                                 <TextBlock TextWrapping="Wrap"
-                                           Text="These numbers come from a short or dry run. Re-run without --job short before quoting them in the report." />
+                                           Text="{loc:T Pairs.QuickRun}" />
                             </Border>
                         </StackPanel>
                     </Border>
 
                     <Border Name="ChartCard" Classes="Card" Height="240">
                         <DockPanel>
-                            <TextBlock DockPanel.Dock="Top" Classes="CardTitle" Text="Speedup over the naive version, log scale (dashed line = same speed)" />
+                            <TextBlock DockPanel.Dock="Top" Classes="CardTitle" TextWrapping="Wrap" Text="{loc:T Pairs.Chart.Title}" />
                             <sp:AvaPlot Name="Chart" Margin="0,8,0,0" />
                         </DockPanel>
                     </Border>
@@ -67,18 +68,18 @@
                         <DataGrid ItemsSource="{Binding Rows}" IsReadOnly="True" AutoGenerateColumns="False"
                                   GridLinesVisibility="Horizontal" HeadersVisibility="Column">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Case" Binding="{Binding Case}" Width="Auto" />
-                                <DataGridTextColumn Header="Optimised" Binding="{Binding Method}" Width="Auto" />
-                                <DataGridTextColumn Header="Naive" Binding="{Binding BaselineText}" Width="Auto" />
-                                <DataGridTextColumn Header="Optimised" Binding="{Binding MeanText}" Width="Auto" />
-                                <DataGridTextColumn Header="Speedup" Binding="{Binding SpeedupText}" Width="Auto" />
-                                <DataGridTextColumn Header="Allocated" Binding="{Binding AllocatedText}" Width="*" />
+                                <DataGridTextColumn Header="{loc:T Pairs.Col.Case}" Binding="{Binding Case}" Width="Auto" />
+                                <DataGridTextColumn Header="{loc:T Pairs.Col.Method}" Binding="{Binding Method}" Width="Auto" />
+                                <DataGridTextColumn Header="{loc:T Pairs.Col.Naive}" Binding="{Binding BaselineText}" Width="Auto" />
+                                <DataGridTextColumn Header="{loc:T Pairs.Col.Optimised}" Binding="{Binding MeanText}" Width="Auto" />
+                                <DataGridTextColumn Header="{loc:T Pairs.Col.Speedup}" Binding="{Binding SpeedupText}" Width="Auto" />
+                                <DataGridTextColumn Header="{loc:T Pairs.Col.Allocated}" Binding="{Binding AllocatedText}" Width="*" />
                             </DataGrid.Columns>
                         </DataGrid>
                     </Border>
 
                     <TextBlock Classes="Hint" TextWrapping="Wrap"
-                               Text="Times are the BenchmarkDotNet mean per operation; the naive method of each row is the [Baseline] of its group." />
+                               Text="{loc:T Pairs.Hint}" />
                     <TextBlock Classes="Hint" TextWrapping="Wrap" Text="{Binding Machine}" />
                 </StackPanel>
             </ScrollViewer>

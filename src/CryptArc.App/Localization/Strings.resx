@@ -1,0 +1,582 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Nav.Analyse" xml:space="preserve">
+    <value>Analyse</value>
+  </data>
+  <data name="Nav.Compare" xml:space="preserve">
+    <value>Compare codecs</value>
+  </data>
+  <data name="Nav.Compress" xml:space="preserve">
+    <value>Compress</value>
+  </data>
+  <data name="Nav.Lab" xml:space="preserve">
+    <value>Transform lab</value>
+  </data>
+  <data name="Nav.Pairs" xml:space="preserve">
+    <value>Naive vs optimised</value>
+  </data>
+  <data name="Nav.Archive" xml:space="preserve">
+    <value>Encrypted archive</value>
+  </data>
+  <data name="Nav.Soon" xml:space="preserve">
+    <value>soon</value>
+  </data>
+  <data name="Shell.ChooseFile" xml:space="preserve">
+    <value>Choose file…</value>
+  </data>
+  <data name="Shell.Language" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="Shell.PickerTitle" xml:space="preserve">
+    <value>Choose a file to analyse</value>
+  </data>
+  <data name="Shell.NoFile" xml:space="preserve">
+    <value>No file selected</value>
+  </data>
+  <data name="Shell.FileSize" xml:space="preserve">
+    <value>{0:N0} bytes</value>
+  </data>
+  <data name="Shell.Status.Initial" xml:space="preserve">
+    <value>Choose a file to analyse it and compare every codec on it.</value>
+  </data>
+  <data name="Shell.Status.Reading" xml:space="preserve">
+    <value>Reading…</value>
+  </data>
+  <data name="Shell.Status.Analysing" xml:space="preserve">
+    <value>Analysing…</value>
+  </data>
+  <data name="Shell.Status.Done" xml:space="preserve">
+    <value>CRC-32 {0:X8} · {1} codecs measured</value>
+  </data>
+  <data name="Common.Failed" xml:space="preserve">
+    <value>Failed: {0}</value>
+  </data>
+  <data name="Common.NoFileYet" xml:space="preserve">
+    <value>No file yet</value>
+  </data>
+  <data name="Common.UseChooseFile" xml:space="preserve">
+    <value>Use “Choose file…” above to load one.</value>
+  </data>
+  <data name="Unit.Bytes" xml:space="preserve">
+    <value>{0:N0} B</value>
+  </data>
+  <data name="Unit.B" xml:space="preserve">
+    <value>{0} B</value>
+  </data>
+  <data name="Unit.KiB" xml:space="preserve">
+    <value>{0:F1} KiB</value>
+  </data>
+  <data name="Unit.MiB" xml:space="preserve">
+    <value>{0:N1} MiB</value>
+  </data>
+  <data name="Unit.Ms" xml:space="preserve">
+    <value>{0:N0} ms</value>
+  </data>
+  <data name="Unit.MBps" xml:space="preserve">
+    <value>{0:N0} MB/s</value>
+  </data>
+  <data name="Unit.BitsPerByte" xml:space="preserve">
+    <value>{0:F2} bits/byte</value>
+  </data>
+  <data name="Unit.Time.S" xml:space="preserve">
+    <value>{0:F2} s</value>
+  </data>
+  <data name="Unit.Time.Ms" xml:space="preserve">
+    <value>{0:F2} ms</value>
+  </data>
+  <data name="Unit.Time.Us" xml:space="preserve">
+    <value>{0:F2} µs</value>
+  </data>
+  <data name="Unit.Time.Ns" xml:space="preserve">
+    <value>{0:F1} ns</value>
+  </data>
+  <data name="Analyse.Title" xml:space="preserve">
+    <value>Analyse a file</value>
+  </data>
+  <data name="Analyse.Subtitle" xml:space="preserve">
+    <value>Entropy, repeats and the share of text decide which codec CryptArc picks for each block.</value>
+  </data>
+  <data name="Analyse.Entropy" xml:space="preserve">
+    <value>Entropy</value>
+  </data>
+  <data name="Analyse.Entropy.Hint" xml:space="preserve">
+    <value>bits/byte, mean of blocks</value>
+  </data>
+  <data name="Analyse.Repeat" xml:space="preserve">
+    <value>Repeat ratio</value>
+  </data>
+  <data name="Analyse.Repeat.Hint" xml:space="preserve">
+    <value>same byte as previous</value>
+  </data>
+  <data name="Analyse.Text" xml:space="preserve">
+    <value>Text share</value>
+  </data>
+  <data name="Analyse.Text.Hint" xml:space="preserve">
+    <value>printable, mean of blocks</value>
+  </data>
+  <data name="Analyse.Recommended" xml:space="preserve">
+    <value>Recommended codec</value>
+  </data>
+  <data name="Analyse.Recommended.Empty" xml:space="preserve">
+    <value>empty file</value>
+  </data>
+  <data name="Analyse.Recommended.All" xml:space="preserve">
+    <value>all {0} blocks</value>
+  </data>
+  <data name="Analyse.Recommended.Some" xml:space="preserve">
+    <value>{0} of {1} blocks, the rest mostly {2}</value>
+  </data>
+  <data name="Analyse.NotImplemented" xml:space="preserve">
+    <value>{0} (not implemented yet)</value>
+  </data>
+  <data name="Analyse.Heatmap.Title" xml:space="preserve">
+    <value>Entropy by block</value>
+  </data>
+  <data name="Analyse.Heatmap.Blocks" xml:space="preserve">
+    <value>{0} blocks of 64 KiB</value>
+  </data>
+  <data name="Analyse.Heatmap.Sampled" xml:space="preserve">
+    <value>{0} sampled blocks of 64 KiB</value>
+  </data>
+  <data name="Analyse.Heatmap.ToolTip" xml:space="preserve">
+    <value>Offset {0:N0}
+{1:F2} bits/byte · {2:P0} text
+Codec: {3}</value>
+  </data>
+  <data name="Analyse.Heatmap.Low" xml:space="preserve">
+    <value>compressible</value>
+  </data>
+  <data name="Analyse.Heatmap.High" xml:space="preserve">
+    <value>near random</value>
+  </data>
+  <data name="Analyse.Histogram.Title" xml:space="preserve">
+    <value>Byte histogram, whole file</value>
+  </data>
+  <data name="Analyse.Histogram.Legend" xml:space="preserve">
+    <value>Blue: printable ASCII and whitespace, what the text share counts. Grey: every other byte value.</value>
+  </data>
+  <data name="Analyse.Histogram.Axis" xml:space="preserve">
+    <value>% of file</value>
+  </data>
+  <data name="Analyse.Histogram.Caption" xml:space="preserve">
+    <value>{0} of 256 values occur · most common 0x{1:X2}{2}, {3:P1}</value>
+  </data>
+  <data name="Analyse.Histogram.Space" xml:space="preserve">
+    <value>(space)</value>
+  </data>
+  <data name="Compare.Title" xml:space="preserve">
+    <value>Compare codecs</value>
+  </data>
+  <data name="Compare.Subtitle" xml:space="preserve">
+    <value>Every registered codec on the same file; each round trip is checked by CRC-32.</value>
+  </data>
+  <data name="Compare.Size" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="Compare.Speed" xml:space="preserve">
+    <value>Speed</value>
+  </data>
+  <data name="Compare.Empty.Hint" xml:space="preserve">
+    <value>Load a file and the codecs are measured on it automatically.</value>
+  </data>
+  <data name="Compare.Chart.Speed" xml:space="preserve">
+    <value>Encode speed, MB/s (higher is better; Store is a plain copy and left out)</value>
+  </data>
+  <data name="Compare.Chart.Size" xml:space="preserve">
+    <value>Compressed size, % of original (lower is better)</value>
+  </data>
+  <data name="Compare.Col.Codec" xml:space="preserve">
+    <value>Codec</value>
+  </data>
+  <data name="Compare.Col.Compressed" xml:space="preserve">
+    <value>Compressed</value>
+  </data>
+  <data name="Compare.Col.Ratio" xml:space="preserve">
+    <value>Ratio</value>
+  </data>
+  <data name="Compare.Col.Speed" xml:space="preserve">
+    <value>Encode / decode</value>
+  </data>
+  <data name="Compare.Col.RoundTrip" xml:space="preserve">
+    <value>Round trip</value>
+  </data>
+  <data name="Compare.Speed.Value" xml:space="preserve">
+    <value>{0:F1} / {1:F1} MB/s</value>
+  </data>
+  <data name="Compare.Ok" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Compare.Mismatch" xml:space="preserve">
+    <value>MISMATCH</value>
+  </data>
+  <data name="Compress.Title" xml:space="preserve">
+    <value>Compress</value>
+  </data>
+  <data name="Compress.Subtitle" xml:space="preserve">
+    <value>Split the file into independent blocks and compress them in parallel. Nothing is written to disk until the archive container exists.</value>
+  </data>
+  <data name="Compress.Codec" xml:space="preserve">
+    <value>Codec</value>
+  </data>
+  <data name="Compress.BlockSize" xml:space="preserve">
+    <value>Block size, KiB</value>
+  </data>
+  <data name="Compress.Threads" xml:space="preserve">
+    <value>Threads</value>
+  </data>
+  <data name="Compress.Threads.Hint" xml:space="preserve">
+    <value>1 thread runs the sequential baseline; compare it with more threads below.</value>
+  </data>
+  <data name="Compress.Verify" xml:space="preserve">
+    <value>Verify every block</value>
+  </data>
+  <data name="Compress.Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Compress.Run" xml:space="preserve">
+    <value>Compress</value>
+  </data>
+  <data name="Compress.Blocks" xml:space="preserve">
+    <value>Blocks</value>
+  </data>
+  <data name="Compress.MapTooLarge" xml:space="preserve">
+    <value>Too many blocks to draw a map; pick a larger block size to see one.</value>
+  </data>
+  <data name="Compress.Result.Compressed" xml:space="preserve">
+    <value>Compressed</value>
+  </data>
+  <data name="Compress.Result.Ratio" xml:space="preserve">
+    <value>{0} of input</value>
+  </data>
+  <data name="Compress.Result.Time" xml:space="preserve">
+    <value>Time</value>
+  </data>
+  <data name="Compress.Result.WallClock" xml:space="preserve">
+    <value>wall clock</value>
+  </data>
+  <data name="Compress.Result.Throughput" xml:space="preserve">
+    <value>Throughput</value>
+  </data>
+  <data name="Compress.Result.OfInput" xml:space="preserve">
+    <value>of input</value>
+  </data>
+  <data name="Compress.Result.Verification" xml:space="preserve">
+    <value>Verification</value>
+  </data>
+  <data name="Compress.Result.RoundTrip" xml:space="preserve">
+    <value>round trip</value>
+  </data>
+  <data name="Compress.Runs" xml:space="preserve">
+    <value>Runs</value>
+  </data>
+  <data name="Compress.Runs.BlockSize" xml:space="preserve">
+    <value>{0} KiB</value>
+  </data>
+  <data name="Compress.Runs.Hint" xml:space="preserve">
+    <value>Speedup is against the latest 1-thread run with the same codec and block size. Wall-clock time is indicative; BlockCompressorBenchmarks in bench/ is the measurement for the report.</value>
+  </data>
+  <data name="Compress.Col.Codec" xml:space="preserve">
+    <value>Codec</value>
+  </data>
+  <data name="Compress.Col.Block" xml:space="preserve">
+    <value>Block</value>
+  </data>
+  <data name="Compress.Col.Threads" xml:space="preserve">
+    <value>Threads</value>
+  </data>
+  <data name="Compress.Col.Time" xml:space="preserve">
+    <value>Time</value>
+  </data>
+  <data name="Compress.Col.Ratio" xml:space="preserve">
+    <value>Ratio</value>
+  </data>
+  <data name="Compress.Col.Speedup" xml:space="preserve">
+    <value>Speedup</value>
+  </data>
+  <data name="Compress.Auto" xml:space="preserve">
+    <value>Auto (per block)</value>
+  </data>
+  <data name="Compress.Auto.Short" xml:space="preserve">
+    <value>Auto</value>
+  </data>
+  <data name="Compress.Status.Ready" xml:space="preserve">
+    <value>Pick the settings and press Compress.</value>
+  </data>
+  <data name="Compress.Status.OneThread" xml:space="preserve">
+    <value>Compressing on one thread (sequential baseline)…</value>
+  </data>
+  <data name="Compress.Status.Threads" xml:space="preserve">
+    <value>Compressing on {0} threads…</value>
+  </data>
+  <data name="Compress.Status.Cancelled" xml:space="preserve">
+    <value>Cancelled after {0} of {1} blocks.</value>
+  </data>
+  <data name="Compress.Status.Done" xml:space="preserve">
+    <value>Done: {0} blocks.</value>
+  </data>
+  <data name="Compress.Verification.Off" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="Compress.Verification.AllOk" xml:space="preserve">
+    <value>All OK</value>
+  </data>
+  <data name="Compress.Verification.Failed" xml:space="preserve">
+    <value>FAILED</value>
+  </data>
+  <data name="Compress.Speedup.Baseline" xml:space="preserve">
+    <value>baseline</value>
+  </data>
+  <data name="Compress.Speedup.NeedsBaseline" xml:space="preserve">
+    <value>needs 1-thread run</value>
+  </data>
+  <data name="Compress.Tile.Pending" xml:space="preserve">
+    <value>Block {0}: pending</value>
+  </data>
+  <data name="Compress.Tile.Done" xml:space="preserve">
+    <value>Block {0} · offset {1:N0}
+{2} · {3:P1}</value>
+  </data>
+  <data name="Compress.Tile.Failed" xml:space="preserve">
+    <value>round trip FAILED</value>
+  </data>
+  <data name="Lab.Title" xml:space="preserve">
+    <value>Transform lab</value>
+  </data>
+  <data name="Lab.Subtitle" xml:space="preserve">
+    <value>The stages of the BWT codec, one at a time: Burrows–Wheeler groups similar contexts, move-to-front turns them into small numbers, zero runs shrink the zeros, and Huffman codes the rest.</value>
+  </data>
+  <data name="Lab.Input" xml:space="preserve">
+    <value>Input</value>
+  </data>
+  <data name="Lab.Input.Truncated" xml:space="preserve">
+    <value>Only the first {0:N0} bytes are used.</value>
+  </data>
+  <data name="Lab.Input.Size" xml:space="preserve">
+    <value>{0:N0} bytes</value>
+  </data>
+  <data name="Lab.Preset.English" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="Lab.Preset.Code" xml:space="preserve">
+    <value>Source code</value>
+  </data>
+  <data name="Lab.Preset.Random" xml:space="preserve">
+    <value>Random</value>
+  </data>
+  <data name="Lab.Stage.Input" xml:space="preserve">
+    <value>Input</value>
+  </data>
+  <data name="Lab.Stage.Rle" xml:space="preserve">
+    <value>Zero runs</value>
+  </data>
+  <data name="Lab.Stage.Zeros" xml:space="preserve">
+    <value>{0:P0} zeros</value>
+  </data>
+  <data name="Lab.Bwt.Title" xml:space="preserve">
+    <value>1 · Burrows–Wheeler: sort every rotation, keep the last column</value>
+  </data>
+  <data name="Lab.Bwt.RowsFirst" xml:space="preserve">
+    <value>First {0} of {1} rows. Original text is row {2}.</value>
+  </data>
+  <data name="Lab.Bwt.RowsAll" xml:space="preserve">
+    <value>All {0} rows. Original text is row {1}, marked.</value>
+  </data>
+  <data name="Lab.Bwt.Output" xml:space="preserve">
+    <value>Last column — the BWT output. Equal letters cluster because they are followed by similar text:</value>
+  </data>
+  <data name="Lab.Mtf.Title" xml:space="preserve">
+    <value>2 · Move-to-front: each byte becomes its position in a recently-used list</value>
+  </data>
+  <data name="Lab.Mtf.Hint" xml:space="preserve">
+    <value>A repeat of the previous byte is 0, a byte seen a moment ago is a small number. Clusters from BWT turn into runs of zeros.</value>
+  </data>
+  <data name="Lab.Rle.Title" xml:space="preserve">
+    <value>3 · Zero runs: a run of zeros becomes a few RUNA/RUNB digits (0 and 1)</value>
+  </data>
+  <data name="Lab.Rle.Hint" xml:space="preserve">
+    <value>Other values move up by one to make room for the two digits, as in bzip2.</value>
+  </data>
+  <data name="Lab.Huffman.Title" xml:space="preserve">
+    <value>4 · Huffman: short codes for frequent symbols</value>
+  </data>
+  <data name="Lab.Huffman.Raw" xml:space="preserve">
+    <value>Huffman on the input</value>
+  </data>
+  <data name="Lab.Huffman.Pipeline" xml:space="preserve">
+    <value>After the transforms</value>
+  </data>
+  <data name="Lab.Huffman.Size" xml:space="preserve">
+    <value>{0:N0} B · {1:P0}</value>
+  </data>
+  <data name="Lab.Verdict.SavesOne" xml:space="preserve">
+    <value>The transforms save 1 byte over Huffman alone. Table headers are not counted.</value>
+  </data>
+  <data name="Lab.Verdict.Saves" xml:space="preserve">
+    <value>The transforms save {0:N0} bytes over Huffman alone. Table headers are not counted.</value>
+  </data>
+  <data name="Lab.Verdict.NoHelp" xml:space="preserve">
+    <value>On this input the transforms do not help: there is too little repetition for BWT to group. Table headers are not counted.</value>
+  </data>
+  <data name="Lab.Col.Symbol" xml:space="preserve">
+    <value>Symbol</value>
+  </data>
+  <data name="Lab.Col.Means" xml:space="preserve">
+    <value>Means</value>
+  </data>
+  <data name="Lab.Col.Count" xml:space="preserve">
+    <value>Count</value>
+  </data>
+  <data name="Lab.Col.Bits" xml:space="preserve">
+    <value>Bits</value>
+  </data>
+  <data name="Lab.Col.Code" xml:space="preserve">
+    <value>Code</value>
+  </data>
+  <data name="Lab.Meaning.RunA" xml:space="preserve">
+    <value>RUNA (zero-run digit)</value>
+  </data>
+  <data name="Lab.Meaning.RunB" xml:space="preserve">
+    <value>RUNB (zero-run digit)</value>
+  </data>
+  <data name="Lab.Meaning.Escape" xml:space="preserve">
+    <value>escape: rank 254 or 255 follows</value>
+  </data>
+  <data name="Lab.Meaning.Rank" xml:space="preserve">
+    <value>MTF rank {0}</value>
+  </data>
+  <data name="Pairs.Title" xml:space="preserve">
+    <value>Naive vs optimised</value>
+  </data>
+  <data name="Pairs.Subtitle" xml:space="preserve">
+    <value>Every optimised routine keeps its straightforward counterpart (hard rule 4). These are their Release BenchmarkDotNet results; the app does not time anything here.</value>
+  </data>
+  <data name="Pairs.Empty.Title" xml:space="preserve">
+    <value>No benchmark results</value>
+  </data>
+  <data name="Pairs.Empty.Hint" xml:space="preserve">
+    <value>Run the benchmarks in Release, copy the *.pairs.json files from BenchmarkDotNet.Artifacts/results into bench/results/, and rebuild. Looked in:</value>
+  </data>
+  <data name="Pairs.QuickRun" xml:space="preserve">
+    <value>These numbers come from a short or dry run. Re-run without --job short before quoting them in the report.</value>
+  </data>
+  <data name="Pairs.Chart.Title" xml:space="preserve">
+    <value>Speedup over the naive version, log scale (dashed line = same speed)</value>
+  </data>
+  <data name="Pairs.Chart.Slower" xml:space="preserve">
+    <value>{0:0.##}× slower</value>
+  </data>
+  <data name="Pairs.Col.Case" xml:space="preserve">
+    <value>Case</value>
+  </data>
+  <data name="Pairs.Col.Method" xml:space="preserve">
+    <value>Optimised</value>
+  </data>
+  <data name="Pairs.Col.Naive" xml:space="preserve">
+    <value>Naive</value>
+  </data>
+  <data name="Pairs.Col.Optimised" xml:space="preserve">
+    <value>Optimised</value>
+  </data>
+  <data name="Pairs.Col.Speedup" xml:space="preserve">
+    <value>Speedup</value>
+  </data>
+  <data name="Pairs.Col.Allocated" xml:space="preserve">
+    <value>Allocated</value>
+  </data>
+  <data name="Pairs.Hint" xml:space="preserve">
+    <value>Times are the BenchmarkDotNet mean per operation; the naive method of each row is the [Baseline] of its group.</value>
+  </data>
+  <data name="Pairs.Machine" xml:space="preserve">
+    <value>{0}, {1} logical cores · {2} · {3} · BenchmarkDotNet {4} · measured {5:yyyy-MM-dd HH:mm}</value>
+  </data>
+  <data name="Pairs.Headline.Faster" xml:space="preserve">
+    <value>up to {0:F1}× faster</value>
+  </data>
+  <data name="Pairs.Headline.Slower" xml:space="preserve">
+    <value>{0:F1}× slower</value>
+  </data>
+  <data name="Pairs.Row.Faster" xml:space="preserve">
+    <value>{0:F2}× faster</value>
+  </data>
+  <data name="Pairs.Row.Slower" xml:space="preserve">
+    <value>{0:F2}× slower</value>
+  </data>
+  <data name="Pairs.Suite.Crc32Benchmarks.Title" xml:space="preserve">
+    <value>CRC-32</value>
+  </data>
+  <data name="Pairs.Suite.Crc32Benchmarks.Story" xml:space="preserve">
+    <value>Per-bit loop → 256-entry lookup table.</value>
+  </data>
+  <data name="Pairs.Suite.HuffmanBenchmarks.Title" xml:space="preserve">
+    <value>Huffman decoding</value>
+  </data>
+  <data name="Pairs.Suite.HuffmanBenchmarks.Story" xml:space="preserve">
+    <value>Bit-by-bit tree walk → two-level lookup table.</value>
+  </data>
+  <data name="Pairs.Suite.SuffixArrayBenchmarks.Title" xml:space="preserve">
+    <value>Suffix array (BWT)</value>
+  </data>
+  <data name="Pairs.Suite.SuffixArrayBenchmarks.Story" xml:space="preserve">
+    <value>Comparison sort of suffixes → prefix doubling with radix sort. The naive sort is near-quadratic on text.</value>
+  </data>
+  <data name="Pairs.Suite.MoveToFrontBenchmarks.Title" xml:space="preserve">
+    <value>Move-to-front</value>
+  </data>
+  <data name="Pairs.Suite.MoveToFrontBenchmarks.Story" xml:space="preserve">
+    <value>Byte-by-byte loops → front check, vectorised search and block move.</value>
+  </data>
+  <data name="Pairs.Suite.LzssMatchSearchBenchmarks.Title" xml:space="preserve">
+    <value>LZSS match search</value>
+  </data>
+  <data name="Pairs.Suite.LzssMatchSearchBenchmarks.Story" xml:space="preserve">
+    <value>Linear scan of the 32 KiB window → hash chains.</value>
+  </data>
+  <data name="Pairs.Suite.LzssMatchLengthBenchmarks.Title" xml:space="preserve">
+    <value>LZSS match length</value>
+  </data>
+  <data name="Pairs.Suite.LzssMatchLengthBenchmarks.Story" xml:space="preserve">
+    <value>One byte per step → 8 bytes per step with TrailingZeroCount.</value>
+  </data>
+  <data name="Pairs.Suite.DeflateMatchSearchBenchmarks.Title" xml:space="preserve">
+    <value>Deflate match search</value>
+  </data>
+  <data name="Pairs.Suite.DeflateMatchSearchBenchmarks.Story" xml:space="preserve">
+    <value>Linear scan of the 32 KiB window → hash chains, over 3…258 byte matches.</value>
+  </data>
+  <data name="Pairs.Suite.BackReferenceBenchmarks.Title" xml:space="preserve">
+    <value>Back-reference copy</value>
+  </data>
+  <data name="Pairs.Suite.BackReferenceBenchmarks.Story" xml:space="preserve">
+    <value>One byte at a time → vectorised copy in blocks of the match distance.</value>
+  </data>
+  <data name="Pairs.Suite.LzwBenchmarks.Title" xml:space="preserve">
+    <value>LZW dictionary</value>
+  </data>
+  <data name="Pairs.Suite.LzwBenchmarks.Story" xml:space="preserve">
+    <value>Linear search → open-addressing hash table.</value>
+  </data>
+  <data name="Pairs.Suite.ArithmeticBenchmarks.Title" xml:space="preserve">
+    <value>Arithmetic coding</value>
+  </data>
+  <data name="Pairs.Suite.ArithmeticBenchmarks.Story" xml:space="preserve">
+    <value>O(k) cumulative-frequency scans → Fenwick tree with binary lifting.</value>
+  </data>
+  <data name="Pairs.Suite.BlockCompressorBenchmarks.Title" xml:space="preserve">
+    <value>Parallel blocks</value>
+  </data>
+  <data name="Pairs.Suite.BlockCompressorBenchmarks.Story" xml:space="preserve">
+    <value>One block after another → independent blocks on several threads (ADR-0005).</value>
+  </data>
+</root>

@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CryptArc.App.Localization;
 using CryptArc.App.Services;
 using CryptArc.Core.Analysis;
 
@@ -8,6 +9,8 @@ namespace CryptArc.App.ViewModels;
 /// <summary>The "Analyse" page: the file's statistics and the per-block entropy heatmap.</summary>
 public partial class AnalysePageViewModel : ObservableObject
 {
+    private static readonly Localizer L = Localizer.Instance;
+
     [ObservableProperty]
     private bool _hasFile;
 
@@ -36,6 +39,10 @@ public partial class AnalysePageViewModel : ObservableObject
     [ObservableProperty]
     private string _histogramCaption = string.Empty;
 
+    /// <summary>Label of the histogram's vertical axis; the view draws it, the text is decided here.</summary>
+    [ObservableProperty]
+    private string _histogramAxisTitle = string.Empty;
+
     /// <summary>One cell per profiled block, in file order.</summary>
     public ObservableCollection<HeatmapCell> Blocks { get; } = [];
 
@@ -44,28 +51,29 @@ public partial class AnalysePageViewModel : ObservableObject
     /// <param name="summary">Whole-file figures aggregated from the blocks.</param>
     public void Show(MeasurementReport report, FileSummary summary)
     {
-        Entropy = $"{summary.Entropy:F2}";
-        RepeatRatio = $"{summary.RepeatRatio:P1}";
-        TextRatio = $"{summary.TextRatio:P1}";
+        Entropy = L.Number(summary.Entropy, "F2");
+        RepeatRatio = L.Number(summary.RepeatRatio, "P1");
+        TextRatio = L.Number(summary.TextRatio, "P1");
         Recommendation = summary.RecommendedDisplay;
         RecommendationCaption = summary.BlockCount == 0
-            ? "empty file"
+            ? L["Analyse.Recommended.Empty"]
             : summary.RunnerUp is null
-                ? $"all {summary.BlockCount} blocks"
-                : $"{summary.RecommendedBlocks} of {summary.BlockCount} blocks, the rest mostly {summary.RunnerUp}";
+                ? L.Format("Analyse.Recommended.All", summary.BlockCount)
+                : L.Format("Analyse.Recommended.Some", summary.RecommendedBlocks, summary.BlockCount, summary.RunnerUp);
 
         Blocks.Clear();
         foreach (BlockProfile block in report.Blocks)
             Blocks.Add(new HeatmapCell(block.Profile.Entropy,
-                $"Offset {block.Offset:N0}\n{block.Profile.Entropy:F2} bits/byte · {block.Profile.TextRatio:P0} text\n" +
-                $"Codec: {DataAnalyzer.Recommend(block.Profile)}"));
+                L.Format("Analyse.Heatmap.ToolTip", block.Offset, block.Profile.Entropy, block.Profile.TextRatio,
+                    DataAnalyzer.Recommend(block.Profile))));
 
         BlocksCaption = report.Blocks.Length == CodecMeasurement.MaxHeatmapBlocks
-            ? $"{report.Blocks.Length} sampled blocks of 64 KiB"
-            : $"{report.Blocks.Length} blocks of 64 KiB";
+            ? L.Format("Analyse.Heatmap.Sampled", report.Blocks.Length)
+            : L.Format("Analyse.Heatmap.Blocks", report.Blocks.Length);
 
         Histogram = report.Histogram;
         HistogramCaption = DescribeHistogram(report.Histogram);
+        HistogramAxisTitle = L["Analyse.Histogram.Axis"];
 
         HasFile = true;
     }
@@ -84,10 +92,12 @@ public partial class AnalysePageViewModel : ObservableObject
         }
 
         if (total == 0)
-            return "empty file";
+            return L["Analyse.Recommended.Empty"];
 
-        string symbol = top is >= 0x21 and <= 0x7E ? $" '{(char)top}'" : top == 0x20 ? " (space)" : string.Empty;
-        return $"{distinct} of 256 values occur · most common 0x{top:X2}{symbol}, {counts[top] / (double)total:P1}";
+        string symbol = top is >= 0x21 and <= 0x7E
+            ? $" '{(char)top}'"
+            : top == 0x20 ? " " + L["Analyse.Histogram.Space"] : string.Empty;
+        return L.Format("Analyse.Histogram.Caption", distinct, top, symbol, counts[top] / (double)total);
     }
 }
 

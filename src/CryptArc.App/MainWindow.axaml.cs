@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
+using CryptArc.App.Localization;
 using CryptArc.App.Services;
 using CryptArc.App.ViewModels;
 
@@ -26,7 +27,7 @@ public partial class MainWindow : Window
     /// need a public parameterless one. The application itself never calls it.
     /// </summary>
     public MainWindow()
-        : this(new MainWindowViewModel(new CodecMeasurement(), new AnalysePageViewModel(), new ComparePageViewModel(), new CompressPageViewModel(), new TransformLabPageViewModel(), new NaiveVsOptimisedPageViewModel(new BenchmarkResults())))
+        : this(new MainWindowViewModel(new CodecMeasurement(), new LanguagePreference(), new AnalysePageViewModel(), new ComparePageViewModel(), new CompressPageViewModel(), new TransformLabPageViewModel(), new NaiveVsOptimisedPageViewModel(new BenchmarkResults())))
     {
     }
 
@@ -44,7 +45,7 @@ public partial class MainWindow : Window
 
         IReadOnlyList<IStorageFile> files = await storage.OpenFilePickerAsync(new FilePickerOpenOptions
         {
-            Title = "Choose a file to analyse",
+            Title = Localizer.Instance["Shell.PickerTitle"],
             AllowMultiple = false,
         });
 

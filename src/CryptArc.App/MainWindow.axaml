@@ -1,5 +1,6 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="using:CryptArc.App.Localization"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:CryptArc.App.ViewModels"
@@ -42,43 +43,51 @@
                     <TextBlock Text="CryptArc" FontSize="17" FontWeight="Bold" VerticalAlignment="Center" />
                 </StackPanel>
 
+                <!-- Each language is listed under its own name, so the switch reads
+                     the same whichever language is active. -->
+                <StackPanel DockPanel.Dock="Bottom" Spacing="6" Margin="12,12,12,0">
+                    <TextBlock Classes="Hint" Text="{loc:T Shell.Language}" />
+                    <ComboBox ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedLanguage}"
+                              HorizontalAlignment="Stretch" />
+                </StackPanel>
+
                 <ListBox Classes="Nav" SelectedIndex="{Binding SelectedPageIndex}" Background="Transparent">
                     <ListBoxItem>
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <PathIcon Data="{StaticResource SemiIconSearch}" />
-                            <TextBlock Text="Analyse" />
+                            <TextBlock Text="{loc:T Nav.Analyse}" />
                         </StackPanel>
                     </ListBoxItem>
                     <ListBoxItem>
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <PathIcon Data="{StaticResource SemiIconHistogram}" />
-                            <TextBlock Text="Compare codecs" />
+                            <TextBlock Text="{loc:T Nav.Compare}" />
                         </StackPanel>
                     </ListBoxItem>
                     <ListBoxItem>
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <PathIcon Data="{StaticResource SemiIconLayers}" />
-                            <TextBlock Text="Compress" />
+                            <TextBlock Text="{loc:T Nav.Compress}" />
                         </StackPanel>
                     </ListBoxItem>
                     <ListBoxItem>
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <PathIcon Data="{StaticResource SemiIconBeaker}" />
-                            <TextBlock Text="Transform lab" />
+                            <TextBlock Text="{loc:T Nav.Lab}" />
                         </StackPanel>
                     </ListBoxItem>
                     <ListBoxItem>
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <PathIcon Data="{StaticResource SemiIconBolt}" />
-                            <TextBlock Text="Naive vs optimised" />
+                            <TextBlock Text="{loc:T Nav.Pairs}" />
                         </StackPanel>
                     </ListBoxItem>
                     <ListBoxItem IsEnabled="False">
                         <DockPanel>
-                            <Border DockPanel.Dock="Right" Classes="Soon"><TextBlock Classes="Hint" Text="soon" /></Border>
+                            <Border DockPanel.Dock="Right" Classes="Soon"><TextBlock Classes="Hint" Text="{loc:T Nav.Soon}" /></Border>
                             <StackPanel Orientation="Horizontal" Spacing="10">
                                 <PathIcon Data="{StaticResource SemiIconLock}" />
-                                <TextBlock Text="Encrypted archive" />
+                                <TextBlock Text="{loc:T Nav.Archive}" />
                             </StackPanel>
                         </DockPanel>
                     </ListBoxItem>
@@ -93,7 +102,7 @@
                 <DockPanel>
                     <Button Name="ChooseFileButton" DockPanel.Dock="Right"
                             Classes="Primary" Theme="{DynamicResource SolidButton}"
-                            Content="Choose file…" IsEnabled="{Binding !IsBusy}"
+                            Content="{loc:T Shell.ChooseFile}" IsEnabled="{Binding !IsBusy}"
                             VerticalAlignment="Center" />
                     <PathIcon DockPanel.Dock="Left" Data="{StaticResource SemiIconFile}"
                               Width="28" Height="28" Margin="0,0,14,0"

@@ -10,3 +10,7 @@
 - Guard re-entrancy with `IsBusy` so a second click cannot start a second run.
 - Catch exceptions and surface them as `Status` text — an unhandled exception in
   an `async void` event handler kills the process.
+- **Text kept in a property must survive a language switch.** Keep what the
+  text was built from and rebuild it on `Localizer.LanguageChanged`; a string
+  formatted once stays in the old language. `Localizer` is plain C#, not an
+  Avalonia type, so using it here is allowed.

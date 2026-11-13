@@ -1,6 +1,8 @@
+using System.Globalization;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using CryptArc.App.Localization;
 using CryptArc.App.Services;
 using CryptArc.App.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,6 +21,13 @@ public partial class App : Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             ServiceProvider services = ConfigureServices();
+
+            // Before anything is resolved: view models read their first strings in
+            // their constructors. The saved choice wins, then the system language.
+            Localizer localizer = Localizer.Instance;
+            string? saved = services.GetRequiredService<ILanguagePreference>().Load();
+            localizer.Use(localizer.FindLanguage(saved) ?? localizer.Match(CultureInfo.CurrentUICulture));
+
             MainWindow window = services.GetRequiredService<MainWindow>();
             desktop.MainWindow = window;
 
@@ -38,6 +47,7 @@ public partial class App : Application
         new ServiceCollection()
             .AddSingleton<ICodecMeasurement, CodecMeasurement>()
             .AddSingleton<IBenchmarkResults, BenchmarkResults>()
+            .AddSingleton<ILanguagePreference, LanguagePreference>()
             .AddTransient<AnalysePageViewModel>()
             .AddTransient<ComparePageViewModel>()
             .AddTransient<CompressPageViewModel>()

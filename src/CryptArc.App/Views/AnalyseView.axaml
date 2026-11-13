@@ -1,5 +1,6 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="using:CryptArc.App.Localization"
              xmlns:vm="using:CryptArc.App.ViewModels"
              xmlns:conv="using:CryptArc.App.Converters"
              xmlns:sp="clr-namespace:ScottPlot.Avalonia;assembly=ScottPlot.Avalonia"
@@ -10,17 +11,17 @@
         <StackPanel Spacing="16">
 
             <StackPanel Spacing="4">
-                <TextBlock Classes="PageTitle" Text="Analyse a file" />
+                <TextBlock Classes="PageTitle" Text="{loc:T Analyse.Title}" />
                 <TextBlock Classes="Secondary"
-                           Text="Entropy, repeats and the share of text decide which codec CryptArc picks for each block." />
+                           Text="{loc:T Analyse.Subtitle}" />
             </StackPanel>
 
             <Border Classes="Card" IsVisible="{Binding !HasFile}" Padding="32">
                 <StackPanel Spacing="8" HorizontalAlignment="Center">
                     <PathIcon Data="{StaticResource SemiIconFile}" Width="36" Height="36" Opacity="0.5" />
-                    <TextBlock HorizontalAlignment="Center" Text="No file yet" FontWeight="SemiBold" />
+                    <TextBlock HorizontalAlignment="Center" Text="{loc:T Common.NoFileYet}" FontWeight="SemiBold" />
                     <TextBlock Classes="Secondary" HorizontalAlignment="Center"
-                               Text="Use “Choose file…” above to load one." />
+                               Text="{loc:T Common.UseChooseFile}" />
                 </StackPanel>
             </Border>
 
@@ -29,28 +30,28 @@
                 <UniformGrid Columns="4" ColumnSpacing="12">
                     <Border Classes="Card">
                         <StackPanel Spacing="2">
-                            <TextBlock Classes="Secondary" Text="Entropy" />
+                            <TextBlock Classes="Secondary" Text="{loc:T Analyse.Entropy}" />
                             <TextBlock Classes="Metric" Text="{Binding Entropy}" />
-                            <TextBlock Classes="Hint" Text="bits/byte, mean of blocks" />
+                            <TextBlock Classes="Hint" Text="{loc:T Analyse.Entropy.Hint}" />
                         </StackPanel>
                     </Border>
                     <Border Classes="Card">
                         <StackPanel Spacing="2">
-                            <TextBlock Classes="Secondary" Text="Repeat ratio" />
+                            <TextBlock Classes="Secondary" Text="{loc:T Analyse.Repeat}" />
                             <TextBlock Classes="Metric" Text="{Binding RepeatRatio}" />
-                            <TextBlock Classes="Hint" Text="same byte as previous" />
+                            <TextBlock Classes="Hint" Text="{loc:T Analyse.Repeat.Hint}" />
                         </StackPanel>
                     </Border>
                     <Border Classes="Card">
                         <StackPanel Spacing="2">
-                            <TextBlock Classes="Secondary" Text="Text share" />
+                            <TextBlock Classes="Secondary" Text="{loc:T Analyse.Text}" />
                             <TextBlock Classes="Metric" Text="{Binding TextRatio}" />
-                            <TextBlock Classes="Hint" Text="printable, mean of blocks" />
+                            <TextBlock Classes="Hint" Text="{loc:T Analyse.Text.Hint}" />
                         </StackPanel>
                     </Border>
                     <Border Classes="Card Accent">
                         <StackPanel Spacing="2">
-                            <TextBlock Classes="Secondary" Text="Recommended codec" />
+                            <TextBlock Classes="Secondary" Text="{loc:T Analyse.Recommended}" />
                             <TextBlock Classes="Metric" Text="{Binding Recommendation}" />
                             <TextBlock Classes="Hint" Text="{Binding RecommendationCaption}" TextWrapping="Wrap" />
                         </StackPanel>
@@ -62,7 +63,7 @@
                         <DockPanel>
                             <TextBlock DockPanel.Dock="Right" Classes="Hint" VerticalAlignment="Center"
                                        Text="{Binding BlocksCaption}" />
-                            <TextBlock Classes="CardTitle" Text="Entropy by block" />
+                            <TextBlock Classes="CardTitle" Text="{loc:T Analyse.Heatmap.Title}" />
                         </DockPanel>
 
                         <ItemsControl ItemsSource="{Binding Blocks}">
@@ -81,7 +82,7 @@
                         </ItemsControl>
 
                         <StackPanel Orientation="Horizontal" Spacing="6">
-                            <TextBlock Classes="Hint" VerticalAlignment="Center" Text="compressible" />
+                            <TextBlock Classes="Hint" VerticalAlignment="Center" Text="{loc:T Analyse.Heatmap.Low}" />
                             <ItemsControl Name="Legend" VerticalAlignment="Center">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
@@ -94,7 +95,7 @@
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
-                            <TextBlock Classes="Hint" VerticalAlignment="Center" Text="near random" />
+                            <TextBlock Classes="Hint" VerticalAlignment="Center" Text="{loc:T Analyse.Heatmap.High}" />
                         </StackPanel>
                     </StackPanel>
                 </Border>
@@ -104,10 +105,10 @@
                         <DockPanel DockPanel.Dock="Top">
                             <TextBlock DockPanel.Dock="Right" Classes="Hint" VerticalAlignment="Center"
                                        Text="{Binding HistogramCaption}" />
-                            <TextBlock Classes="CardTitle" Text="Byte histogram, whole file" />
+                            <TextBlock Classes="CardTitle" Text="{loc:T Analyse.Histogram.Title}" />
                         </DockPanel>
                         <TextBlock DockPanel.Dock="Bottom" Classes="Hint" Margin="0,4,0,0"
-                                   Text="Blue: printable ASCII and whitespace, what the text share counts. Grey: every other byte value." />
+                                   Text="{loc:T Analyse.Histogram.Legend}" />
                         <sp:AvaPlot Name="HistogramChart" Margin="0,8,0,0" />
                     </DockPanel>
                 </Border>

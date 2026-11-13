@@ -1,3 +1,5 @@
+using CryptArc.App.Localization;
+
 namespace CryptArc.App.ViewModels;
 
 /// <summary>One row of the "how did each algorithm do" table shown in the UI.</summary>
@@ -7,6 +9,12 @@ namespace CryptArc.App.ViewModels;
 /// <param name="EncodeThroughput">Compression speed in MB/s.</param>
 /// <param name="DecodeThroughput">Decompression speed in MB/s.</param>
 /// <param name="RoundTripOk">Whether the data survived a compress/decompress cycle intact.</param>
+/// <remarks>
+/// The display texts are fixed when the row is created, in the language of that moment,
+/// and are part of the record's equality. A data grid keeps the cells of a row it
+/// considers unchanged, so after a language switch the rows are created again
+/// (<see cref="Retranslated"/>) rather than asked for their texts a second time.
+/// </remarks>
 public sealed record CodecResult(
     string Codec,
     long CompressedSize,
@@ -15,11 +23,20 @@ public sealed record CodecResult(
     double DecodeThroughput,
     bool RoundTripOk)
 {
-    public string SizeText => $"{CompressedSize:N0} B";
+    /// <summary>Compressed size for display.</summary>
+    public string SizeText { get; } = Localizer.Instance.Format("Unit.Bytes", CompressedSize);
 
-    public string RatioText => $"{Ratio:P1}";
+    /// <summary>Ratio for display.</summary>
+    public string RatioText { get; } = Localizer.Instance.Number(Ratio, "P1");
 
-    public string SpeedText => $"{EncodeThroughput:F1} / {DecodeThroughput:F1} MB/s";
+    /// <summary>Encode and decode speed for display.</summary>
+    public string SpeedText { get; } = Localizer.Instance.Format("Compare.Speed.Value", EncodeThroughput, DecodeThroughput);
 
-    public string StatusText => RoundTripOk ? "OK" : "MISMATCH";
+    /// <summary>Round-trip outcome for display.</summary>
+    public string StatusText { get; } = Localizer.Instance[RoundTripOk ? "Compare.Ok" : "Compare.Mismatch"];
+
+    /// <summary>The same result with its texts in the current language.</summary>
+    /// <returns>A new row.</returns>
+    public CodecResult Retranslated() =>
+        new(Codec, CompressedSize, Ratio, EncodeThroughput, DecodeThroughput, RoundTripOk);
 }

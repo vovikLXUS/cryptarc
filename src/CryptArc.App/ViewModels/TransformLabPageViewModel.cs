@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Text;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CryptArc.App.Localization;
 using CryptArc.App.Services;
 
 namespace CryptArc.App.ViewModels;
@@ -15,6 +16,8 @@ namespace CryptArc.App.ViewModels;
 public partial class TransformLabPageViewModel : ObservableObject
 {
     private const int PreviewValues = 400;
+
+    private static readonly Localizer L = Localizer.Instance;
 
     [ObservableProperty]
     private string _input = "banana_bandana_banana_bandana";
@@ -50,16 +53,25 @@ public partial class TransformLabPageViewModel : ObservableObject
     private string _verdict = string.Empty;
 
     /// <summary>Creates the page and runs the default example.</summary>
-    public TransformLabPageViewModel() => Recompute();
+    public TransformLabPageViewModel()
+    {
+        Recompute();
+        L.LanguageChanged += (_, _) =>
+        {
+            // The preset buttons carry translated names, so the list is built again.
+            OnPropertyChanged(nameof(Presets));
+            Recompute();
+        };
+    }
 
-    /// <summary>Example inputs offered as buttons.</summary>
-    public IReadOnlyList<LabPreset> Presets { get; } =
+    /// <summary>Example inputs offered as buttons. The texts themselves are data and are not translated.</summary>
+    public IReadOnlyList<LabPreset> Presets =>
     [
         new("banana", "banana_bandana_banana_bandana"),
         new("abracadabra", "abracadabra abracadabra abracadabra"),
-        new("English", "the cat sat on the mat and the dog sat on the log, so the cat and the dog sat."),
-        new("Source code", "for (int i = 0; i < n; i++) { sum += a[i]; }\nfor (int j = 0; j < n; j++) { sum += b[j]; }\n"),
-        new("Random", "q7Zp2Lx9Vb4Nk1Rt8Mw3Yc6Hs0Jd5Gf"),
+        new(L["Lab.Preset.English"], "the cat sat on the mat and the dog sat on the log, so the cat and the dog sat."),
+        new(L["Lab.Preset.Code"], "for (int i = 0; i < n; i++) { sum += a[i]; }\nfor (int j = 0; j < n; j++) { sum += b[j]; }\n"),
+        new(L["Lab.Preset.Random"], "q7Zp2Lx9Vb4Nk1Rt8Mw3Yc6Hs0Jd5Gf"),
     ];
 
     /// <summary>One chip per stage for the summary row.</summary>
@@ -80,25 +92,25 @@ public partial class TransformLabPageViewModel : ObservableObject
     {
         byte[] bytes = Encoding.UTF8.GetBytes(Input);
         InputNote = bytes.Length > TransformLab.MaxInputBytes
-            ? $"Only the first {TransformLab.MaxInputBytes:N0} bytes are used."
-            : $"{bytes.Length:N0} bytes";
+            ? L.Format("Lab.Input.Truncated", TransformLab.MaxInputBytes)
+            : L.Format("Lab.Input.Size", bytes.Length);
         if (bytes.Length > TransformLab.MaxInputBytes)
             Array.Resize(ref bytes, TransformLab.MaxInputBytes);
 
         LabReport report = TransformLab.Run(bytes);
 
         Stages.Clear();
-        Stages.Add(Chip("Input", report.Input, isLast: false));
+        Stages.Add(Chip(L["Lab.Stage.Input"], report.Input, isLast: false));
         Stages.Add(Chip("BWT", report.Bwt, isLast: false));
         Stages.Add(Chip("Move-to-front", report.Mtf, isLast: false));
-        Stages.Add(Chip("Zero runs", report.Rle, isLast: true));
+        Stages.Add(Chip(L["Lab.Stage.Rle"], report.Rle, isLast: true));
 
         Rotations.Clear();
         foreach (RotationRow row in report.Rotations)
             Rotations.Add(row);
         RotationsCaption = report.Rotations.Length < bytes.Length + 1
-            ? $"First {report.Rotations.Length} of {bytes.Length + 1} rows. Original text is row {report.PrimaryIndex}."
-            : $"All {report.Rotations.Length} rows. Original text is row {report.PrimaryIndex}, marked.";
+            ? L.Format("Lab.Bwt.RowsFirst", report.Rotations.Length, bytes.Length + 1, report.PrimaryIndex)
+            : L.Format("Lab.Bwt.RowsAll", report.Rotations.Length, report.PrimaryIndex);
 
         BwtPreview = TransformLab.Printable(report.Bwt.Bytes);
         MtfPreview = Numbers(report.Mtf.Bytes);
@@ -109,13 +121,15 @@ public partial class TransformLabPageViewModel : ObservableObject
         double inputLength = Math.Max(1, bytes.Length);
         HuffmanRawShare = Math.Min(1, rawBytes / inputLength);
         HuffmanPipelineShare = Math.Min(1, pipelineBytes / inputLength);
-        HuffmanRawSize = $"{rawBytes:N0} B · {rawBytes / inputLength:P0}";
-        HuffmanPipelineSize = $"{pipelineBytes:N0} B · {pipelineBytes / inputLength:P0}";
+        HuffmanRawSize = L.Format("Lab.Huffman.Size", rawBytes, rawBytes / inputLength);
+        HuffmanPipelineSize = L.Format("Lab.Huffman.Size", pipelineBytes, pipelineBytes / inputLength);
         Verdict = bytes.Length == 0
             ? string.Empty
-            : pipelineBytes < rawBytes
-                ? $"The transforms save {rawBytes - pipelineBytes:N0} byte{(rawBytes - pipelineBytes == 1 ? "" : "s")} over Huffman alone. Table headers are not counted."
-                : "On this input the transforms do not help: there is too little repetition for BWT to group. Table headers are not counted.";
+            : pipelineBytes >= rawBytes
+                ? L["Lab.Verdict.NoHelp"]
+                : rawBytes - pipelineBytes == 1
+                    ? L["Lab.Verdict.SavesOne"]
+                    : L.Format("Lab.Verdict.Saves", rawBytes - pipelineBytes);
 
         HuffmanCodes.Clear();
         foreach (HuffmanRow row in report.Huffman.Rows)
@@ -123,7 +137,11 @@ public partial class TransformLabPageViewModel : ObservableObject
     }
 
     private static StageChip Chip(string name, StageResult stage, bool isLast) =>
-        new(name, $"{stage.Bytes.Length:N0} B", $"{stage.Entropy:F2} bits/byte", $"{stage.ZeroShare:P0} zeros", !isLast);
+        new(name,
+            L.Format("Unit.Bytes", stage.Bytes.Length),
+            L.Format("Unit.BitsPerByte", stage.Entropy),
+            L.Format("Lab.Stage.Zeros", stage.ZeroShare),
+            !isLast);
 
     private static string Numbers(byte[] bytes)
     {
@@ -137,7 +155,7 @@ public partial class TransformLabPageViewModel : ObservableObject
         }
 
         if (bytes.Length > count)
-            text.Append($" … (+{bytes.Length - count:N0})");
+            text.Append(" … (+").Append(L.Number(bytes.Length - count, "N0")).Append(')');
         return text.ToString();
     }
 }
@@ -166,11 +184,11 @@ public sealed record HuffmanRowView(int Symbol, int Count, int Length, string Co
     /// What the symbol stands for after zero-run coding: the two run digits, or a
     /// move-to-front rank shifted up by one.
     /// </summary>
-    public string Meaning => Symbol switch
+    public string Meaning { get; } = Symbol switch
     {
-        0 => "RUNA (zero-run digit)",
-        1 => "RUNB (zero-run digit)",
-        255 => "escape: rank 254 or 255 follows",
-        _ => $"MTF rank {Symbol - 1}",
+        0 => Localizer.Instance["Lab.Meaning.RunA"],
+        1 => Localizer.Instance["Lab.Meaning.RunB"],
+        255 => Localizer.Instance["Lab.Meaning.Escape"],
+        _ => Localizer.Instance.Format("Lab.Meaning.Rank", Symbol - 1),
     };
 }
