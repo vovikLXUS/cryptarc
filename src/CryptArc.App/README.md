@@ -7,10 +7,6 @@ Avalonia desktop application. Like the CLI, it is a thin shell over `Core`.
 A side menu switches between pages; the file card at the top is shared by all
 of them. Theme: Semi.Avalonia, charts: ScottPlot (ADR-0015).
 
-The interface is in English and Ukrainian. The switch is at the bottom of the
-side menu and takes effect at once, without a restart; see
-[Languages](#languages) below.
-
 | Page | Shows |
 |---|---|
 | Analyse | entropy, repeat ratio and text share as the mean over 64 KiB blocks, the codec picked for most blocks, a heatmap of entropy per block, and a histogram of every byte value over the whole file |
@@ -22,6 +18,10 @@ side menu and takes effect at once, without a restart; see
 | Naive vs optimised | the optimisation pairs of hard rule 4 as measured by BenchmarkDotNet in Release: speedup chart, times and allocations per case, and the machine. Reads `bench/results/*.pairs.json`, copied beside the executable at build time; the app times nothing here |
 
 Planned, shown as "soon" in the menu: the encrypted archive.
+
+The interface is in English and Ukrainian. The switch is at the bottom of the
+side menu and takes effect at once, without a restart; see
+[Languages](#languages) below.
 
 ## Structure
 
@@ -44,20 +44,6 @@ dotnet run --project src/CryptArc.App -c Release
 dotnet run --project src/CryptArc.App -c Release -- path/to/file   # opens it straight away
 ```
 
-## Dependency injection
-
-`App.axaml.cs` builds a `Microsoft.Extensions.DependencyInjection` container and
-resolves `MainWindow` from it; the window gets its view model and the view model
-gets `ICodecMeasurement` through the constructor. Register new services there.
-`MainWindow()` without arguments exists only for the XAML previewer. See
-ADR-0014 for why this is not Prism.
-
-## Why the file picker lives in code-behind
-
-Opening a dialog needs a `TopLevel`, which is a view concept. Keeping it in the
-window means `MainWindowViewModel` only ever receives a path, so it stays plain
-and unit-testable without an Avalonia harness.
-
 ## Languages
 
 Every string the user sees comes from `Localization/Strings.resx` (English, the
@@ -79,3 +65,17 @@ translation drops a placeholder, or when a view has literal text.
 
 Not translated: codec names (they come from `CodecRegistry`), method and class
 names from the benchmark results, and exception messages from the runtime.
+
+## Dependency injection
+
+`App.axaml.cs` builds a `Microsoft.Extensions.DependencyInjection` container and
+resolves `MainWindow` from it; the window gets its view model and the view model
+gets `ICodecMeasurement` through the constructor. Register new services there.
+`MainWindow()` without arguments exists only for the XAML previewer. See
+ADR-0014 for why this is not Prism.
+
+## Why the file picker lives in code-behind
+
+Opening a dialog needs a `TopLevel`, which is a view concept. Keeping it in the
+window means `MainWindowViewModel` only ever receives a path, so it stays plain
+and unit-testable without an Avalonia harness.
