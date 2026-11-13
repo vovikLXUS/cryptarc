@@ -120,7 +120,10 @@
              the drag events keep reaching the window itself. It carries no text on
              purpose: the picture is enough and needs no translation. -->
         <Border Name="DropOverlay" Grid.ColumnSpan="2" IsVisible="False" IsHitTestVisible="False"
-                Background="#CCF8FAFC" Padding="24">
+                Padding="24">
+            <Border.Background>
+                <SolidColorBrush Color="{StaticResource BrandMidnightMainBg}" Opacity="0.8" />
+            </Border.Background>
             <Panel>
                 <Rectangle RadiusX="16" RadiusY="16" StrokeThickness="2" StrokeDashArray="6,4"
                            Stroke="{DynamicResource SemiColorPrimary}"

@@ -59,4 +59,5 @@ and unit-testable without an Avalonia harness.
 Drag-and-drop follows the same rule: the window turns the drop into a local path
 and calls the same `LoadAsync`. A drag is accepted only when it carries a file on
 disk and nothing is loading; folders, text and other data are refused, and the
-cursor shows it. Of several dropped files the first one is opened.
+cursor shows it. When several items are dropped, the first file among them is
+opened and folders are skipped.
