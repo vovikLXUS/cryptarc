@@ -168,8 +168,8 @@ is silently garbage.
 | RLE0 | none | zero runs as bijective base-2 digits | `O(n)` |
 | MTF | 256-byte array, not a linked list | move-to-front | `O(k)` worst, `O(1)` typical |
 | Arithmetic coding | frequency model plus 32-bit range state | renormalise | `O(n)` |
-| Deduplication | Rabin-Karp rolling hash, SHA-256 per chunk | content-defined chunking | `O(n)` |
-| Block pipeline | bounded `Channel<T>` (producer/consumer queue) | enqueue/dequeue | `O(1)` |
+| Block pipeline | fixed batch of pooled block buffers, twice the thread count | fill, seal in parallel, write in order | `O(1)` per block |
+| Deduplication (planned, not implemented) | Rabin-Karp rolling hash, SHA-256 per chunk | content-defined chunking | `O(n)` |
 | Analyzer | `stackalloc int[256]` histogram | count, then entropy | `O(n)`, zero allocation |
 
 ---
@@ -192,8 +192,9 @@ Independence buys three things at once:
 3. **Selective extraction** — one file can be restored without touching the rest
    of the archive, because the block index records where each file starts.
 
-Stages are joined by a bounded `Channel<T>` so a slow disk cannot let compressed
-blocks pile up without limit.
+Blocks are read in batches of twice the thread count, sealed in parallel and
+written in order before the next batch is read, so a slow disk cannot let
+compressed blocks pile up without limit. Extraction is sequential.
 
 ---
 

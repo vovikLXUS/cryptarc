@@ -91,6 +91,9 @@
         <DataTemplate DataType="vm:NaiveVsOptimisedPageViewModel">
             <views:NaiveVsOptimisedView />
         </DataTemplate>
+        <DataTemplate DataType="vm:ArchivePageViewModel">
+            <views:ArchiveView />
+        </DataTemplate>
     </Application.DataTemplates>
 
     <Application.Styles>

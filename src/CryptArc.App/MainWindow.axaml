@@ -22,12 +22,6 @@
             <Setter Property="Width" Value="16" />
             <Setter Property="Height" Value="16" />
         </Style>
-        <Style Selector="Border.Soon">
-            <Setter Property="Background" Value="{DynamicResource SemiColorFill0}" />
-            <Setter Property="CornerRadius" Value="4" />
-            <Setter Property="Padding" Value="6,1" />
-            <Setter Property="Margin" Value="8,0,0,0" />
-        </Style>
     </Window.Styles>
 
     <Grid ColumnDefinitions="264,*">
@@ -74,14 +68,11 @@
                             <TextBlock Text="Naive vs optimised" />
                         </StackPanel>
                     </ListBoxItem>
-                    <ListBoxItem IsEnabled="False">
-                        <DockPanel>
-                            <Border DockPanel.Dock="Right" Classes="Soon"><TextBlock Classes="Hint" Text="soon" /></Border>
-                            <StackPanel Orientation="Horizontal" Spacing="10">
-                                <PathIcon Data="{StaticResource SemiIconLock}" />
-                                <TextBlock Text="Encrypted archive" />
-                            </StackPanel>
-                        </DockPanel>
+                    <ListBoxItem>
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <PathIcon Data="{StaticResource SemiIconLock}" />
+                            <TextBlock Text="Encrypted archive" />
+                        </StackPanel>
                     </ListBoxItem>
                 </ListBox>
             </DockPanel>
