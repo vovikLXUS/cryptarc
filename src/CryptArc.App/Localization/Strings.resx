@@ -30,9 +30,6 @@
   <data name="Nav.Archive" xml:space="preserve">
     <value>Encrypted archive</value>
   </data>
-  <data name="Nav.Soon" xml:space="preserve">
-    <value>soon</value>
-  </data>
   <data name="Shell.ChooseFile" xml:space="preserve">
     <value>Choose file…</value>
   </data>
@@ -225,7 +222,7 @@ Codec: {3}</value>
     <value>Compress</value>
   </data>
   <data name="Compress.Subtitle" xml:space="preserve">
-    <value>Split the file into independent blocks and compress them in parallel. Nothing is written to disk until the archive container exists.</value>
+    <value>Split the file into independent blocks and compress them in parallel. Nothing is written to disk here; the Encrypted archive page packs files for real.</value>
   </data>
   <data name="Compress.Codec" xml:space="preserve">
     <value>Codec</value>
@@ -578,5 +575,158 @@ Codec: {3}</value>
   </data>
   <data name="Pairs.Suite.BlockCompressorBenchmarks.Story" xml:space="preserve">
     <value>One block after another → independent blocks on several threads (ADR-0005).</value>
+  </data>
+  <data name="Unit.GiB" xml:space="preserve">
+    <value>{0:N2} GiB</value>
+  </data>
+  <data name="Archive.Title" xml:space="preserve">
+    <value>Encrypted archive</value>
+  </data>
+  <data name="Archive.Subtitle" xml:space="preserve">
+    <value>Pack files into a .cryptarc archive, or open one to list, verify and restore it. Each block is compressed, then sealed with AES-256-GCM under a key derived from the password with Argon2id.</value>
+  </data>
+  <data name="Archive.Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Archive.Create" xml:space="preserve">
+    <value>Create</value>
+  </data>
+  <data name="Archive.AddFiles" xml:space="preserve">
+    <value>Add files…</value>
+  </data>
+  <data name="Archive.AddFolder" xml:space="preserve">
+    <value>Add folder…</value>
+  </data>
+  <data name="Archive.Clear" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="Archive.NothingAdded" xml:space="preserve">
+    <value>Nothing added yet.</value>
+  </data>
+  <data name="Archive.Codec" xml:space="preserve">
+    <value>Codec</value>
+  </data>
+  <data name="Archive.Threads" xml:space="preserve">
+    <value>Threads</value>
+  </data>
+  <data name="Archive.Password" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="Archive.RepeatPassword" xml:space="preserve">
+    <value>Repeat password</value>
+  </data>
+  <data name="Archive.NoRecovery" xml:space="preserve">
+    <value>There is no recovery: without the password the archive cannot be opened.</value>
+  </data>
+  <data name="Archive.CreateButton" xml:space="preserve">
+    <value>Create archive…</value>
+  </data>
+  <data name="Archive.Open" xml:space="preserve">
+    <value>Open</value>
+  </data>
+  <data name="Archive.Choose" xml:space="preserve">
+    <value>Choose archive…</value>
+  </data>
+  <data name="Archive.Unlock" xml:space="preserve">
+    <value>Unlock</value>
+  </data>
+  <data name="Archive.UnlockHint" xml:space="preserve">
+    <value>Unlocking checks the HMAC over the whole file before anything in it is trusted. A wrong password and a tampered archive look the same.</value>
+  </data>
+  <data name="Archive.ExtractAll" xml:space="preserve">
+    <value>Extract all…</value>
+  </data>
+  <data name="Archive.Verify" xml:space="preserve">
+    <value>Verify</value>
+  </data>
+  <data name="Archive.Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="Archive.Col.Path" xml:space="preserve">
+    <value>Path</value>
+  </data>
+  <data name="Archive.Col.Size" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="Archive.Col.Stored" xml:space="preserve">
+    <value>Stored</value>
+  </data>
+  <data name="Archive.Col.Ratio" xml:space="preserve">
+    <value>Ratio</value>
+  </data>
+  <data name="Archive.Col.Modified" xml:space="preserve">
+    <value>Modified (UTC)</value>
+  </data>
+  <data name="Archive.NoArchive" xml:space="preserve">
+    <value>No archive chosen</value>
+  </data>
+  <data name="Archive.Summary" xml:space="preserve">
+    <value>{0:N0} files · {1} original · {2} stored</value>
+  </data>
+  <data name="Archive.SummaryRatio" xml:space="preserve">
+    <value>{0:N0} files · {1} original · {2} stored ({3})</value>
+  </data>
+  <data name="Archive.Status.Initial" xml:space="preserve">
+    <value>Add files to pack, or choose an archive to open.</value>
+  </data>
+  <data name="Archive.Status.NeedNewPassword" xml:space="preserve">
+    <value>Enter a password for the new archive.</value>
+  </data>
+  <data name="Archive.Status.Mismatch" xml:space="preserve">
+    <value>The passwords do not match.</value>
+  </data>
+  <data name="Archive.Status.Packing" xml:space="preserve">
+    <value>Deriving the key and packing…</value>
+  </data>
+  <data name="Archive.Status.Created" xml:space="preserve">
+    <value>Created {0}: {1:N0} files, {2} in {3:F1} s.</value>
+  </data>
+  <data name="Archive.Status.EnterAndUnlock" xml:space="preserve">
+    <value>Enter the password and press Unlock.</value>
+  </data>
+  <data name="Archive.Status.EnterPassword" xml:space="preserve">
+    <value>Enter the password.</value>
+  </data>
+  <data name="Archive.Status.Unlocking" xml:space="preserve">
+    <value>Deriving the key and checking integrity…</value>
+  </data>
+  <data name="Archive.Status.Unlocked" xml:space="preserve">
+    <value>Unlocked: the archive passed its integrity check.</value>
+  </data>
+  <data name="Archive.Status.Verifying" xml:space="preserve">
+    <value>Verifying every block…</value>
+  </data>
+  <data name="Archive.Status.Verified" xml:space="preserve">
+    <value>Verified: all {0:N0} files decode and match their checksums ({1:F1} s).</value>
+  </data>
+  <data name="Archive.Status.Extracting" xml:space="preserve">
+    <value>Extracting…</value>
+  </data>
+  <data name="Archive.Status.Restored" xml:space="preserve">
+    <value>Restored {0:N0} files to {1} ({2:F1} s).</value>
+  </data>
+  <data name="Archive.Status.Closed" xml:space="preserve">
+    <value>Archive closed.</value>
+  </data>
+  <data name="Archive.Status.Cancelled" xml:space="preserve">
+    <value>Cancelled.</value>
+  </data>
+  <data name="Archive.Dialog.AddFiles" xml:space="preserve">
+    <value>Add files to the archive</value>
+  </data>
+  <data name="Archive.Dialog.AddFolders" xml:space="preserve">
+    <value>Add folders to the archive</value>
+  </data>
+  <data name="Archive.Dialog.Create" xml:space="preserve">
+    <value>Create archive</value>
+  </data>
+  <data name="Archive.Dialog.Choose" xml:space="preserve">
+    <value>Choose an archive</value>
+  </data>
+  <data name="Archive.Dialog.ExtractTo" xml:space="preserve">
+    <value>Extract to</value>
+  </data>
+  <data name="Archive.Dialog.FileType" xml:space="preserve">
+    <value>CryptArc archive</value>
   </data>
 </root>

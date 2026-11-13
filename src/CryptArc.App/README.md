@@ -11,13 +11,10 @@ of them. Theme: Semi.Avalonia, charts: ScottPlot (ADR-0015).
 |---|---|
 | Analyse | entropy, repeat ratio and text share as the mean over 64 KiB blocks, the codec picked for most blocks, a heatmap of entropy per block, and a histogram of every byte value over the whole file |
 | Compare codecs | every registered codec on the file: a bar chart of size or encode speed, and a sortable table |
-| Compress | `BlockCompressor` on the file with a chosen codec or Auto, block size and thread count: progress, cancel, a live map of blocks coloured by codec, and a history of runs with speedup against the one-thread baseline. Nothing is written to disk until the container exists |
-
+| Compress | `BlockCompressor` on the file with a chosen codec or Auto, block size and thread count: progress, cancel, a live map of blocks coloured by codec, and a history of runs with speedup against the one-thread baseline. Nothing is written to disk here |
 | Transform lab | a short text through the stages of the BWT codec: the sorted rotation matrix and its last column, move-to-front, zero-run coding, and the Huffman code of the result next to Huffman on the raw text. Needs no file |
-
 | Naive vs optimised | the optimisation pairs of hard rule 4 as measured by BenchmarkDotNet in Release: speedup chart, times and allocations per case, and the machine. Reads `bench/results/*.pairs.json`, copied beside the executable at build time; the app times nothing here |
-
-Planned, shown as "soon" in the menu: the encrypted archive.
+| Encrypted archive | create a `.cryptarc` archive from files and folders with a codec or Auto, a thread count and a password; open one to see its file table, verify every block and extract everything. Needs no loaded file; opening the app on a `.cryptarc` file lands here |
 
 The interface is in English and Ukrainian. The switch is at the bottom of the
 side menu and takes effect at once, without a restart; see
@@ -31,6 +28,7 @@ side menu and takes effect at once, without a restart; see
 | `App.axaml(.cs)` | application-level styles and lifetime; DI composition root |
 | `MainWindow.axaml` | shell: side menu, file card, content area |
 | `MainWindow.axaml.cs` | code-behind; owns the file picker only |
+| `Views/ArchiveView.axaml.cs` | the archive page's file, folder and save dialogs, and its password boxes |
 | `Views/` | one `UserControl` per page; `CompareView` draws its chart in code-behind |
 | `Converters/` | value-to-brush converters (heatmap colours) |
 | `Localization/` | `Strings.resx` (English) and `Strings.uk.resx` (Ukrainian), `Localizer`, and the `{loc:T Key}` markup extension |

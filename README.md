@@ -14,8 +14,10 @@ Coursework for *Algorithms and Optimisation of Software Solutions*.
 | Store, RLE, Huffman, BWT, LZSS, LZW, Arithmetic, Deflate | ✅ every codec in `CodecId` |
 | Bit I/O, CRC-32, entropy analyzer | ✅ |
 | Deflate interoperability with RFC 1951 | ✅ checked against a reference implementation both ways |
-| Archive container + AES-256-GCM | 🚧 planned |
-| Avalonia desktop UI | ✅ analyser screen, 🚧 pack/unpack |
+| Archive container: Argon2id, AES-256-GCM per block, HMAC-SHA256 trailer | ✅ |
+| Command line: `analyze`, `test`, `pack`, `unpack`, `list`, `verify` | ✅ |
+| Avalonia desktop UI: analyse, compare, compress, transform lab, naive vs optimised, encrypted archive | ✅ |
+| Deduplication of repeated chunks | 🚧 planned, not in format version 1 |
 
 ## Layout
 
@@ -38,6 +40,10 @@ dotnet test  CryptArc.slnx -c Release
 
 dotnet run --project src/CryptArc.Cli -c Release -- analyze <file>
 dotnet run --project src/CryptArc.Cli -c Release -- test <file>
+dotnet run --project src/CryptArc.Cli -c Release -- pack <archive> <path>...
+dotnet run --project src/CryptArc.Cli -c Release -- unpack <archive> [directory]
+dotnet run --project src/CryptArc.Cli -c Release -- list <archive>
+dotnet run --project src/CryptArc.Cli -c Release -- verify <archive>
 dotnet run --project src/CryptArc.App -c Release
 
 dotnet run --project bench/CryptArc.Bench -c Release -- --filter '*'

@@ -30,9 +30,6 @@
   <data name="Nav.Archive" xml:space="preserve">
     <value>Зашифрований архів</value>
   </data>
-  <data name="Nav.Soon" xml:space="preserve">
-    <value>скоро</value>
-  </data>
   <data name="Shell.ChooseFile" xml:space="preserve">
     <value>Вибрати файл…</value>
   </data>
@@ -225,7 +222,7 @@
     <value>Стиснення</value>
   </data>
   <data name="Compress.Subtitle" xml:space="preserve">
-    <value>Файл ділиться на незалежні блоки, які стискаються паралельно. На диск нічого не записується, доки немає контейнера архіву.</value>
+    <value>Файл ділиться на незалежні блоки, які стискаються паралельно. Тут на диск нічого не записується; справжнє пакування файлів — на сторінці «Зашифрований архів».</value>
   </data>
   <data name="Compress.Codec" xml:space="preserve">
     <value>Кодек</value>
@@ -578,5 +575,158 @@
   </data>
   <data name="Pairs.Suite.BlockCompressorBenchmarks.Story" xml:space="preserve">
     <value>Блок за блоком → незалежні блоки на кількох потоках (ADR-0005).</value>
+  </data>
+  <data name="Unit.GiB" xml:space="preserve">
+    <value>{0:N2} ГіБ</value>
+  </data>
+  <data name="Archive.Title" xml:space="preserve">
+    <value>Зашифрований архів</value>
+  </data>
+  <data name="Archive.Subtitle" xml:space="preserve">
+    <value>Запакуйте файли в архів .cryptarc або відкрийте наявний, щоб переглянути, перевірити й відновити його вміст. Кожен блок стискається, а потім шифрується AES-256-GCM ключем, виведеним із пароля за допомогою Argon2id.</value>
+  </data>
+  <data name="Archive.Cancel" xml:space="preserve">
+    <value>Скасувати</value>
+  </data>
+  <data name="Archive.Create" xml:space="preserve">
+    <value>Створення</value>
+  </data>
+  <data name="Archive.AddFiles" xml:space="preserve">
+    <value>Додати файли…</value>
+  </data>
+  <data name="Archive.AddFolder" xml:space="preserve">
+    <value>Додати теку…</value>
+  </data>
+  <data name="Archive.Clear" xml:space="preserve">
+    <value>Очистити</value>
+  </data>
+  <data name="Archive.NothingAdded" xml:space="preserve">
+    <value>Ще нічого не додано.</value>
+  </data>
+  <data name="Archive.Codec" xml:space="preserve">
+    <value>Кодек</value>
+  </data>
+  <data name="Archive.Threads" xml:space="preserve">
+    <value>Потоки</value>
+  </data>
+  <data name="Archive.Password" xml:space="preserve">
+    <value>Пароль</value>
+  </data>
+  <data name="Archive.RepeatPassword" xml:space="preserve">
+    <value>Повторіть пароль</value>
+  </data>
+  <data name="Archive.NoRecovery" xml:space="preserve">
+    <value>Відновлення неможливе: без пароля архів не відкрити.</value>
+  </data>
+  <data name="Archive.CreateButton" xml:space="preserve">
+    <value>Створити архів…</value>
+  </data>
+  <data name="Archive.Open" xml:space="preserve">
+    <value>Відкриття</value>
+  </data>
+  <data name="Archive.Choose" xml:space="preserve">
+    <value>Вибрати архів…</value>
+  </data>
+  <data name="Archive.Unlock" xml:space="preserve">
+    <value>Розблокувати</value>
+  </data>
+  <data name="Archive.UnlockHint" xml:space="preserve">
+    <value>Під час розблокування перевіряється HMAC усього файлу, перш ніж довіряти будь-чому в ньому. Неправильний пароль і змінений архів виглядають однаково.</value>
+  </data>
+  <data name="Archive.ExtractAll" xml:space="preserve">
+    <value>Розпакувати все…</value>
+  </data>
+  <data name="Archive.Verify" xml:space="preserve">
+    <value>Перевірити</value>
+  </data>
+  <data name="Archive.Close" xml:space="preserve">
+    <value>Закрити</value>
+  </data>
+  <data name="Archive.Col.Path" xml:space="preserve">
+    <value>Шлях</value>
+  </data>
+  <data name="Archive.Col.Size" xml:space="preserve">
+    <value>Розмір</value>
+  </data>
+  <data name="Archive.Col.Stored" xml:space="preserve">
+    <value>Збережено</value>
+  </data>
+  <data name="Archive.Col.Ratio" xml:space="preserve">
+    <value>Коефіцієнт</value>
+  </data>
+  <data name="Archive.Col.Modified" xml:space="preserve">
+    <value>Змінено (UTC)</value>
+  </data>
+  <data name="Archive.NoArchive" xml:space="preserve">
+    <value>Архів не вибрано</value>
+  </data>
+  <data name="Archive.Summary" xml:space="preserve">
+    <value>Файлів: {0:N0} · початковий розмір {1} · збережено {2}</value>
+  </data>
+  <data name="Archive.SummaryRatio" xml:space="preserve">
+    <value>Файлів: {0:N0} · початковий розмір {1} · збережено {2} ({3})</value>
+  </data>
+  <data name="Archive.Status.Initial" xml:space="preserve">
+    <value>Додайте файли для пакування або виберіть архів, щоб відкрити його.</value>
+  </data>
+  <data name="Archive.Status.NeedNewPassword" xml:space="preserve">
+    <value>Введіть пароль для нового архіву.</value>
+  </data>
+  <data name="Archive.Status.Mismatch" xml:space="preserve">
+    <value>Паролі не збігаються.</value>
+  </data>
+  <data name="Archive.Status.Packing" xml:space="preserve">
+    <value>Виведення ключа й пакування…</value>
+  </data>
+  <data name="Archive.Status.Created" xml:space="preserve">
+    <value>Створено {0}: файлів — {1:N0}, {2} за {3:F1} с.</value>
+  </data>
+  <data name="Archive.Status.EnterAndUnlock" xml:space="preserve">
+    <value>Введіть пароль і натисніть «Розблокувати».</value>
+  </data>
+  <data name="Archive.Status.EnterPassword" xml:space="preserve">
+    <value>Введіть пароль.</value>
+  </data>
+  <data name="Archive.Status.Unlocking" xml:space="preserve">
+    <value>Виведення ключа й перевірка цілісності…</value>
+  </data>
+  <data name="Archive.Status.Unlocked" xml:space="preserve">
+    <value>Розблоковано: архів пройшов перевірку цілісності.</value>
+  </data>
+  <data name="Archive.Status.Verifying" xml:space="preserve">
+    <value>Перевірка кожного блока…</value>
+  </data>
+  <data name="Archive.Status.Verified" xml:space="preserve">
+    <value>Перевірено: усі файли ({0:N0}) декодуються й відповідають контрольним сумам ({1:F1} с).</value>
+  </data>
+  <data name="Archive.Status.Extracting" xml:space="preserve">
+    <value>Розпакування…</value>
+  </data>
+  <data name="Archive.Status.Restored" xml:space="preserve">
+    <value>Відновлено файлів: {0:N0}, до {1} ({2:F1} с).</value>
+  </data>
+  <data name="Archive.Status.Closed" xml:space="preserve">
+    <value>Архів закрито.</value>
+  </data>
+  <data name="Archive.Status.Cancelled" xml:space="preserve">
+    <value>Скасовано.</value>
+  </data>
+  <data name="Archive.Dialog.AddFiles" xml:space="preserve">
+    <value>Додати файли до архіву</value>
+  </data>
+  <data name="Archive.Dialog.AddFolders" xml:space="preserve">
+    <value>Додати теки до архіву</value>
+  </data>
+  <data name="Archive.Dialog.Create" xml:space="preserve">
+    <value>Створити архів</value>
+  </data>
+  <data name="Archive.Dialog.Choose" xml:space="preserve">
+    <value>Виберіть архів</value>
+  </data>
+  <data name="Archive.Dialog.ExtractTo" xml:space="preserve">
+    <value>Розпакувати до</value>
+  </data>
+  <data name="Archive.Dialog.FileType" xml:space="preserve">
+    <value>Архів CryptArc</value>
   </data>
 </root>

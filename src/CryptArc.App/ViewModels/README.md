@@ -11,6 +11,8 @@ Presentation state for the Avalonia UI.
 | `BlockTile`, `CodecUsage`, `RunRecord`, `CodecChoice` | the Compress page's map tiles, legend, history rows and codec list |
 | `TransformLabPageViewModel` | input text, presets and every stage's output for the "Transform lab" page |
 | `NaiveVsOptimisedPageViewModel` | suite list and naive/optimised rows from `IBenchmarkResults` for the "Naive vs optimised" page |
+| `ArchivePageViewModel` | sources, settings and status for the "Encrypted archive" page; keeps the opened `ArchiveReader`, never a password |
+| `ArchiveEntryRow` | one row of the opened archive's file table |
 | `FileSummary` | whole-file figures aggregated over block profiles |
 | `HeatmapCell` | one heatmap square: entropy and tooltip |
 | `CodecResult` | one row of the codec comparison table, with display-formatted strings |

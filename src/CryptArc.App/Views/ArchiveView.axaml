@@ -1,0 +1,145 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="using:CryptArc.App.Localization"
+             xmlns:vm="using:CryptArc.App.ViewModels"
+             x:Class="CryptArc.App.Views.ArchiveView"
+             x:DataType="vm:ArchivePageViewModel">
+
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Top" Spacing="4" Margin="0,0,0,16">
+            <TextBlock Classes="PageTitle" Text="{loc:T Archive.Title}" />
+            <TextBlock Classes="Secondary"
+                       Text="{loc:T Archive.Subtitle}" />
+        </StackPanel>
+
+        <!-- What is happening now; shared by both halves of the page. -->
+        <Border DockPanel.Dock="Bottom" Classes="Card" Margin="0,16,0,0" Padding="18,12">
+            <DockPanel>
+                <Button DockPanel.Dock="Right" Content="{loc:T Archive.Cancel}" Margin="12,0,0,0"
+                        Command="{Binding CancelCommand}" IsVisible="{Binding IsBusy}" />
+                <ProgressBar DockPanel.Dock="Left" IsIndeterminate="True" Width="80" Margin="0,0,12,0"
+                             IsVisible="{Binding IsBusy}" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding Status}" TextWrapping="Wrap" VerticalAlignment="Center" />
+            </DockPanel>
+        </Border>
+
+        <Grid ColumnDefinitions="340,16,*">
+
+            <!-- Create -->
+            <Border Grid.Column="0" Classes="Card" VerticalAlignment="Top">
+                <StackPanel Spacing="14" IsEnabled="{Binding IsIdle}">
+                    <TextBlock Classes="CardTitle" Text="{loc:T Archive.Create}" />
+
+                    <StackPanel Spacing="6">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Name="AddFilesButton" Content="{loc:T Archive.AddFiles}" />
+                            <Button Name="AddFolderButton" Content="{loc:T Archive.AddFolder}" />
+                            <Button Content="{loc:T Archive.Clear}" Command="{Binding ClearSourcesCommand}"
+                                    IsVisible="{Binding HasSources}" />
+                        </StackPanel>
+                        <TextBlock Classes="Hint" Text="{loc:T Archive.NothingAdded}" IsVisible="{Binding !HasSources}" />
+                        <ListBox ItemsSource="{Binding Sources}" MaxHeight="132" IsVisible="{Binding HasSources}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate x:DataType="x:String">
+                                    <TextBlock Classes="Hint" Text="{Binding}" ToolTip.Tip="{Binding}"
+                                               TextTrimming="PrefixCharacterEllipsis" />
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </StackPanel>
+
+                    <StackPanel Spacing="6">
+                        <TextBlock Classes="Secondary" Text="{loc:T Archive.Codec}" />
+                        <!-- A template rather than ToString: the "Auto" entry's name follows the language. -->
+                        <ComboBox ItemsSource="{Binding CodecChoices}" SelectedItem="{Binding SelectedCodec}"
+                                  HorizontalAlignment="Stretch">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate x:DataType="vm:CodecChoice">
+                                    <TextBlock Text="{Binding Name}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <StackPanel Spacing="6">
+                        <DockPanel>
+                            <TextBlock DockPanel.Dock="Right" FontWeight="SemiBold" Text="{Binding Threads}" />
+                            <TextBlock Classes="Secondary" Text="{loc:T Archive.Threads}" />
+                        </DockPanel>
+                        <Slider Minimum="1" Maximum="{Binding MaxThreads}" Value="{Binding Threads}"
+                                TickFrequency="1" IsSnapToTickEnabled="True" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="6">
+                        <TextBlock Classes="Secondary" Text="{loc:T Archive.Password}" />
+                        <TextBox Name="NewPasswordBox" PasswordChar="•" />
+                        <TextBlock Classes="Secondary" Text="{loc:T Archive.RepeatPassword}" />
+                        <TextBox Name="RepeatPasswordBox" PasswordChar="•" />
+                        <TextBlock Classes="Hint" TextWrapping="Wrap"
+                                   Text="{loc:T Archive.NoRecovery}" />
+                    </StackPanel>
+
+                    <Button Name="CreateButton" Classes="Primary" Theme="{DynamicResource SolidButton}"
+                            Content="{loc:T Archive.CreateButton}" HorizontalAlignment="Stretch"
+                            IsEnabled="{Binding CanCreate}" />
+                </StackPanel>
+            </Border>
+
+            <!-- Open -->
+            <Border Grid.Column="2" Classes="Card">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" Classes="CardTitle" Text="{loc:T Archive.Open}" Margin="0,0,0,14" />
+
+                    <DockPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+                        <Button Name="ChooseArchiveButton" DockPanel.Dock="Right" Content="{loc:T Archive.Choose}"
+                                IsEnabled="{Binding IsIdle}" />
+                        <PathIcon DockPanel.Dock="Left" Data="{StaticResource SemiIconLock}"
+                                  Width="18" Height="18" Margin="0,0,10,0"
+                                  Foreground="{DynamicResource SemiColorPrimary}" />
+                        <TextBlock Text="{Binding ArchiveName}" FontWeight="SemiBold" VerticalAlignment="Center"
+                                   TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding ArchivePath}" />
+                    </DockPanel>
+
+                    <!-- Locked: ask for the password. -->
+                    <StackPanel DockPanel.Dock="Top" Spacing="6" IsVisible="{Binding IsLocked}">
+                        <StackPanel Spacing="6" IsVisible="{Binding HasArchive}">
+                            <TextBlock Classes="Secondary" Text="{loc:T Archive.Password}" />
+                            <DockPanel>
+                                <Button Name="UnlockButton" DockPanel.Dock="Right" Margin="8,0,0,0"
+                                        Classes="Primary" Theme="{DynamicResource SolidButton}"
+                                        Content="{loc:T Archive.Unlock}" IsEnabled="{Binding CanUnlock}" />
+                                <TextBox Name="OpenPasswordBox" PasswordChar="•" IsEnabled="{Binding CanUnlock}" />
+                            </DockPanel>
+                        </StackPanel>
+                        <TextBlock Classes="Hint" TextWrapping="Wrap"
+                                   Text="{loc:T Archive.UnlockHint}" />
+                    </StackPanel>
+
+                    <!-- Unlocked: actions below, the file table in between. -->
+                    <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Spacing="8" Margin="0,12,0,0"
+                                IsVisible="{Binding IsOpen}" IsEnabled="{Binding CanUseArchive}">
+                        <Button Name="ExtractButton" Classes="Primary" Theme="{DynamicResource SolidButton}"
+                                Content="{loc:T Archive.ExtractAll}" />
+                        <Button Content="{loc:T Archive.Verify}" Command="{Binding VerifyCommand}" />
+                        <Button Content="{loc:T Archive.Close}" Command="{Binding CloseCommand}" />
+                    </StackPanel>
+
+                    <TextBlock DockPanel.Dock="Top" Classes="Hint" Text="{Binding Summary}" Margin="0,0,0,8"
+                               IsVisible="{Binding IsOpen}" />
+
+                    <DataGrid ItemsSource="{Binding Entries}" IsReadOnly="True" AutoGenerateColumns="False"
+                              GridLinesVisibility="Horizontal" HeadersVisibility="Column"
+                              IsVisible="{Binding IsOpen}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="{loc:T Archive.Col.Path}" Binding="{Binding Path}" Width="*" />
+                            <DataGridTextColumn Header="{loc:T Archive.Col.Size}" Binding="{Binding Size}" Width="Auto" />
+                            <DataGridTextColumn Header="{loc:T Archive.Col.Stored}" Binding="{Binding Stored}" Width="Auto" />
+                            <DataGridTextColumn Header="{loc:T Archive.Col.Ratio}" Binding="{Binding Ratio}" Width="Auto" />
+                            <DataGridTextColumn Header="{loc:T Archive.Col.Modified}" Binding="{Binding Modified}" Width="Auto" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+            </Border>
+        </Grid>
+    </DockPanel>
+</UserControl>

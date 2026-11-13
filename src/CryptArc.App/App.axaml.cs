@@ -53,6 +53,7 @@ public partial class App : Application
             .AddTransient<CompressPageViewModel>()
             .AddTransient<TransformLabPageViewModel>()
             .AddTransient<NaiveVsOptimisedPageViewModel>()
+            .AddTransient<ArchivePageViewModel>()
             .AddTransient<MainWindowViewModel>()
             .AddTransient<MainWindow>()
             .BuildServiceProvider(new ServiceProviderOptions
