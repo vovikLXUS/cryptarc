@@ -7,7 +7,9 @@
 - **No ready-made compressors.** `System.IO.Compression` and friends are banned
   in `src/`. They may appear in `bench/` as a baseline only.
 - **No hand-written cryptography.** Use `System.Security.Cryptography` and
-  Konscious Argon2. Do not implement a cipher, hash or KDF.
+  Konscious Argon2. Do not implement a cipher, hash or KDF. `Sarc/SarcCrypto.cs`
+  assembles the CTR mode SARC requires from library AES (ADR-0017); that is the
+  only exception.
 - **Hot paths allocate nothing.** `Span<T>` / `ReadOnlySpan<T>`,
   `stackalloc` for small fixed buffers, `ArrayPool<byte>.Shared` for blocks.
   No LINQ, no `List<T>`, no string formatting inside codec loops.

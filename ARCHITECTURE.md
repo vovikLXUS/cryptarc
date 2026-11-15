@@ -238,6 +238,19 @@ archive ──────────► HMAC-SHA256(macKey) over everything �
   downgraded silently.
 - Order is **compress, then encrypt**. Reversing it costs the entire ratio.
 
+### 7.1 SARC v1 (FORMAT_SPEC_P2)
+
+The interchange format of Project 2 lives in `Core/Sarc` beside `.cryptarc` and
+shares no format code with it ([docs/sarc-v1.md](docs/sarc-v1.md), ADR-0017).
+
+```
+password ──PBKDF2-HMAC-SHA256(salt, 100 000, 64 B)──► K_enc ‖ K_mac      once per archive
+file ──blocks──► LZ77 (greedy | lazy) + 3 canonical Huffman trees, or raw
+blocks ──0/1 knapsack (DP) per volume──► payload: file table, block table, data
+payload ──AES-256-CTR(K_enc, nonce ‖ ctr from 1)──► ciphertext
+header ‖ ciphertext ──HMAC-SHA256(K_mac)──► tag; reader checks it before decrypting
+```
+
 ---
 
 ## 8. Error handling contract
@@ -249,6 +262,7 @@ archive ──────────► HMAC-SHA256(macKey) over everything �
 | unknown `CodecId` in an archive | `NotSupportedException` naming the codec |
 | wrong password or tampered data | GCM tag check fails, `CryptographicException`; never a partial, silent restore |
 | unsupported `formatVersion` | refuse to read, name the version |
+| any rejected SARC volume or volume set | `SarcException` carrying the specification's code, `E_SHORT` … `E_VOLUMES`; never a partial restore |
 
 Decoders parse attacker-controlled bytes. Every length read from a stream is
 bounds-checked before it is used.

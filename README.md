@@ -15,7 +15,8 @@ Coursework for *Algorithms and Optimisation of Software Solutions*.
 | Bit I/O, CRC-32, entropy analyzer | ✅ |
 | Deflate interoperability with RFC 1951 | ✅ checked against a reference implementation both ways |
 | Archive container: Argon2id, AES-256-GCM per block, HMAC-SHA256 trailer | ✅ |
-| Command line: `analyze`, `test`, `pack`, `unpack`, `list`, `verify` | ✅ |
+| SARC v1 (FORMAT_SPEC_P2): PBKDF2, AES-256-CTR, HMAC, LZ77 + canonical Huffman, volumes by knapsack, `E_*` codes | ✅ all 12 reference archives, cross-read with another team |
+| Command line: `analyze`, `test`, `pack`, `unpack`, `list`, `verify`, `sarc-pack`, `sarc-unpack`, `sarc-verify`, `sarc-list` | ✅ |
 | Avalonia desktop UI: analyse, compare, compress, transform lab, naive vs optimised, encrypted archive | ✅ |
 | Deduplication of repeated chunks | 🚧 planned, not in format version 1 |
 
@@ -44,10 +45,24 @@ dotnet run --project src/CryptArc.Cli -c Release -- pack <archive> <path>...
 dotnet run --project src/CryptArc.Cli -c Release -- unpack <archive> [directory]
 dotnet run --project src/CryptArc.Cli -c Release -- list <archive>
 dotnet run --project src/CryptArc.Cli -c Release -- verify <archive>
+dotnet run --project src/CryptArc.Cli -c Release -- sarc-pack <archive.arc> <path>... [--config team_config.json]
+dotnet run --project src/CryptArc.Cli -c Release -- sarc-unpack <directory> <volume>...
+dotnet run --project src/CryptArc.Cli -c Release -- sarc-verify <volume>...
+dotnet run --project src/CryptArc.Cli -c Release -- sarc-list <volume>...
 dotnet run --project src/CryptArc.App -c Release
 
 dotnet run --project bench/CryptArc.Bench -c Release -- --filter '*'
 ```
+
+Every archive command asks for the password, or reads it from one line of
+redirected standard input — for scripts:
+
+```bash
+echo 'algo2026' | dotnet run --project src/CryptArc.Cli -c Release -- sarc-verify team/reference/ref_01_single_file.arc
+```
+
+Exit codes: 0 success, 1 failure (a rejected SARC archive prints its `E_*` code
+after `error:`), 2 bad usage.
 
 ## Design rules
 
@@ -68,6 +83,8 @@ dotnet run --project bench/CryptArc.Bench -c Release -- --filter '*'
 | [ADR.md](ADR.md) | why it is that way — one record per hard-to-reverse decision |
 | [AGENTS.md](AGENTS.md) | how to work in this repo — rules, commands, conventions |
 | [docs/container-format.md](docs/container-format.md) | the `.cryptarc` on-disk format |
+| [docs/sarc-v1.md](docs/sarc-v1.md) | how SARC v1 (FORMAT_SPEC_P2) is implemented, and its conformance evidence |
+| [META-USAGE](META-USAGE) | declaration of generated code, as the course requires |
 
 Every project and every `Core` sub-folder also carries its own `README.md`
 (what the folder does) and, where there are constraints to respect, an
