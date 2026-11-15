@@ -71,6 +71,26 @@ refuses anything else. The other values are reserved.
 - **`formatVersion` is checked on read.** Any change to the field layout bumps it,
   and readers keep support for older versions.
 
+## Codec identifiers
+
+`codecId` in the table prefix and in the block index is one byte. Values are
+append-only (ADR-0008); a reader refuses one it does not know.
+
+| Value | Codec | Stream format documented in |
+|---:|---|---|
+| 0 | Store | `src/CryptArc.Core/Codecs/StoreCodec.cs` — the bytes as they are |
+| 1 | RLE | `Codecs/RleCodec.cs` |
+| 2 | Huffman | `Codecs/HuffmanCodec.cs` |
+| 3 | LZSS | `Codecs/LzssCodec.cs` |
+| 4 | Deflate | `Codecs/DeflateCodec.cs` — raw RFC 1951, no zlib or gzip wrapper |
+| 5 | LZW | `Codecs/LzwCodec.cs` |
+| 6 | BWT | `Codecs/BwtCodec.cs` |
+| 7 | Arithmetic | `Codecs/ArithmeticCodec.cs` |
+
+Each codec's stream format is written out in the XML comment of its class; those
+comments are part of this specification. The file table itself is always coded
+with Deflate (4), or Store (0) when that does not shrink it.
+
 ## Key derivation
 
 ```
