@@ -223,6 +223,9 @@ public static class SarcBlockCodec
         if (tokenCount > destination.Length)
             throw new SarcException(SarcErrorCode.Payload, $"token_count {tokenCount} is larger than raw_len {destination.Length}.");
 
+        if (destination.Length > (long)tokenCount * MaxMatch)
+            throw new SarcException(SarcErrorCode.Payload, $"{tokenCount} elements cannot produce raw_len {destination.Length}; each yields at most {MaxMatch} bytes.");
+
         Span<int> literalCounts = stackalloc int[SarcCodeTable.MaxCodeLength + 1];
         Span<int> lengthCounts = stackalloc int[SarcCodeTable.MaxCodeLength + 1];
         Span<int> distanceCounts = stackalloc int[SarcCodeTable.MaxCodeLength + 1];

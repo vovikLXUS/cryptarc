@@ -125,6 +125,23 @@ public class SarcRejectionTests
         Assert.Equal(SarcErrorCode.Payload, Rejection(Reseal(OneFile(), p => Edited(p, x => x[14]++))));
 
     [Fact]
+    public void BlocksDeclaringMoreThanTheirFileArePayloadBeforeAnythingIsDecoded()
+    {
+        // Two blocks that each claim the whole file: caught from the tables alone.
+        byte[] data = TestData.Constant(1000);
+        byte[] coded = SarcBlockCodec.Encode(data);
+        byte[] payload = SarcPayload.Write(
+            [new SarcFileRecord("a.txt", 1000, CryptArc.Core.Hashing.Crc32.Compute(data), SarcFileType.Synthetic, 1)],
+            [new SarcBlockRecord(0, 0, 1000, (uint)coded.Length, 0, 0), new SarcBlockRecord(0, 1, 1000, (uint)coded.Length, 0, 0)],
+            [coded, coded]);
+        SarcVolumeHeader header = SarcVolume.ReadHeader(OneFile());
+
+        SarcException rejection = Assert.Throws<SarcException>(() => SarcArchiveReader.ReadDecrypted([header], [payload]));
+        Assert.Equal(SarcErrorCode.Payload, rejection.Code);
+        Assert.Contains("declare more", rejection.Message);
+    }
+
+    [Fact]
     public void AnInvalidCodeTableInsideAnArchiveIsCode()
     {
         byte[] volume = PackOne("a.txt", System.Text.Encoding.ASCII.GetBytes(string.Concat(Enumerable.Repeat("hello world ", 40))));
@@ -184,6 +201,16 @@ public class SarcRejectionTests
         volumes[0] = SarcVolume.Seal(OpenPayload(volumes[0]), 0, (ushort)(header.VolumeCount + 1), header.Salt, header.Nonce, keys);
 
         Assert.Equal(SarcErrorCode.Volumes, Rejection(volumes));
+    }
+
+    [Fact]
+    public void VolumesDisagreeingAboutAFileTypeArePayload()
+    {
+        byte[][] volumes = ThreeVolumes();
+        // Every volume lists "m.bin" alone, so its file_type is at offset 19.
+        volumes[1] = Reseal(volumes[1], p => Edited(p, x => x[19] = (byte)((x[19] + 1) % 7)));
+
+        Assert.Equal(SarcErrorCode.Payload, Rejection(volumes));
     }
 
     [Fact]

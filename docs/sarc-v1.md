@@ -42,13 +42,17 @@ tests are reported as skipped, not passed.
 3. PBKDF2 once; per volume the HMAC in constant time → `E_HMAC`; only then decryption.
 4. Payload: `reserved`, `flags` (`PREDICTION` is refused), `file_type`, safe names,
    table and data lengths → `E_PAYLOAD`.
-5. Blocks: tables (alphabet, order, lengths 1…15, Kraft equality, a lone symbol of
-   length 1), codes, references, padding → `E_CODE`; lengths that disagree, bytes
-   after the stream → `E_PAYLOAD`.
-6. The set: count, duplicates, index range, one `volume_count` → `E_VOLUMES`.
-7. Each file joined by (name, `block_seq`): gap-free from 0, summing to `orig_size`,
-   sizes and CRC agreeing between volumes → `E_PAYLOAD`.
-8. CRC-32 of each file → `E_CRC`.
+5. The set: count, duplicates, index range, one `volume_count` → `E_VOLUMES`. It needs
+   only the headers, so it runs before any block is decoded (the specification lists it
+   as step 9; for a single fault the code is the same).
+6. The `raw_len` of each file's blocks, summed over all volumes, against `orig_size`,
+   before any output buffer is allocated → `E_PAYLOAD`.
+7. Blocks: tables (alphabet, order, lengths 1…15, Kraft equality, a lone symbol of
+   length 1), codes, references, padding → `E_CODE`; lengths that disagree,
+   `token_count × 258 < raw_len`, bytes after the stream → `E_PAYLOAD`.
+8. Each file joined by (name, `block_seq`): gap-free from 0, summing to `orig_size`,
+   size, CRC, type and strategy agreeing between volumes → `E_PAYLOAD`.
+9. CRC-32 of each file → `E_CRC`.
 
 Nothing is written until every check has passed, and extraction never replaces an
 existing file.
@@ -56,12 +60,17 @@ existing file.
 ## Command line
 
 ```bash
-dotnet run --project src/CryptArc.Cli -c Release -- sarc-pack backup.arc docs README.md --config team/team_config.json
-dotnet run --project src/CryptArc.Cli -c Release -- sarc-unpack restored backup.part1.arc backup.part0.arc
-dotnet run --project src/CryptArc.Cli -c Release -- sarc-verify backup.part*.arc
+dotnet run --project src/CryptArc.Cli -c Release -- sarc-pack docs.arc README.md ADR.md ARCHITECTURE.md --volume 8192
+dotnet run --project src/CryptArc.Cli -c Release -- sarc-verify docs.part*.arc
+dotnet run --project src/CryptArc.Cli -c Release -- sarc-unpack restored docs.part*.arc
 ```
 
-A rejection prints `error: E_<CODE>: <detail>` on standard error and exits with 1.
+Several volumes come out as `docs.part0.arc`, `docs.part1.arc`, … and may be given
+in any order. Paths are flattened to bare names, so two inputs with one file name
+(`docs/README.md` and `README.md`) are refused. With the team package in place,
+`--config team/team_config.json` takes `block_size`, `max_volume_bytes` and the
+priorities from it. A rejection prints `error: E_<CODE>: <detail>` on standard error
+and exits with 1.
 
 ## Limits
 

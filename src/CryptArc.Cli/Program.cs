@@ -138,6 +138,9 @@ static int Pack(string archive, string[] paths)
         }
     }
 
+    if (sources.Count == 0)
+        Console.Error.WriteLine("warning: nothing to pack; writing an empty archive");
+
     string password = ReadPassword("Password: ");
     if (!Console.IsInputRedirected && password != ReadPassword("Repeat password: "))
         throw new ArgumentException("The passwords do not match.");
@@ -220,6 +223,9 @@ static int SarcPack(string archive, string[] arguments)
         else
             Console.Error.WriteLine($"warning: skipped '{source.Name}': SARC v1 names cannot contain '/', '\\', ':' or NUL");
     }
+
+    if (sources.Count == 0)
+        Console.Error.WriteLine("warning: nothing to pack; writing an empty archive");
 
     string password = ReadPassword("Password: ");
     if (!Console.IsInputRedirected && password != ReadPassword("Repeat password: "))

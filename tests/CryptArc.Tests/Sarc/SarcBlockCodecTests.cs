@@ -111,6 +111,11 @@ public class SarcBlockCodecTests
         Assert.Equal(SarcErrorCode.Payload, DecodeFailure(Block(TwoLiterals, OneLength, DistanceTwo, 3, [0b1011_0000]), 7));
 
     [Fact]
+    public void ARawLengthTheElementsCannotReachIsPayload() =>
+        // Three elements yield at most 3 × 258 bytes, so 1000 is impossible before any bit is read.
+        Assert.Equal(SarcErrorCode.Payload, DecodeFailure(Block(TwoLiterals, OneLength, DistanceTwo, 3, [0b1011_0000]), 1000));
+
+    [Fact]
     public void ATableRunningPastTheBlockIsPayload() =>
         Assert.Equal(SarcErrorCode.Payload, DecodeFailure(TwoLiterals[..^1], 0));
 

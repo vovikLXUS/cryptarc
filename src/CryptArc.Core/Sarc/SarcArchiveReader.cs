@@ -19,9 +19,11 @@ public sealed record SarcFile(string Name, byte[] Data, SarcFileType FileType, b
 /// <item>length ≥ 73 (<c>E_SHORT</c>), magic and version (<c>E_MAGIC</c>), length against <c>ciphertext_len</c> (<c>E_LENGTH</c>);</item>
 /// <item>the same salt in every volume, else they come from different archives (<c>E_VOLUMES</c>);</item>
 /// <item>PBKDF2 once; the HMAC in constant time before any decryption (<c>E_HMAC</c>);</item>
-/// <item>decryption, then the payload's fields (<c>E_PAYLOAD</c>) and every block (<c>E_CODE</c>, <c>E_PAYLOAD</c>);</item>
+/// <item>decryption, then the payload's fields (<c>E_PAYLOAD</c>);</item>
 /// <item>the set: as many volumes as <c>volume_count</c>, no index twice or out of range, one <c>volume_count</c> (<c>E_VOLUMES</c>);</item>
-/// <item>each file's blocks joined by (name, <c>block_seq</c>): a gap-free series from 0 summing to <c>orig_size</c> (<c>E_PAYLOAD</c>);</item>
+/// <item>the bytes each file's blocks declare, against <c>orig_size</c>, before anything is allocated (<c>E_PAYLOAD</c>);</item>
+/// <item>every block (<c>E_CODE</c>, <c>E_PAYLOAD</c>);</item>
+/// <item>each file's blocks joined by (name, <c>block_seq</c>): a gap-free series from 0 summing to <c>orig_size</c>, one size, CRC, type and strategy in every volume (<c>E_PAYLOAD</c>);</item>
 /// <item>the CRC-32 of each file (<c>E_CRC</c>).</item>
 /// </list>
 /// <para>
@@ -98,10 +100,13 @@ public static class SarcArchiveReader
         for (int v = 0; v < payloads.Length; v++)
             contents[v] = SarcPayload.Read(payloads[v]);
 
+        // The set is checked from the headers before any block is decoded: a duplicated
+        // volume must be E_VOLUMES, not "too many bytes declared".
+        CheckVolumeSet(headers);
+        CheckDeclaredSizes(contents);
+
         for (int v = 0; v < payloads.Length; v++)
             decoded[v] = DecodeBlocks(contents[v]);
-
-        CheckVolumeSet(headers);
 
         int[] order = new int[payloads.Length];
         for (int v = 0; v < order.Length; v++)
@@ -175,6 +180,28 @@ public static class SarcArchiveReader
         return output;
     }
 
+    /// <summary>
+    /// Before a single output buffer is allocated: the blocks of each file, over every
+    /// volume, may not declare more bytes than the file has. Otherwise many blocks each
+    /// claiming <c>raw_len = orig_size</c> would allocate far more than the archive holds.
+    /// </summary>
+    private static void CheckDeclaredSizes(SarcPayloadContents[] contents)
+    {
+        var declared = new Dictionary<string, long>(StringComparer.Ordinal);
+        foreach (SarcPayloadContents volume in contents)
+        {
+            foreach (SarcBlockRecord block in volume.Blocks)
+            {
+                SarcFileRecord file = volume.Files[block.FileIndex];
+                long total = declared.GetValueOrDefault(file.Name) + block.RawLength;
+                if (total > file.OriginalSize)
+                    throw new SarcException(SarcErrorCode.Payload, $"The blocks of '{file.Name}' declare more than its orig_size {file.OriginalSize}.");
+
+                declared[file.Name] = total;
+            }
+        }
+    }
+
     private static void CheckVolumeSet(SarcVolumeHeader[] headers)
     {
         int count = headers[0].VolumeCount;
@@ -210,8 +237,9 @@ public static class SarcArchiveReader
             {
                 if (assemblies.TryGetValue(file.Name, out var known))
                 {
-                    if (known.Record.OriginalSize != file.OriginalSize || known.Record.Crc32 != file.Crc32)
-                        throw new SarcException(SarcErrorCode.Payload, $"The volumes disagree about the size or CRC-32 of '{file.Name}'.");
+                    if (known.Record.OriginalSize != file.OriginalSize || known.Record.Crc32 != file.Crc32
+                        || known.Record.FileType != file.FileType || known.Record.Strategy != file.Strategy)
+                        throw new SarcException(SarcErrorCode.Payload, $"The volumes disagree about the size, CRC-32, type or strategy of '{file.Name}'.");
                 }
                 else
                 {

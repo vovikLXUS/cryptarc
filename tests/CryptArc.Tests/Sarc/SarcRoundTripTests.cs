@@ -91,6 +91,15 @@ public class SarcRoundTripTests
     }
 
     [Fact]
+    public void AnArchiveOfNoFilesIsOneEmptyVolume()
+    {
+        byte[] volume = SarcArchiveWriter.Create([], Password).Single();
+
+        Assert.Equal(SarcVolume.MinimumSize + SarcPayload.FixedFieldsSize, volume.Length);
+        Assert.Empty(Read([volume]));
+    }
+
+    [Fact]
     public void AFileOfConstantBytesShrinksSeveralTimes()
     {
         byte[] data = TestData.Constant(100_000);

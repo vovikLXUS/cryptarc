@@ -51,6 +51,18 @@ internal static class SarcVolumePacker
         IReadOnlyList<int> fileRecordSizes, IReadOnlyList<SarcPackItem> items, int maxVolumeBytes, SarcPacking packing)
     {
         var plans = new List<SarcVolumePlan>();
+
+        // No files: still one volume, file_count = block_count = 0, so the archive exists
+        // and reads back as empty (criterion C2: "коректна робота на порожньому архіві").
+        if (items.Count == 0)
+        {
+            if (maxVolumeBytes < VolumeOverhead)
+                throw new ArgumentException($"A {maxVolumeBytes}-byte volume cannot hold even an empty payload.");
+
+            plans.Add(new SarcVolumePlan([], []));
+            return plans;
+        }
+
         var pending = new List<int>(items.Count);
         for (int i = 0; i < items.Count; i++)
             pending.Add(i);
@@ -95,6 +107,10 @@ internal static class SarcVolumePacker
             for (int i = 0; i < pending.Count; i++)
                 (chosen[i] ? placed : remaining).Add(pending[i]);
 
+            // The table stays as reserved, files without a block in this volume included.
+            // §7: "Змінювати склад таблиці після вибору блоків не можна" — trimming it would
+            // pack a volume for a capacity other than the one the knapsack solved for.
+            // The issued ref_06 lists only files that have blocks; readers accept both.
             plans.Add(new SarcVolumePlan([.. files], [.. placed]));
             pending = remaining;
         }
