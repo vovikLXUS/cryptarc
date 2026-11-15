@@ -5,6 +5,7 @@ Long-form design documents. Short-form notes live next to the code they describe
 | File | Contents |
 |---|---|
 | `container-format.md` | the `.cryptarc` on-disk format: header, tables, blocks, trailer, key derivation |
+| `sarc-v1.md` | SARC v1 (FORMAT_SPEC_P2): the choices the course spec leaves open, reader order, conformance evidence, limits |
 
 Root-level companions:
 

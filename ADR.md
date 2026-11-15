@@ -36,6 +36,8 @@ For *what* the system looks like, see [ARCHITECTURE.md](ARCHITECTURE.md).
 | [0013](#adr-0013--deflate-follows-rfc-1951-to-the-bit) | Deflate follows RFC 1951 to the bit | Accepted |
 | [0014](#adr-0014--plain-microsoftextensionsdependencyinjection-in-the-gui-not-prism) | Plain `Microsoft.Extensions.DependencyInjection` in the GUI, not Prism | Accepted |
 | [0015](#adr-0015--semiavalonia-for-the-look-scottplot-for-charts) | Semi.Avalonia for the look, ScottPlot for charts | Accepted |
+| [0016](#adr-0016--interface-strings-in-resx-switched-at-run-time-through-one-localizer) | Interface strings in `.resx`, switched at run time through one `Localizer` | Accepted |
+| [0017](#adr-0017--sarc-v1-beside-cryptarc-ctr-assembled-from-library-aes) | SARC v1 beside `.cryptarc`; CTR assembled from library AES | Accepted |
 
 ---
 
@@ -695,3 +697,53 @@ languages after a switch.
   is what .NET tooling and translators expect, and it costs nothing here.
 - **Injecting `ILocalizer` into every view model.** Consistent with ADR-0014,
   but XAML would still need the static, giving two ways to reach one object.
+
+---
+
+## ADR-0017 — SARC v1 beside `.cryptarc`; CTR assembled from library AES
+
+**Status:** Accepted · 2026-11-15
+
+### Context
+
+Project 2 fixes one archive format for every team, `FORMAT_SPEC_P2.md` (SARC v1):
+PBKDF2-HMAC-SHA256, AES-256-CTR, HMAC-SHA256, LZ77 with three canonical Huffman
+trees, volumes packed by a knapsack, and eight failure codes. Checkpoint 1 and the
+cross-team review read the instructor's reference archives and the other team's
+archives. `.cryptarc` (Argon2id, AES-GCM, eight codecs) reads none of them: at
+the review, all twelve reference files were refused as "not a .cryptarc archive".
+
+.NET offers AES in ECB, CBC, CFB and GCM, but not CTR.
+
+### Decision
+
+- Implement SARC v1 in `Core/Sarc` exactly as specified, with its own MSB-first
+  bit streams, and expose it through the `sarc-*` commands. `.cryptarc` stays as
+  it is; the two formats share only CRC-32, the match finder, the Huffman length
+  builder and `LzOutput`.
+- Build CTR as the specification defines it: counter blocks
+  `nonce ‖ uint32_BE(i)`, `i` from 1, encrypted with the library's `Aes.EncryptEcb`
+  and XORed with the data. The block cipher, PBKDF2 and HMAC all remain library
+  code; only the mode of operation is assembled, in one file.
+- Failures carry the specification's code in a `SarcException`, because
+  `InvalidDataException` is sealed.
+
+### Consequences
+
+- The reference archives, the control example and another team's archives are
+  readable, and ours are readable by them — the evidence is in `docs/sarc-v1.md`.
+- Two formats to maintain. `.cryptarc` remains the place for the codec comparison
+  and Argon2id; SARC is what the acceptance cases and other teams use.
+- Hand-assembled CTR must never reuse a (key, nonce, counter) triple: the writer
+  draws a fresh salt and nonce prefix per archive and puts the volume index in
+  the nonce. `AesCtr.TransformNaive` is the one-block-at-a-time baseline.
+
+### Alternatives
+
+- **Replace `.cryptarc` with SARC.** Rejected for now: it deletes the work behind
+  ADR-0002 to ADR-0013 and the benchmarks built on it, and is not required.
+- **A third-party CTR implementation (BouncyCastle).** A large dependency for a
+  dozen lines that the specification spells out, and still AES underneath.
+- **Emulate CTR with `AesGcm`.** GCM's internal counter starts at 2 and adds a
+  tag; matching the specified keystream would be fragile and obscure.
+

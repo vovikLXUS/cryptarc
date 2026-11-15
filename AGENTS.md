@@ -39,7 +39,9 @@ When you add a rule, put it in the `AGENTS.md` closest to the code it governs.
 2. **Cryptography is never written by hand.** AES-256-GCM, SHA-256, HMAC and
    PBKDF2 come from `System.Security.Cryptography`; Argon2id from
    `Konscious.Security.Cryptography.Argon2`. Do not implement, "improve" or
-   reimplement a cipher, a hash or a KDF.
+   reimplement a cipher, a hash or a KDF. The one exception is the AES-256-CTR
+   mode that SARC v1 prescribes and .NET lacks: `Core/Sarc/SarcCrypto.cs`
+   assembles it from library AES (ADR-0017), and nowhere else may.
 3. **Compress, then encrypt — never the reverse.** Ciphertext is
    indistinguishable from random and will not compress.
 4. **Keep the naive implementation.** Every optimised routine keeps its
@@ -56,6 +58,7 @@ dotnet test  CryptArc.slnx -c Release
 
 dotnet run --project src/CryptArc.Cli -c Release -- analyze <file>
 dotnet run --project src/CryptArc.Cli -c Release -- test <file>
+echo <password> | dotnet run --project src/CryptArc.Cli -c Release -- sarc-verify <volume>...
 dotnet run --project src/CryptArc.App -c Release
 
 dotnet run --project bench/CryptArc.Bench -c Release -- --filter '*Crc32*'
@@ -68,12 +71,13 @@ the report.
 
 | Path | Contents | Notes |
 |---|---|---|
-| `src/CryptArc.Core` | algorithms, bit I/O, analyzer, container | no UI dependencies |
+| `src/CryptArc.Core` | algorithms, bit I/O, analyzer, container, SARC v1 (`Sarc/`) | no UI dependencies |
 | `src/CryptArc.Cli` | command line front end | thin, no logic |
 | `src/CryptArc.App` | Avalonia desktop app | thin, no logic |
 | `bench/CryptArc.Bench` | BenchmarkDotNet suite | the only place a reference compressor may appear |
 | `tests/CryptArc.Tests` | xUnit tests | round-trip theories run over the whole registry |
 | `docs/` | format spec and design notes | |
+| `team/` | the issued Project 2 team package | git-ignored, never committed; `SarcReferenceArchiveTests` runs `team/reference` when it is present |
 
 Each project and each `Core` sub-folder has its own `README.md`; folders with
 extra constraints also have an `AGENTS.md`. Read the one nearest to the file you
@@ -118,6 +122,8 @@ an error — the container falls back to `Store`. Do not throw for it.
 - Conventional Commits (`feat:`, `fix:`, `perf:`, `docs:`, `test:`).
 - Releases are cut by pushing a `vX.Y.Z` tag; CI builds and publishes.
 - Do not commit or push unless asked.
+- Code produced with an AI tool is declared in [META-USAGE](META-USAGE) in the
+  same change. The course halves the grade for undeclared generated code.
 
 ## Agent skills
 

@@ -12,6 +12,17 @@ public sealed record ArchiveSource(
     FileAttributes Attributes = FileAttributes.Normal)
 {
     /// <summary>
+    /// Whether <see cref="ArchiveWriter"/> accepts a path: relative, '/' separated, no empty,
+    /// <c>.</c> or <c>..</c> segment, and no '\', ':' or NUL. A name can be legal on the
+    /// local file system and still fail this — <c>notes: draft.txt</c> on macOS — so a
+    /// caller packing a directory can skip such a file instead of losing the whole archive.
+    /// </summary>
+    /// <param name="archivePath">The path as it would be stored.</param>
+    /// <returns>Whether it can be stored.</returns>
+    public static bool IsValidArchivePath(string archivePath) =>
+        ArchiveFormat.IsSafePath(archivePath) && System.Text.Encoding.UTF8.GetByteCount(archivePath) <= ushort.MaxValue;
+
+    /// <summary>
     /// Lists the files under a path: a file gives one source named after it, and a
     /// directory gives every file below it, prefixed with the directory's own name.
     /// Symbolic links are skipped, so an archive cannot follow one out of the tree.

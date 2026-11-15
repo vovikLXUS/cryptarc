@@ -11,7 +11,9 @@
   Add a dedicated file only for behaviour unique to the algorithm.
 - **Malformed input must be tested.** Truncated streams, lengths that run past
   the buffer, impossible control bytes. Decoders parse untrusted data, so
-  `InvalidDataException` is required behaviour, not a nicety.
+  `InvalidDataException` is required behaviour, not a nicety. SARC is the
+  exception: it throws `SarcException`, and a test asserts the exact
+  `SarcErrorCode` the specification assigns to the fault.
 - Cover the **boundaries** of every format: the sizes just below, at and above a
   group or window limit, plus empty and single-byte input.
 - When an optimised implementation is added, assert that it agrees with the

@@ -178,7 +178,7 @@ internal static class ArchiveFormat
             writer.Write(entry.Sha256);
         }
 
-        writer.Write(blocks.Count);
+        writer.Write((uint)blocks.Count);
         foreach (BlockRecord block in blocks)
         {
             writer.Write(block.Offset);
@@ -207,8 +207,9 @@ internal static class ArchiveFormat
             for (uint i = 0; i < header.EntryCount; i++)
                 parsed.Add(ReadEntry(reader, parsed.Count));
 
-            int blockCount = reader.ReadInt32();
-            if (blockCount < 0 || blockCount * (long)BlockRecordSize != buffer.Length - buffer.Position)
+            // u32 in the specification; a count beyond int.MaxValue could not fit in memory anyway.
+            uint blockCount = reader.ReadUInt32();
+            if (blockCount > int.MaxValue || blockCount * (long)BlockRecordSize != buffer.Length - buffer.Position)
                 throw new InvalidDataException("The block index has the wrong length.");
 
             var blocks = new BlockRecord[blockCount];
