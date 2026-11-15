@@ -29,6 +29,7 @@ src/CryptArc.App     Avalonia desktop application
 bench/CryptArc.Bench BenchmarkDotNet suite
 tests/CryptArc.Tests xUnit round-trip and unit tests
 docs/                format specification and design notes
+team/reference       the instructor's SARC v1 reference archives (Project 2)
 ```
 
 ## Build and run

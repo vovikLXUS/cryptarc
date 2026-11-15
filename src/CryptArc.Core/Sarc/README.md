@@ -24,5 +24,6 @@ Naive/optimised pairs (hard rule 4): `AesCtr.TransformNaive` vs `Transform`,
 `SarcVolumePacker.Greedy` vs `Knapsack`, `SarcParse.Greedy` vs `Lazy`.
 
 The control example of §8 is reproduced byte for byte by
-`SarcControlExampleTests`. Design notes and limits are in
+`SarcControlExampleTests`, and `SarcReferenceArchiveTests` runs the whole
+reference set in [`team/reference`](../../../team/reference). Design notes and limits are in
 [docs/sarc-v1.md](../../../docs/sarc-v1.md).

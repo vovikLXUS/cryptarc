@@ -10,13 +10,13 @@ Code: [`src/CryptArc.Core/Sarc`](../src/CryptArc.Core/Sarc).
 | Check | Result |
 |---|---|
 | §8 control example: canonical codes, the 57-byte block, the 172-byte volume | reproduced byte for byte (`SarcControlExampleTests`) |
-| `ref_01` … `ref_06`, the 3-volume one given in reverse order | all files restored, sizes and CRC-32 as in the `.json` manifests |
-| `bad_01` … `bad_06` | rejected with exactly the code in `expected_failures.json` |
+| `ref_01` … `ref_06`, the 3-volume one given in reverse order | all files restored, sizes and CRC-32 as in the `.json` manifests (`SarcReferenceArchiveTests`) |
+| `bad_01` … `bad_06` | rejected with exactly the code in `expected_failures.json` (`SarcReferenceArchiveTests`) |
 | Cross-team: our volumes read by team T01's archiver, theirs read by ours | 31 files, 20 volumes each way, byte-identical |
 
-The reference archives belong to the issued team package (`team/reference/`) and
-are not committed here; the control example is embedded in the tests because the
-specification defines it completely.
+The instructor's reference set is committed in [`team/reference/`](../team/reference)
+and runs on every `dotnet test`, so CI fails as soon as the reader stops
+conforming. Its README records where the copy came from.
 
 ## Choices the specification leaves open
 
