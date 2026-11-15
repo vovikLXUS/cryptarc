@@ -22,9 +22,9 @@
   src/CryptArc.Core/Sarc/{README,AGENTS,CLAUDE}.md, правки README.md,
   AGENTS.md, docs/container-format.md, src/CryptArc.Cli/README.md.
 
-Того ж дня додано tests/CryptArc.Tests/Sarc/SarcReferenceArchiveTests.cs і
-team/reference/README.md. Самі файли team/reference/* — не згенеровані: це
-еталонний набір викладача, скопійований без змін (SHA-256 звірено) з
+Того ж дня додано tests/CryptArc.Tests/Sarc/SarcReferenceArchiveTests.cs: він
+проганяє еталонний набір викладача з team/reference. Сам набір у репозиторій
+не входить (team/ ігнорується git); для перевірки використано копію з
 репозиторію команди T01, HrychanokIhor/SmartSecureFileArchiver, коміт b944a08.
 
 Перевірено: 742 тести проходять; шість еталонних архівів читаються, шість

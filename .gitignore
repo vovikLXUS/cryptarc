@@ -485,3 +485,7 @@ $RECYCLE.BIN/
 *.cryptarc
 bench/BenchmarkDotNet.Artifacts/
 corpus/
+
+# The issued Project 2 team package (reference archives, corpus, team_config.json)
+# stays local: SarcReferenceArchiveTests reads team/reference when it is present.
+/team/

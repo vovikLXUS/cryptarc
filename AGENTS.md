@@ -77,7 +77,7 @@ the report.
 | `bench/CryptArc.Bench` | BenchmarkDotNet suite | the only place a reference compressor may appear |
 | `tests/CryptArc.Tests` | xUnit tests | round-trip theories run over the whole registry |
 | `docs/` | format spec and design notes | |
-| `team/reference/` | the instructor's SARC v1 reference archives | never edited; `SarcReferenceArchiveTests` runs them all |
+| `team/` | the issued Project 2 team package | git-ignored, never committed; `SarcReferenceArchiveTests` runs `team/reference` when it is present |
 
 Each project and each `Core` sub-folder has its own `README.md`; folders with
 extra constraints also have an `AGENTS.md`. Read the one nearest to the file you

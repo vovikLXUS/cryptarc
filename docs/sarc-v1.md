@@ -14,9 +14,11 @@ Code: [`src/CryptArc.Core/Sarc`](../src/CryptArc.Core/Sarc).
 | `bad_01` … `bad_06` | rejected with exactly the code in `expected_failures.json` (`SarcReferenceArchiveTests`) |
 | Cross-team: our volumes read by team T01's archiver, theirs read by ours | 31 files, 20 volumes each way, byte-identical |
 
-The instructor's reference set is committed in [`team/reference/`](../team/reference)
-and runs on every `dotnet test`, so CI fails as soon as the reader stops
-conforming. Its README records where the copy came from.
+The instructor's reference set is not committed: it belongs to the issued team
+package. Copy that package's `reference/` folder to `team/reference/` (the whole
+`team/` folder is git-ignored), or point `SARC_REFERENCE_DIR` at it, and
+`SarcReferenceArchiveTests` runs it on every `dotnet test`. Without it, those
+tests are reported as skipped, not passed.
 
 ## Choices the specification leaves open
 

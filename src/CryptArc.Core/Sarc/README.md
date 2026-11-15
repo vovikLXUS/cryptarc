@@ -25,5 +25,5 @@ Naive/optimised pairs (hard rule 4): `AesCtr.TransformNaive` vs `Transform`,
 
 The control example of §8 is reproduced byte for byte by
 `SarcControlExampleTests`, and `SarcReferenceArchiveTests` runs the whole
-reference set in [`team/reference`](../../../team/reference). Design notes and limits are in
+reference set from `team/reference` (git-ignored; copy it from the issued package). Design notes and limits are in
 [docs/sarc-v1.md](../../../docs/sarc-v1.md).

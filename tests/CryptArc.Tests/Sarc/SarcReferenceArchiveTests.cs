@@ -5,17 +5,26 @@ using CryptArc.Core.Sarc;
 namespace CryptArc.Tests.Sarc;
 
 /// <summary>
-/// The instructor's acceptance set in <c>team/reference</c>: every <c>ref_*</c> must
-/// restore exactly as its manifest says, every <c>bad_*</c> must fail with the code in
-/// <c>expected_failures.json</c>. This is the oracle for SARC conformance; a failure here
-/// means the reader is wrong, never the files.
+/// The instructor's acceptance set: every <c>ref_*</c> must restore exactly as its
+/// manifest says, every <c>bad_*</c> must fail with the code in <c>expected_failures.json</c>.
+/// This is the oracle for SARC conformance; a failure here means the reader is wrong,
+/// never the files.
 /// </summary>
+/// <remarks>
+/// The set is not in git. It is read from <c>SARC_REFERENCE_DIR</c> if that is set,
+/// otherwise from <c>team/reference</c> at the repository root, where the issued team
+/// package goes (the folder is ignored). Without it these tests are reported as skipped.
+/// </remarks>
 public class SarcReferenceArchiveTests
 {
     /// <summary>The password of the whole set, as the <c>ref_*.json</c> manifests state it.</summary>
     private const string ReferencePassword = "algo2026";
 
-    private static readonly string ReferenceDirectory = FindReferenceDirectory();
+    /// <summary>Where the reference set is looked for.</summary>
+    internal static readonly string ReferenceDirectory = FindReferenceDirectory();
+
+    /// <summary>Whether the set is there to be tested.</summary>
+    internal static bool IsAvailable => File.Exists(Path.Combine(ReferenceDirectory, "expected_failures.json"));
 
     public static TheoryData<string> Sets
     {
@@ -40,7 +49,7 @@ public class SarcReferenceArchiveTests
         }
     }
 
-    [Fact]
+    [ReferenceSetFact]
     public void TheWholeSetIsPresent()
     {
         Assert.Equal(6, Directory.GetFiles(ReferenceDirectory, "ref_*.json").Length);
@@ -50,7 +59,7 @@ public class SarcReferenceArchiveTests
         Assert.Equal(6, expected.RootElement.EnumerateObject().Count());
     }
 
-    [Theory]
+    [ReferenceSetTheory]
     [MemberData(nameof(Sets))]
     public void EveryReferenceArchiveRestoresAsItsManifestSays(string set)
     {
@@ -78,7 +87,7 @@ public class SarcReferenceArchiveTests
         }
     }
 
-    [Theory]
+    [ReferenceSetTheory]
     [MemberData(nameof(Failures))]
     public void EveryDamagedReferenceArchiveFailsWithItsExpectedCode(string file, string code)
     {
@@ -88,9 +97,16 @@ public class SarcReferenceArchiveTests
         Assert.Equal(code, rejection.SpecName);
     }
 
-    /// <summary>Walks up from the test binaries to the repository root, which holds <c>CryptArc.slnx</c>.</summary>
+    /// <summary>
+    /// <c>SARC_REFERENCE_DIR</c>, or <c>team/reference</c> under the repository root, found
+    /// by walking up from the test binaries to the folder that holds <c>CryptArc.slnx</c>.
+    /// </summary>
     private static string FindReferenceDirectory()
     {
+        string? configured = Environment.GetEnvironmentVariable("SARC_REFERENCE_DIR");
+        if (!string.IsNullOrEmpty(configured))
+            return configured;
+
         for (DirectoryInfo? directory = new(AppContext.BaseDirectory); directory is not null; directory = directory.Parent)
         {
             if (File.Exists(Path.Combine(directory.FullName, "CryptArc.slnx")))
@@ -98,5 +114,31 @@ public class SarcReferenceArchiveTests
         }
 
         throw new DirectoryNotFoundException("The repository root (CryptArc.slnx) was not found above " + AppContext.BaseDirectory);
+    }
+}
+
+/// <summary>A fact that is skipped, not failed, when the reference set is absent.</summary>
+public sealed class ReferenceSetFactAttribute : FactAttribute
+{
+    /// <summary>Sets <see cref="FactAttribute.Skip"/> when there is nothing to test.</summary>
+    public ReferenceSetFactAttribute()
+    {
+        if (!SarcReferenceArchiveTests.IsAvailable)
+            Skip = ReferenceSetTheoryAttribute.Missing;
+    }
+}
+
+/// <summary>A theory that is skipped, not failed, when the reference set is absent.</summary>
+public sealed class ReferenceSetTheoryAttribute : TheoryAttribute
+{
+    internal static string Missing =>
+        $"No reference set in {SarcReferenceArchiveTests.ReferenceDirectory}: copy reference/ from the issued " +
+        "Project 2 package to team/reference, or set SARC_REFERENCE_DIR.";
+
+    /// <summary>Sets <see cref="FactAttribute.Skip"/> when there is nothing to test.</summary>
+    public ReferenceSetTheoryAttribute()
+    {
+        if (!SarcReferenceArchiveTests.IsAvailable)
+            Skip = Missing;
     }
 }
